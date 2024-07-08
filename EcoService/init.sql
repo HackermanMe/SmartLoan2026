@@ -45,3 +45,6 @@ ALTER COLUMN Email VARCHAR(255);
 --SELECT * FROM RHAccounts WHERE Nom LIKE '%EPSE%';
 SELECT * FROM RHStaffs WHERE Email LIKE 'ftchangai';
 
+SELECT b.IDGroup, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee
+FROM [EcoServiceDB].[dbo].RhAccounts a JOIN [EcoServiceDB].[dbo].[RHRoles] b ON a.IDGroup = b.IDGroup WHERE a.Login = 'FTCHANGAI'
+

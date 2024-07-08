@@ -139,8 +139,8 @@ namespace EcoService.Models
 
         public SqlDataReader AccountRole(string login)
         {
-            string query = "SELECT b.idGroup,  a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee " +
-                "FROM [EcoServiceDB].[dbo].RhAccounts a JOIN [EcoServiceDB].[dbo].[RHRole] b ON a.idGroup = b.idGroup WHERE a.Login = @Login";
+            string query = "SELECT b.IDGroup, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee " +
+                "FROM [EcoServiceDB].[dbo].RhAccounts a JOIN [EcoServiceDB].[dbo].[RHRoles] b ON a.IDGroup = b.IDGroup WHERE a.Login = @Login";
             return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@Login", login));
         }
 

@@ -1,6 +1,6 @@
-﻿ 
-   
-
+﻿@{
+    string idgroup = Session["idGroup"] as string;
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -37,32 +37,36 @@
                             <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
                             <span class="hide-menu">Accueil</span>
                         </li>
-                        @{ string idgroup = Session["accountName"]?.ToString() ?? "DEFAULT";
-                            if (idgroup == "100")
-                            {
-                                <li class="sidebar-item">
-                                    <a class="sidebar-link" @Url.Action("Index", "RHAdmin") aria-expanded="false">
-                                        <span>
-                                            <i class="ti ti-layout-dashboard"></i>
-                                        </span>
-                                        <span class="hide-menu">Administration</span>
-                                    </a>
-                                </li>
-                             
-                            }
-                            else
-                            {
-                                <li class="sidebar-item">
-                                    <a class="sidebar-link"  @Url.Action("StaffSimulation","RHStaff") aria-expanded="false">
-                                        <span>
-                                            <i class="ti ti-dashboard"></i>
-                                        </span>
-                                        <span class="hide-menu">Tableau de Bord</span>
-                                    </a>
-                                </li>
-}
+                        @if (idgroup == "100")
+                        {
+                            <li class="sidebar-item">
+                                <a class="sidebar-link" @Url.Action("Index", "RHAdmin") aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-layout-dashboard"></i>
+                                    </span>
+                                    <span class="hide-menu">Administration</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a class="sidebar-link" @Url.Action("StaffSimulation", "RHStaff") aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-dashboard"></i>
+                                    </span>
+                                    <span class="hide-menu">Tableau de Bord</span>
+                                </a>
+                            </li>
                         }
-
+                        else
+                        {
+                            <li class="sidebar-item">
+                                <a class="sidebar-link active" @Url.Action("StaffSimulation", "RHStaff") aria-expanded="false">
+                                    <span>
+                                        <i class="ti ti-dashboard"></i>
+                                    </span>
+                                    <span class="hide-menu">Tableau de Bord</span>
+                                </a>
+                            </li>
+                        }
 
                     </ul>
                 </nav>

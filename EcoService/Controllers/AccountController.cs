@@ -93,35 +93,38 @@ namespace Ecoservice.Controllers
                         string accountNamel = Session["accountName"]?.ToString() ?? "DEFAULT";
 
                         RHSqlQuery a = new RHSqlQuery();
-
                         SqlDataReader DbReader = a.AccountRole(accountNamel);
 
-                       
-                        while (DbReader.Read())
+                        if (DbReader.Read())
                         {
-                        
-                          int idgroup = DbReader.GetInt32(DbReader.GetOrdinal("idGroup"));
-                        if (idgroup != null && idgroup==100)
+                            // Vérification de la présence de la colonne IDGroup
+                            if (DbReader.IsDBNull(DbReader.GetOrdinal("IDGroup")))
                             {
-                                Session["idGroup"] = idgroup;
-
-                                // FormsAuthentication.SetAuthCookie(model.UserName, model.RememberMe);
-                                FormsAuthentication.SetAuthCookie(model.UserName.ToString(), false);
-
-                                return RedirectToAction("Index", "RHAdmin");
-                            } else
-                            {
-                                Session["idGroup"] = idgroup;
-                                // FormsAuthentication.SetAuthCookie(model.UserName, model.RememberMe);
-                                FormsAuthentication.SetAuthCookie(model.UserName.ToString(), false);
-
-                                return RedirectToAction("StaffSimulation", "RHStaff");
+                                ModelState.AddModelError("", "IDGroup est null dans la base de données.");
                             }
-                            
+                            else
+                            {
+                                int idgroup = DbReader.GetInt32(DbReader.GetOrdinal("IDGroup"));
+                                Session["idGroup"] = idgroup;
+
+                                FormsAuthentication.SetAuthCookie(model.UserName, model.RememberMe);
+
+                                if (idgroup == 100)
+                                {
+                                    return RedirectToAction("Index", "RHAdmin");
+                                }
+                                else
+                                {
+                                    return RedirectToAction("StaffSimulation", "RHStaff");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Gérer le cas où aucune donnée n'est lue
+                            ModelState.AddModelError("", "Erreur de rôle utilisateur.");
                         }
 
-
-                       
                     }
                     else
                     {
@@ -133,7 +136,6 @@ namespace Ecoservice.Controllers
 
                     //return RedirectToAction("StaffSimulation", "RHStaff");
                 }
-
                 catch
                 {
                     // If we got this far, something failed, redisplay form
