@@ -100,7 +100,7 @@ namespace Ecoservice.Controllers
                             // Vérification de la présence de la colonne IDGroup
                             if (DbReader.IsDBNull(DbReader.GetOrdinal("IDGroup")))
                             {
-                                ModelState.AddModelError("", "IDGroup est null dans la base de données.");
+                                ModelState.AddModelError("", "Groupe non attribué.");
                             }
                             else
                             {
