@@ -1,0 +1,1322 @@
+﻿@{
+
+    //ViewBag.Title = "Liste des personnes";
+
+}
+
+@{
+
+    if ((Session["Cont"].ToString() == "TresoProofDepotRetrait"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        Proof TRESO DEPOT RETRAIT : CHOISIR LA DATE
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" style="display:none" class="form-control  datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="beginDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Choisir la date :</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class=" form-control pull-right datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="endDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+    if ((Session["Cont"].ToString() == "Clearingbatch"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        COMPENSE SUIVI DES BATCH
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>Choisir la catégorie</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <select class=" form-control pull-right " id="beginDate" name="choix">
+                                    <option value="BACH">BACH </option>
+                                    <option value="BACHLOG">BACHLOG </option>
+                                    <option value="DAY">DAY </option>
+                                    <option value="DAYLOG">DAYLOG</option>
+                                    <option value="RET">RET</option>
+                                    <option value="RJA">RJA</option>
+                                    <option value="RJALOG">RJALOG</option>
+                                    <option value="VRMT">VRMT </option>
+                                    <option value="VRMTLOG"> BACHLOG - DAYLOG - VRMTLOG</option>
+
+                                </select>
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Numero batch</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" size="20" class=" form-control pull-right" value="" id="endDate">
+
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+    if ((Session["Cont"].ToString() == "SMUserListe"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        Smart Teller Rapport d'utilisation
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>Date Début:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control  datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="beginDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Date Fin:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class=" form-control pull-right datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="endDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    if ((Session["Cont"].ToString() == "CRPReportBCEAO"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        CRP Rapport BCEAO: CHOISIR LA PERIODE
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>Date Début:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control  datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="beginDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Date Fin:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class=" form-control pull-right datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="endDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    if ((Session["Cont"].ToString() == "ATPReportBCEAO"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        ATP Rapport BCEAO : CHOISIR LA PERIODE
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>Date Début:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control  datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="beginDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Date Fin:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class=" form-control pull-right datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="endDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    if ((Session["Cont"].ToString() == "AchatVenteDevise"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        ACHAT VENTE DEVISE: CHOISIR LA PERIODE
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>Date Début:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control  datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="beginDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Date Fin:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class=" form-control pull-right datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="endDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+
+    if ((Session["Cont"].ToString() == "CashCanauxDigitaux"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        Détails des paiements sur canaux digitauxx liste de 1000 réference Maxi
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div>
+
+                            <div>
+                                <div>
+
+                                </div>
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Liste des réfences ( Votre fichier doit contenir 1000 Réferences Maximum</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="file" class=" form-control pull-right " id="endDate">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    if ((Session["Cont"].ToString() == "CadTombesCS"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        CAD  Tombes Personne Physique: CHOISIR LA PERIODE
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>Date Début:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control  datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="beginDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Date Fin:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class=" form-control pull-right datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="endDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    if ((Session["Cont"].ToString() == "CadTombesCBCM"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        CAD Tombes Corporate et Commercial : CHOISIR LA PERIODE
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>Date Début:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control  datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="beginDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Date Fin:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class=" form-control pull-right datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="endDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    if ((Session["Cont"].ToString() == "CadCashColl"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        CAD CASH COLL : Cliquer sur Générer Excel
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" style="display:none" class="form-control  datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="beginDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" style="display:none" class=" form-control pull-right datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="endDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    if ((Session["Cont"].ToString() == "CadIFRS"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        CAD IFRS : CHOISIR LA PERIODE
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>Date Début:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control  datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="beginDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Date Fin:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class=" form-control pull-right datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="endDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    if ((Session["Cont"].ToString() == "CADComptesOps"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        CAD Liste des comptes opérations  : CHOISIR LA PERIODE
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" style="display:none" class="form-control  datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="beginDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Mise en place avant date comprise :</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class=" form-control pull-right datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="endDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    if ((Session["Cont"].ToString() == "ATMExtractions"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        ATM Extractions
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>Date Début:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control  datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="beginDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Date Fin:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class=" form-control pull-right datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="endDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    if ((Session["Cont"].ToString() == "AgenceAoAcBu"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        Agence, Account class, Business Unit - d'une liste de moins de 100 compte'
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div>
+
+                            <div>
+                                <div>
+
+                                </div>
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Liste des comptes ( Votre fichier ne doit contenir 1000 comptes Maximum</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="file" class=" form-control pull-right " id="endDate">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    if ((Session["Cont"].ToString() == "AdresseClientPphysique"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        Adresse client liste pour une liste de moins de 1000 compte
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div>
+
+                            <div>
+                                <div>
+
+                                </div>
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Liste des comptes ( Votre fichier ne doit contenir 1000 comptes Maximum</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="file" class=" form-control pull-right " id="endDate">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    if ((Session["Cont"].ToString() == "RibCompte"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        RIB ET IBAN D UNE LISTE DE COMPTE
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div>
+
+                            <div>
+                                <div>
+
+                                </div>
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Liste des comptes</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="file" class=" form-control pull-right " id="endDate">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+
+    if ((Session["Cont"].ToString() == "MouvementCM"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        Mouvement d'Affaire Commerciale : CHOISIR LA PERIODE
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>Date Début:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control  datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="beginDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Date Fin:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class=" form-control pull-right datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="endDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+
+    if ((Session["Cont"].ToString() == "CpteDormantReactive"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        Compte dormant reactive durant une periode : CHOISIR LA PERIODE
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>Date Début:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control  datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="beginDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Date Fin:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class=" form-control pull-right datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="endDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    if ((Session["Cont"].ToString() == "SoldeComptes"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        Solde d'une liste de 1000 numéro de compte maximun
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div>
+
+                            <div>
+                                <div>
+
+                                </div>
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+
+                            <label>Liste des comptes ( Votre fichier doit contenir 1000 comptes Maximum</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="file" class=" form-control pull-right " id="endDate">
+
+
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    if ((Session["Cont"].ToString() == "EtgListe"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        <script>document.write(Session["Act"].ToString());</script> CHOISIR LA PERIODE
+                    </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>Date Début:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control  datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="beginDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Date Fin:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class=" form-control pull-right datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="endDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+
+    if ((Session["Cont"].ToString() == "ClientListe"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">EXTRAIRE LES CLIENTS ECOMCA, ECOMOA </h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>Date Début:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" disabled class="form-control  datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="beginDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Date Fin:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" disabled class=" form-control pull-right datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="endDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    if (Session["Cont"].ToString() == "RibIban")
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">CALCUL RIB IBAN</h3>
+
+                </div>
+
+
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>Numéro de compte :</label>
+                            <input maxlength="16" type="text" class=" form-control" size="150" id="parata" />
+                        </div><!-- /.col-lg-6 -->
+
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Calculer</button>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+
+    if (Session["Cont"].ToString() == "LienEcobank")
+    {
+
+        <h1>  Planifier RELEVE-AVIS </h1>
+
+
+        <div>INTERFACE&mdash;AVIS Planification  </div>
+        <div><a href="http://10.8.14.65:5234/Ecoservice/TypeRapport/CreateAvis" target="_blank">PLANIFICATION DES RELEVE & AVIS</a></div>
+
+
+    }
+
+}
+
+
+
+<footer>
+    <p>&copy; @DateTime.Now.Year - ECOSERVICE</p>
+</footer>
+
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+
+            $('.datepicker').datepicker({
+                format: 'dd-mm-yyyy',
+            });
+
+
+
+                /*----------EXPORT DANS LA VUE----------*/
+            $('#afficher').click(function () {
+                var parata = $("#parata").val();
+                var action = $(this).attr('id');
+                var parametre = '?parata=' + parata;
+                @*alert('@Session["Act"].ToString()');
+                alert('@Session["Cont"].ToString()');*@
+             $('div#showList')
+                .show()
+                 .html('<img src="~/Images/ajaxloader.gif">Chargement...')
+
+                .load('@Url.Action(Session["Act"].ToString(), Session["Cont"].ToString())', { parata: $('#parata').val(), idRaport: '@Session["id"].ToString() ', action: action });
+
+
+            });
+
+
+            /*----------FIN DANS LA VUEL----------*/
+
+            /*----------EXPORT CSV----------*/
+            $('#csv').click(function () {
+                var beginDate = $("#beginDate").val();
+                var endDate = $("#endDate").val();
+                var parametre = '?beginDate=' + beginDate + '&endDate=' + endDate;
+                //alert('@Url.Action("ExtraireCsv", Session["Cont"].ToString())' + parametre)
+                location.href = '@Url.Action("ExtraireCsv", Session["Cont"].ToString())' + parametre;
+            });
+
+        /*----------FIN EXPORT CSV----------*/
+
+
+            /*----------EXPORT TXT----------*/
+            $('#txt').click(function () {
+                var beginDate = $("#beginDate").val();
+                var endDate = $("#endDate").val();
+                var parametre = '?beginDate=' + beginDate + '&endDate=' + endDate;
+
+                location.href = '@Url.Action("ExtraireTXT", Session["Cont"].ToString())' + parametre;
+
+                  });/*----------FIN EXPORT TXT----------*/
+
+            /*----------EXPORT EXCEL----------*/
+            $('#excel').click(function () {
+                var beginDate = $("#beginDate").val();
+                var endDate = $("#endDate").val();
+
+                var parametre = '?beginDate=' + beginDate + '&endDate=' + endDate;
+                //alert('@Url.Action("ExtraireExcel", Session["Cont"].ToString())' + parametre)
+
+               location.href = '@Url.Action("ExtraireExcel", Session["Cont"].ToString())' + parametre;
+
+            });
+
+            /*----------FIN EXPORT EXCEL----------*/
+
+
+
+          /*----------EXPORT EXCEL----------*/
+            $('#excelupload').click(function () {
+                var beginDate = $("#beginDate").val();
+                var endDate = $("#endDate").val();
+                var parametre = '?beginDate=' + beginDate + '&endDate=' + endDate + 'lsite=' + liste;
+                alert('@Url.Action("ExtraireExcel", Session["Cont"].ToString())' + parametre)
+
+               location.href = '@Url.Action("ExtraireExcel", Session["Cont"].ToString())' + parametre;
+
+
+
+            });
+
+        /*----------FIN EXPORT EXCEL----------*/
+
+        });
+
+
+    </script>
+}
+
+

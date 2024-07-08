@@ -1,0 +1,34 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+@using GridMvc.Html
+
+@model IEnumerable<DALE.corporatecip>
+
+
+
+@Html.Grid(Model).Columns(columns =>
+{
+    columns.Add(c => c.CodeClient);
+    columns.Add(C => C.IdCorporate);
+    columns.Add(c => c.CategorieCorporate);
+    columns.Add(c => c.Date_Open);
+    columns.Add(c => c.NoCompte);
+    columns.Add(c => c.Rib);
+    columns.Add(c => c.Cle_Rib);
+    columns.Add(c => c.RaisonSociale);
+    columns.Add(c => c.Responsable);
+    columns.Add(c => c.Mandataire);
+    columns.Add(c => c.Adresse);
+    columns.Add(c => c.CodePaysAdresse);
+    columns.Add(c => c.Ville);
+    columns.Add(c => c.Sigle);
+
+});
+
+
+
+
+

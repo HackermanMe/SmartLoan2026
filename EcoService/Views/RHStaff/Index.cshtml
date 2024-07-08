@@ -1,0 +1,56 @@
+﻿@{
+    ViewBag.layout = null;
+}
+
+@using GridMvc.Html
+
+@using System.Data;
+
+
+
+
+
+
+@section Scripts
+{
+    <script type="text/javascript">
+            $(document).ready(function () {
+
+                $('#datatable').dataTable({
+                    "bPaginate": true,
+                    "bLengthChange": true,
+                    "bFilter": true,
+                    "bSort": true,
+                    "bInfo": true,
+                    "bAutoWidth": false
+                });
+
+
+
+            });
+
+             $('.editReport').click(function (event) {
+                    //$('#alert').hide();
+                    var link = $(event.target).closest('a');
+                    var idreport = $(link).attr('id');
+
+                    $.ajax({
+                        url: '@Url.Action("Parametre")',
+                        type: 'POST',
+                        data: { id: idreport },
+                        success: function (data) {
+                            if (data.redirect == 1) { //redirection vers la page d'édition de rapport
+
+                                @*window.location = '@Url.Action("Search")';*@
+                             window.location = '@Url.Action("Simulation")';
+
+
+                            }
+                        }
+
+                    });
+                });
+    </script>
+}
+
+

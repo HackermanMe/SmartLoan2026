@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "Ajout des Prets";
+}
+
+<h1>Ajouter les Prets Existants</h1>
+
+<form method="post" enctype="multipart/form-data" action="ImportLoans">
+    <div class="form-group">
+        <label for="file">Choisir Fichier Excel:</label>
+        <input type="file" name="file" id="file" class="form-control">
+    </div>
+    <button type="submit" class="btn btn-primary m-3">Télécharger</button>
+</form>

@@ -1,0 +1,156 @@
+﻿@{
+
+    //ViewBag.Title = "Liste des personnes";
+
+}
+
+
+@{
+    if ((Session["Cont"].ToString() == "ClientListe"))
+    {
+        <div class=" ">
+
+            <div class="box box-pane">
+                <div class="box-header with-border">
+                    <h3 class="box-title">CHOISIR UNE PERIODE eeeeee</h3>
+
+                </div>
+
+
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>Date Début:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control  datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="beginDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="col-lg-3">
+                            <label>Date Fin:</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class=" form-control pull-right datepicker" value="@DateTime.Now.Date.ToString("dd-MM-yyyy")" id="endDate" data-date-format="dd-mm-yyyy">
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-lg-6 -->
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="input-group ">
+
+                                <button style="margin-right:3px" class="btn btn-info sendParam" id="extraire"><i class="fa "></i> Extraire</button>
+                                <button style="margin-right:3px" class="btn btn-success sendParam" id="afficher"><i class="fa "></i> Afficher</button>
+                                 <button style="margin-right:3px" class="btn btn-info" id="txt"><i class="fa fa-download"></i> Générer TXT</button>
+                                <button style="margin-right:3px" class="btn btn-success" id="excel"><i class="fa fa-download"></i> Générer Excel</button>
+                                <button style="margin-right:3px" class="btn btn-warning" id="csv"><i class="fa fa-download"></i> Générer CSV</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="alert" align="center" class="small-box bg-red" style="display:none"><strong></strong></div>
+                    <div id="showList" align="center" style="display:none"><img src="~/Images/ajaxloader.gif">Chargement...</div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+}
+
+
+<footer>
+    <p>&copy; @DateTime.Now.Year - ECOSERVICE</p>
+</footer>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+
+            $('.datepicker').datepicker({
+                format: 'dd-mm-yyyy',
+            });
+
+
+           /* $('.sendParam').click(function () {
+
+                //if ($('#beginDate').val() > $('#endDate').val()) {
+                //    $('div#showList').hide();
+                //    $('#alert').show().find('strong').text('La date de début doit être antérieure à la date de fin.');
+
+                //} else {
+                    $('#alert').hide();
+                    var action = $(this).attr('id');
+                    //alert(action);
+
+                    $('div#showList')
+                    .show()
+                    .html('<img src="~/Images/ajaxloader.gif">Chargement...')
+                    .load('@Url.Action(Session["Act"].ToString(), Session["Cont"].ToString())', { beginDate: $('#beginDate').val(), endDate: $('#endDate').val(),parata: $('#parata').val(), idRaport: '@Session["id"].ToString() ', action: action });
+                 // alert(Cont);
+                //}
+
+
+
+           /* });*/
+
+
+
+            //});/*----------FIN EXPORT EXCEL----------*/
+
+            /*----------EXPORT CSV----------*/
+            $('#csv').click(function () {
+                var beginDate = $("#beginDate").val();
+                var endDate = $("#endDate").val();
+                var parametre = '?beginDate=' + beginDate + '&endDate=' + endDate;
+                //alert('@Url.Action("ExtraireCsv", Session["Cont"].ToString())' + parametre)
+                location.href = '@Url.Action("ExtraireCsv", Session["Cont"].ToString())' + parametre;
+            });/*----------FIN EXPORT CSV----------*/
+
+
+            /*----------EXPORT TXT----------*/
+            $('#txt').click(function () {
+                var beginDate = $("#beginDate").val();
+                var endDate = $("#endDate").val();
+                var parametre = '?beginDate=' + beginDate + '&endDate=' + endDate;
+
+                location.href = '@Url.Action("ExtraireTXT", Session["Cont"].ToString())' + parametre;
+
+                  });/*----------FIN EXPORT TXT----------*/
+
+            /*----------EXPORT EXCEL----------*/
+            $('#excel').click(function () {
+                var beginDate = $("#beginDate").val();
+                var endDate = $("#endDate").val();
+                var parametre = '?beginDate=' + beginDate + '&endDate=' + endDate;
+                //alert('@Url.Action("ExtraireExcel", Session["Cont"].ToString())' + parametre)
+
+               location.href = '@Url.Action("ExtraireExcel", Session["Cont"].ToString())' + parametre;
+
+
+
+            });/*----------FIN EXPORT TXT----------*/
+
+
+        });
+
+
+    </script>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

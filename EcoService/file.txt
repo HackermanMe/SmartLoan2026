@@ -1,0 +1,7 @@
+2018-01-09 08:38:31.7430|TRACE|EcoService.Controllers.ComptePersonneController|Sample trace message
+2018-01-09 08:38:31.7743|DEBUG|EcoService.Controllers.ComptePersonneController|Sample debug message
+2018-01-09 08:38:31.7743|INFO|EcoService.Controllers.ComptePersonneController|Sample informational message
+2018-01-09 08:38:31.7743|WARN|EcoService.Controllers.ComptePersonneController|Sample warning message
+2018-01-09 08:38:31.7743|ERROR|EcoService.Controllers.ComptePersonneController|Sample error message
+2018-01-09 08:38:31.7743|FATAL|EcoService.Controllers.ComptePersonneController|Sample fatal error message
+2018-01-09 08:38:31.7743|INFO|EcoService.Controllers.ComptePersonneController|Sample informational message

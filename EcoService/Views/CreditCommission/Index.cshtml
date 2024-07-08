@@ -1,0 +1,57 @@
+﻿
+
+@{
+    ViewBag.Title = "Index";
+
+    String Action = Request["action"];
+    String startDate = Request["beginDate"];
+    String endDate = Request["endDate"];
+    String montCom;
+    if (!Request["parata"].IsEmpty())
+    { montCom = Request["parata"]; }
+    else {montCom = "0"; }
+
+    DateTime startDate1 = Convert.ToDateTime(Request["beginDate"]);
+    DateTime endDate1 = Convert.ToDateTime(Request["endDate"]);
+
+
+    TimeSpan diffDate = endDate1 - startDate1;
+    Double nbrJour = Math.Abs((int.Parse((diffDate.TotalDays.ToString()))) + 1);
+
+
+    double com = double.Parse(montCom);
+
+
+    if (com != 0)
+    {
+
+        double comResiduel = Math.Truncate(com / nbrJour);
+
+        double comInitial = com - comResiduel * (nbrJour-1);
+
+        String comR= String.Format("{0:#,###}", comResiduel);
+        String comI= String.Format("{0:#,###}", comInitial);
+        ViewData["comResiduel"] = comR;
+        ViewData["comInitial"] = comI;
+    }
+    else
+    {
+        ViewData["comResiduel"] = "Aucune commission saisie";
+        ViewData["comInitial"] = "Aucune commission saisie";
+    }
+
+
+    String nbrj = String.Format("{0:#,###}", nbrJour);
+
+     ViewData["nbj"] = nbrj;
+
+
+
+}
+
+<h2 style="align-content:flex-start">RESULTATS</h2>
+
+<div class="row"><label><font size="4">Nombre de jours :<font color="blue"> @ViewData["nbj"] jour(s) </font></font></label></div>
+<div class="row"><label><font size="4">Commission journalière Initiale :<font color="red"> @ViewData["comInitial"]</font></font></label></div>
+<div class="row"><label><font size="4">Commission journalière :<font color="blue">  @ViewData["comResiduel"] </font> </font></label></div>
+
