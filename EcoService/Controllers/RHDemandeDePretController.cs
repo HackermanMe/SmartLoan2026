@@ -47,7 +47,7 @@ namespace EcoService.Controllers
                         }
                     }
 
-                    // Vérifier si selectedLoanIds n'est pas null
+                    // Vérifier si les prets sélectionnées ne sont pas null
                     if (selectedLoanIds != null)
                     {
                         // Récupérer les prêts existants sélectionnés pour rachats
@@ -93,6 +93,48 @@ namespace EcoService.Controllers
                 {
                     monthlyPayment = (int)Math.Round(MontantEmprunte / months);
                     totalMonthlyPayments = monthlyPayment;
+
+
+
+                    // Ajouter les mensualités des autres prêts
+                    if (autresPrets != null)
+                    {
+                        foreach (var loan in autresPrets)
+                        {
+                            totalMonthlyPayments -= loan;
+                        }
+                    }
+
+                    // Vérifier si les prets sélectionnées ne sont pas null
+                    if (selectedLoanIds != null)
+                    {
+                        // Récupérer les prêts existants sélectionnés pour rachats
+                        foreach (var loanId in selectedLoanIds)
+                        {
+                            RHSqlQuery pe = new RHSqlQuery();
+                            SqlDataReader loanReader = pe.GetLoanById(loanId);
+
+                            // Vérifier si loanReader n'est pas null
+                            if (loanReader != null)
+                            {
+                                var loan = new Dictionary<string, object>();
+                                while (loanReader.Read())
+                                {
+                                    for (var i = 0; i < loanReader.FieldCount; i++)
+                                    {
+                                        loan[loanReader.GetName(i)] = loanReader.GetValue(i);
+                                    }
+
+                                    // Vérifier si la clé "Mensualites" existe et si sa valeur n'est pas null
+                                    if (loan.ContainsKey("Mensualites") && loan["Mensualites"] != null)
+                                    {
+                                        totalMonthlyPayments -= Convert.ToDecimal(loan["Mensualites"]);
+                                    }
+                                }
+                                loanReader.Close(); // Fermer le reader après utilisation
+                            }
+                        }
+                    }
 
                     decimal quotity = totalMonthlyPayments / netSalary * 100;
 

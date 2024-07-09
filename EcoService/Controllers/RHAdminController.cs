@@ -180,12 +180,12 @@ namespace EcoService.Controllers
             if (file == null || file.ContentLength <= 0)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Fichier invalide");
 
-            var uploadsFolder = Server.MapPath("~/Uploads/Staffs");
+            //var uploadsFolder = Server.MapPath("~/Uploads/Staffs");
 
-            //var uploadsFolder = "//10.8.14.100/SmartLoanList/";
+            var uploadsFolder = "//10.8.14.100/SmartLoanList/";
 
             //string uploadsFolder = WebConfigurationManager.AppSettings["RHExportPath"].ToString();
-            
+
             if (!Directory.Exists(uploadsFolder))
             {
                 Directory.CreateDirectory(uploadsFolder);
@@ -246,7 +246,8 @@ namespace EcoService.Controllers
             if (file == null || file.ContentLength <= 0)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Fichier invalide");
 
-            var uploadsFolder = Server.MapPath("~/App_Data/uploads/");
+            //var uploadsFolder = Server.MapPath("~/App_Data/uploads/");
+            var uploadsFolder = "//10.8.14.100/SmartLoanList/";
 
             if (!Directory.Exists(uploadsFolder))
             {
