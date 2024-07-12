@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Threading.Tasks;
 using System.Web.Configuration;
 using System.Web.Mvc;
 
@@ -32,6 +33,7 @@ namespace EcoService.Models
             return command.ExecuteReader(System.Data.CommandBehavior.CloseConnection);
         }
 
+        // Méthode pour ajouter un utilisateur 
         public void InsertUser(User user)
         {
             string email = user.Email;
@@ -49,6 +51,7 @@ namespace EcoService.Models
             });
         }
 
+        /// Méthode pour lister les rôles
         public List<RHRole> Role()
         {
             List<RHRole> roles = new List<RHRole>();
@@ -67,12 +70,14 @@ namespace EcoService.Models
             return roles;
         }
 
+        // Méthode pour supprimer les prêts existants de la base
         public void DeleteRHLoans()
         {
             string query = "DELETE FROM RHPretsExistants";
             ExecuteNonQuery(query);
         }
 
+        // Méthode pour insérer des prêts existants dans la base
         public void InsertLoans(string numeroCompte, string reference, string type, string montantEmprunte, string enCours, float taux, string mensualites, DateTime dateDebut, DateTime dateFin)
         {
             string query = "INSERT INTO RHPretsExistants (" +
@@ -92,29 +97,33 @@ namespace EcoService.Models
             });
         }
 
+        // Méthode pour récupérer un ou des prêts selon le matricule du staff
         [HttpPost]
-        public SqlDataReader PretExistants(int id)
+        public SqlDataReader PretExistants(int matricule)
         {
             string query = "SELECT p.PretId, p.ReferencePret, p.NumeroCompte, p.Montant, p.EnCours, p.Taux, p.TypeCredit, p.StartDate, p.EndDate, p.Mensualites " +
                 " FROM RHPretsExistants p " +
                 "JOIN RHStaffs s ON p.NumeroCompte = s.NumeroCompte WHERE s.Matricule = @Matricule ORDER BY p.ReferencePret";
-            return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@Matricule", id));
+            return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@Matricule", matricule));
         }
 
-        public SqlDataReader PretExistantsStaff(string id)
+        // Méthode pour récupérer les prêts selon le numéro de compte
+        public SqlDataReader PretExistantsStaff(string numeroCompte)
         {
             string query = "SELECT p.PretId, p.ReferencePret, p.NumeroCompte, p.Montant, p.EnCours, p.Taux, p.TypeCredit, p.StartDate, p.EndDate, p.Mensualites " +
                 " FROM RHPretsExistants p JOIN RHStaffs s ON p.NumeroCompte = s.NumeroCompte " +
                 " WHERE p.NumeroCompte = @NumeroCompte ORDER BY p.ReferencePret";
-            return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@NumeroCompte", id));
+            return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@NumeroCompte", numeroCompte));
         }
 
-        public SqlDataReader GetStaff(int id)
+        // Méthode pou récupérer un staff selon le matricule 
+        public SqlDataReader GetStaff(int matricule)
         {
             string query = "SELECT SalaireNet FROM RHStaffs WHERE Matricule = @Matricule";
-            return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@Matricule", id));
+            return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@Matricule", matricule));
         }
 
+        // Méthode pour récupérer les comptes
         public SqlDataReader Accounts(string login)
         {
             string query = "SELECT b.Matricule AS Matriculee, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee, b.SalaireNet AS SalaireNete " +
@@ -122,6 +131,7 @@ namespace EcoService.Models
             return ExecuteReader(query);
         }
 
+        // Méthode pour récupérer un compte selon le matricule
         public SqlDataReader Account(int matricule)
         {
             string query = "SELECT b.Matricule AS Matriculee, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee, b.SalaireNet AS SalaireNete " +
@@ -130,6 +140,7 @@ namespace EcoService.Models
             return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@Matricule", matricule));
         }
 
+        // Méthode pour récupérer les informations du staff connecté selon le login(Nom d'utilisateur)
         public SqlDataReader AccountLogin(string login)
         {
             string query = "SELECT b.Matricule AS Matriculee, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee, b.SalaireNet AS SalaireNete " +
@@ -137,6 +148,7 @@ namespace EcoService.Models
             return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@Login", login));
         }
 
+        // Méthode pour récupérerles informations d'un compte selon le groupe
         public SqlDataReader AccountRole(string login)
         {
             string query = "SELECT b.IDGroup, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee " +
@@ -150,12 +162,17 @@ namespace EcoService.Models
             return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@NumeroCompte", id));
         }
 
+        // Méthode pour supprimer les staffs de la base de données 
         public void DeleteRHStaff()
         {
             string query = "DELETE FROM RHStaffs";
             ExecuteNonQuery(query);
         }
 
+        // Méthode pour supprimer un prêt autres banques
+        
+
+        // Méthode pour insérer les informations des staffs dans la base de données 
         public void InsertStaffs(string matricule, string email, string salaireNet, string numeroCompte)
         {
             string query = "INSERT INTO RHStaffs (Matricule, Email, SalaireNet, NumeroCompte)" +
@@ -169,12 +186,14 @@ namespace EcoService.Models
             });
         }
 
+        // Méthode pour récupérer un ou des prêts par l'id
         public SqlDataReader GetLoanById(int id)
         {
             string query = "SELECT * FROM RHPretsExistants WHERE PretId = @PretId";
             return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@PretId", id));
         }
 
+        // Méthode pour rechercher un staff selon le matricule, le numéro de compte, le nom ou le prénom 
         public List<Dictionary<string, object>> SearchStaff(string searchTerm)
         {
             var staffList = new List<Dictionary<string, object>>();
@@ -194,6 +213,110 @@ namespace EcoService.Models
                 }
             }
             return staffList;
+        }
+
+        // Méthode pour ajouter une demande de prêt à la base de données
+        public async Task<int> CreerDemande(Demande demande)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "INSERT INTO LoanRequests (Montant, TypePret, Taux, NbreEcheances, Status, Quotity, Matricule, CreatedAt, UpdatedAt) OUTPUT INSERTED.Id VALUES (@Montant, @Amount, @Status, @CreatedAt, @UpdatedAt)";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Montant", demande.Montant);
+                cmd.Parameters.AddWithValue("@TypePret", demande.TypePret);
+                cmd.Parameters.AddWithValue("@Taux", demande.Taux);
+                cmd.Parameters.AddWithValue("@NbreEcheances", demande.NbreEcheances);
+                cmd.Parameters.AddWithValue("@Status", demande.Status);
+                cmd.Parameters.AddWithValue("@Quotity", demande.Quotity);
+                cmd.Parameters.AddWithValue("@Matricule", demande.Matricule);
+                cmd.Parameters.AddWithValue("@CreatedAt", demande.CreatedAt);
+                cmd.Parameters.AddWithValue("@UpdatedAt", demande.UpdatedAt);
+
+                await conn.OpenAsync();
+                int newId = (int)await cmd.ExecuteScalarAsync();
+                return newId;
+            }
+        }
+
+
+        // Méthode pour récupérer une demande de prêt selon le matricule
+        public async Task<Demande> GetLoanRequest(int matricule)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT * FROM RHDemandes WHERE Matricule = @Matricule";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Matricule", matricule);
+
+                await conn.OpenAsync();
+                SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+                if (reader.Read())
+                {
+                    return new Demande
+                    {
+                        DemandeId = (int)reader["DemandeId"],
+                        Montant = (decimal)reader["Montant"],
+                        TypePret = (string)reader["TypePret"],
+                        Taux = (float)reader["Taux"],
+                        NbreEcheances = (int)reader["NbreEcheances"],
+                        Status = (string)reader["Status"],
+                        Quotity = (float)reader["Quotity"],
+                        Matricule = (int)reader["Matricule"],
+                        CreatedAt = (DateTime)reader["CreatedAt"],
+                        UpdatedAt = (DateTime)reader["UpdatedAt"]
+                    };
+                }
+                return null;
+            }
+        }
+
+        // Méthode pour récupérer la liste des demandes de prêt
+        public async Task<List<Demande>> GetLoanRequests()
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT * FROM RHDemandes";
+                SqlCommand cmd = new SqlCommand(query, conn);
+
+                await conn.OpenAsync();
+                SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+                List<Demande> demandes = new List<Demande>();
+                while (reader.Read())
+                {
+                    demandes.Add(new Demande
+                    {
+                        DemandeId = (int)reader["DemandeId"],
+                        Montant = (decimal)reader["Montant"],
+                        TypePret = (string)reader["TypePret"],
+                        Taux = (float)reader["Taux"],
+                        NbreEcheances = (int)reader["NbreEcheances"],
+                        Status = (string)reader["Status"],
+                        Quotity = (float)reader["Quotity"],
+                        Matricule = (int)reader["Matricule"],
+                        CreatedAt = (DateTime)reader["CreatedAt"],
+                        UpdatedAt = (DateTime)reader["UpdatedAt"]
+                    });
+                }
+                return demandes;
+            }
+        }
+
+        // Méthode pour approuver les demandes de Prêts (changer le status 'Pending' en 'Approuvé')
+        public async Task<bool> ApproveLoanRequest(int matricule)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "UPDATE RHDemandes SET Status = 'Approuvé', UpdatedAt = @UpdatedAt WHERE Matricule = @Matricule";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Matricule", matricule);
+                cmd.Parameters.AddWithValue("@UpdatedAt", DateTime.Now);
+
+                await conn.OpenAsync();
+                int rowsAffected = await cmd.ExecuteNonQueryAsync();
+                return rowsAffected > 0;
+            }
         }
     }
 }

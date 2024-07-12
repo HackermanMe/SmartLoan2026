@@ -1,0 +1,14 @@
+﻿
+@{
+    ViewData["Title"] = "Demande de prêt";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form method="post">
+    <div class="form-group">
+        <label for="Amount">Montant</label>
+        <input type="number" class="form-control" id="Amount" name="Amount" asp-for="LoanRequest.Amount" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Soumettre</button>
+</form>

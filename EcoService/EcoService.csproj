@@ -419,6 +419,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\LienEcobankController.cs" />
     <Compile Include="Controllers\MouvementCMController.cs" />
+    <Compile Include="Controllers\RHAccountsController.cs" />
     <Compile Include="Controllers\RHDemandeDePretController.cs" />
     <Compile Include="Controllers\RHStaffController.cs" />
     <Compile Include="Controllers\RibCompteController.cs" />
@@ -434,6 +435,7 @@
     <Compile Include="Models\ClientPhysique.cs" />
     <Compile Include="Models\Compte.cs" />
     <Compile Include="Models\DbConnect.cs" />
+    <Compile Include="Models\Demande.cs" />
     <Compile Include="Models\LoadCompte.cs" />
     <Compile Include="Models\PretExistants.cs" />
     <Compile Include="Models\Rapport.cs" />
@@ -478,6 +480,9 @@
     <Content Include="Views\RHStaff\Index.cshtml" />
     <Content Include="Views\RHStaff\StaffSimulation.cshtml" />
     <Content Include="Views\RHAdmin\UploadLoans.cshtml" />
+    <Content Include="Views\RHDemandeDePret\Index.cshtml" />
+    <Content Include="Views\RHDemandeDePret\Create.cshtml" />
+    <Content Include="Views\RHAccounts\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -487,7 +492,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Scripts\img\" />
-    <Folder Include="Views\RHAccounts\" />
     <Folder Include="Views\RHRole\" />
     <Folder Include="Views\RHSqlquery\" />
   </ItemGroup>

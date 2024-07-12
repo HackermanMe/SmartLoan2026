@@ -28,9 +28,9 @@
     <div class="col d-flex align-items-stretch">
         <div class="card w-100">
             <div class="card-body p-4">
-                <div class="rachat" style="">
-                </div>
                 <h5 class="card-title fw-semibold mb-4">Prêts Existants</h5>
+                <div id="rachat">
+                </div>
                 <div class="table-responsive">
                     <table class="table text-nowrap mb-0 align-middle">
                         <thead class="text-dark fs-4">
@@ -341,7 +341,7 @@ else
     <script>
         $(document).ready(function () {
             setQuotity();
-            
+
             // Appel des fonctions lors du changement de type de prêt
             $('#TypeDePret').on('change', function () {
                 setInterestRate();
@@ -359,6 +359,23 @@ else
 
             // Appeler setQuotity() lorsque les cases à cocher des prêts existants sont modifiées
             $('.pretCheckbox').on('change', function () {
+                var isChecked = $(this).prop('checked');
+                var encours = parseFloat($(this).closest('tr').find('#Encours').text().replace(/\D/g, ''));
+                var montantInitial = parseFloat($(this).closest('tr').find('#montant').text().replace(/\D/g, ''));
+                var resteAPayer = encours - montantInitial * 0.5;
+
+                if (isChecked) {
+                    if (encours >= montantInitial * 0.5) {
+                        // Si l'encours est déjà à 50% ou plus
+                        $('#rachat').html('<div class="alert alert-warning alert-dismissible fade show" role="alert">@staff["Nomm"] devra payer ' + new Intl.NumberFormat().format(resteAPayer) + ' F CFA pour racheter ce prêt.</div>');
+                    } else {
+                        // Si l'encours est inférieur à 50%
+                        $('#rachat').html('<div class="alert alert-success alert-dismissible fade show" role="alert">@staff["Nomm"] peut racheter ce prêt!</div>');
+                    }
+                } else {
+                    // Si la case est décochée, effacer le message
+                    $('#rachat').html('');
+                }
                 setQuotity();
                 calculateMonthlyPayment();
             });
@@ -550,7 +567,7 @@ else
             });
         }
 
-        // Control du modal et du formulaire d'ajout des autres engagements 
+        // Control du modal et du formulaire d'ajout des autres engagements
         var editIndex = -1;
 
         // Ajout de la ligne au tableau lors de la soumission du formulaire
@@ -632,6 +649,6 @@ else
             calculateMonthlyPayment();
         });
 
-        
+
     </script>
 }

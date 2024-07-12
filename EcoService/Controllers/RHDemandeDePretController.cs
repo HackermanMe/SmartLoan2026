@@ -16,6 +16,11 @@ namespace EcoService.Controllers
             return View();
         }
 
+        public ActionResult Create()
+        {
+            return View();
+        }
+
         [HttpPost]
         public ActionResult CalculateMonthlyPayment(decimal MontantEmprunte, decimal annualRate, int months, decimal netSalary, List<int> selectedLoanIds, List<decimal> autresPrets)
         {

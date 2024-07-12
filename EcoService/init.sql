@@ -48,3 +48,18 @@ SELECT * FROM RHStaffs WHERE Email LIKE 'ftchangai';
 SELECT b.IDGroup, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee
 FROM [EcoServiceDB].[dbo].RhAccounts a JOIN [EcoServiceDB].[dbo].[RHRoles] b ON a.IDGroup = b.IDGroup WHERE a.Login = 'FTCHANGAI'
 
+
+-- Script de création de la table de demandes de prêts 
+CREATE TABLE [dbo].[RHDemandes] (
+    [DemandeId]     INT             IDENTITY (1, 1) NOT NULL,
+    [Montant]       DECIMAL (18, 2) NOT NULL,
+    [TypePret]      NVARCHAR (100)  NOT NULL,
+    [Taux]          FLOAT (53)      NOT NULL,
+    [NbreEcheances] INT             NOT NULL,
+    [Status]        NVARCHAR (50)   DEFAULT ('Pending') NULL,
+    [Quotity]       FLOAT (53)      NOT NULL,
+    [Matricule]     INT             NOT NULL,
+    [CreatedAt]     DATETIME        DEFAULT (getdate()) NOT NULL,
+    [UpdatedAt]     DATETIME        DEFAULT (getdate()) NOT NULL,
+    PRIMARY KEY CLUSTERED ([DemandeId] ASC)
+);
