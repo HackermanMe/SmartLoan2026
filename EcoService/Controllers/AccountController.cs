@@ -185,7 +185,6 @@ namespace Ecoservice.Controllers
 
                 // return RedirectToAction("Index", "RHAdmin");
 
-
                 //return Redirect("/");
                 //return  RedirectToAction("Liste", "Personne");
                 // return Json(new { connexion = 1 });
@@ -194,7 +193,6 @@ namespace Ecoservice.Controllers
             ModelState.AddModelError("", "Le nom d'utilisateur ou le mot de passe fourni est incorrect.");
             return View(model);
             // return Redirect(returnUrl);
-
 
             //  return Json(new { connexion = 0 });
         }

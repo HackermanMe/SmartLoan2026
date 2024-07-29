@@ -10,13 +10,11 @@
     var quotiteConsommee = Model.ContainsKey("QuotiteConsommee") ? Model["QuotiteConsommee"] : null;
 }
 
-
-
 @if (staff != null)
 {
     @*<h1>Simulation pour @staff["Email"]</h1>*@
 
-<h1>    @Session["NumeroCompte"]</h1>
+    <h1>    @Session["NumeroCompte"]</h1>
 
     <p>
         <strong>Numéro De Compte :</strong> @staff["NumeroComptee"] <br>
@@ -139,76 +137,76 @@
             </div>
 
             <!-- Modal du formulaire d'ajout des informations des autres engagements -->
-             <div class="modal fade" id="addRowModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-     <div class="modal-dialog modal-lg" role="document">
-         <div class="modal-content">
-             <div class="modal-header">
-                 <h5 class="modal-title" id="exampleModalLabel">Ajouter un prêt</h5>
-                 <button type="button" class="close btn btn-light" data-dismiss="modal" aria-label="Close">
-                     <span aria-hidden="true">&times;</span>
-                 </button>
-             </div>
-             <div class="modal-body">
-                 <form id="addRowForm">
-                     <div class="row">
-                         <div class="col m-3">
-                             <div class="form-floating">
-                                 <input class="form-control" type="text" id="objet" name="objet" required>
-                                 <label for="objet">Type de Crédit :</label>
-                             </div>
-                         </div>
+            <div class="modal fade" id="addRowModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Ajouter un prêt</h5>
+                            <button type="button" class="close btn btn-light" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addRowForm">
+                                <div class="row">
+                                    <div class="col m-3">
+                                        <div class="form-floating">
+                                            <input class="form-control" type="text" id="objet" name="objet" required>
+                                            <label for="objet">Type de Crédit :</label>
+                                        </div>
+                                    </div>
 
-                         <div class="col m-3">
-                             <div class="form-floating">
-                                 <input class="form-control" type="text" id="banque" name="banque" required>
-                                 <label for="banque">Nom de l'institution :</label>
-                             </div>
-                         </div>
-                     </div>
+                                    <div class="col m-3">
+                                        <div class="form-floating">
+                                            <input class="form-control" type="text" id="banque" name="banque" required>
+                                            <label for="banque">Nom de l'institution :</label>
+                                        </div>
+                                    </div>
+                                </div>
 
-                     <div class="row">
-                         <div class="col m-3">
-                             <div class="form-floating">
-                                 <input class="form-control" type="date" id="dateDebut" name="dateDebut" required>
-                                 <label for="dateDebut">Date de mise en place :</label>
-                             </div>
-                         </div>
+                                <div class="row">
+                                    <div class="col m-3">
+                                        <div class="form-floating">
+                                            <input class="form-control" type="date" id="dateDebut" name="dateDebut" required>
+                                            <label for="dateDebut">Date de mise en place :</label>
+                                        </div>
+                                    </div>
 
-                         <div class="col m-3">
-                             <div class="form-floating">
-                                 <input class="form-control" type="date" id="dateFin" name="dateFin" required>
-                                 <label for="dateFin">Dernière Echéance prévue :</label>
-                             </div>
-                         </div>
-                     </div>
-                     <div class="row">
-                     <div class="col m-3">
-                         <div class="form-floating">
-                             <input class="form-control" type="number" id="montantInitial" name="montantInitial" required>
-                             <label for="montantInitial">Montant initial :</label>
-                         </div>
-                     </div>
+                                    <div class="col m-3">
+                                        <div class="form-floating">
+                                            <input class="form-control" type="date" id="dateFin" name="dateFin" required>
+                                            <label for="dateFin">Dernière Echéance prévue :</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col m-3">
+                                        <div class="form-floating">
+                                            <input class="form-control" type="number" id="montantInitial" name="montantInitial" required>
+                                            <label for="montantInitial">Montant initial :</label>
+                                        </div>
+                                    </div>
 
-                     <div class="col m-3">
-                         <div class="form-floating">
-                             <input class="form-control" type="number" id="mensualites" name="mensualites" required>
-                             <label for="mensualites">Mensualités :</label>
-                         </div>
-                     </div>
+                                    <div class="col m-3">
+                                        <div class="form-floating">
+                                            <input class="form-control" type="number" id="mensualites" name="mensualites" required>
+                                            <label for="mensualites">Mensualités :</label>
+                                        </div>
+                                    </div>
 
-                     <div class="col m-3">
-                         <div class="form-floating">
-                             <input class="form-control" type="number" id="encours" name="encours" required>
-                             <label for="encours">Montant Encours :</label>
-                         </div>
-                     </div>
-                 </div>
-                     <button type="submit" class="btn btn-primary m-3">Ajouter</button>
-             </form>
-             </div>
-         </div>
-     </div>
- </div>
+                                    <div class="col m-3">
+                                        <div class="form-floating">
+                                            <input class="form-control" type="number" id="encours" name="encours" required>
+                                            <label for="encours">Montant Encours :</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary m-3">Ajouter</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
 
             <!-- Modal de modification -->
@@ -327,12 +325,18 @@
 
     <div id="message">
     </div>
+    <div id="loan">
+        <button type="button" onclick="sendSimulation()" class="btn btn-primary btn-sm edit-btn">Demander un prêt</button>
+    </div>
+    <div id="sendSimulationMessage">
+
+    </div>
+
 }
 else
 {
     <p>Informations du personnel introuvables.</p>
 }
-
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -396,7 +400,7 @@ else
         });
 
         $('.pretCheckbox:checked').each(function () {
-            
+
             setQuotity();
             calculateMonthlyPayment();
         });
@@ -459,7 +463,6 @@ else
             // Calcul de la quotité
             quotite = parseFloat(@quotiteConsommee) - (sum / @staff["SalaireNete"]) * 100 + ((allmensualites / @staff["SalaireNete"]) * 100);
             engagements = parseFloat(num) - (parseFloat(@quotiteConsommee) - (sum / @staff["SalaireNete"]) * 100 + ((allmensualites / @staff["SalaireNete"]) * 100));
-
 
             // Afficher la quotité
             $('#engagement').text(engagements.toFixed(2) + '%');
@@ -534,7 +537,6 @@ else
                 return;
             }
 
-
             $.ajax({
                 type: 'POST',
                 url: '@Url.Action("CalculateMonthlyPayment", "RHDemandeDePret")',
@@ -553,9 +555,11 @@ else
                     var newQuotity = parseFloat(@quotiteConsommee) + parseFloat(response.quotity) + parseFloat(mensualitees / @staff["SalaireNete"] * 100);
                     $('#quotity').text(newQuotity.toFixed(2) + '%');
                     if (newQuotity <= 40) {
-                        $('#message').html("<div class=\"alert alert-success\" role=\"alert\"><h3 class=\"text-success \">Vous pouvez prendre ce prêt ! </h3></div>");
+                        $('#message').html("<div class=\"alert alert-success\" role=\"alert\"><h4 class=\"text-success \">Vous pouvez prendre ce prêt ! </h4></div>");
+                        $('#loan').show();
                     } else {
-                        $('#message').html("<div class=\"alert alert-danger\" role=\"alert\"><h3 class=\"text-danger \">Vous ne pouvez pas prendre ce prêt !</h3></div>");
+                        $('#message').html("<div class=\"alert alert-danger\" role=\"alert\"><h4 class=\"text-danger \">Vous ne pouvez pas prendre ce prêt !</h4></div>");
+                        $('#loan').hide();
                     }
                 },
                 error: function () {
@@ -564,7 +568,51 @@ else
             });
         }
 
-        // Control du modal et du formulaire d'ajout des autres engagements 
+        // Fonction d'envoi des informations de simulation
+        function sendSimulation() {
+
+            // Envoi des informations du prêt simulé au serveur
+            const Montant = parseFloat($('#MontantEmprunte').val());
+            const annualRate = parseFloat($('#annualRate').val());
+            const months = parseFloat($('#months').val());
+            const netSalary = parseFloat($('#netSalary').val());
+            const autreMensualites = parseFloat($('#mensualites').val());
+            const TypeDePret = $('#TypeDePret').val();
+            @*const quotity = $('#quotity').val();*@
+            const quotity = 39;
+            const matricule = @staff["Matriculee"];
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SendSimulation", "RHDemandeDePret")',
+                data: {
+                    Montant: Montant,
+                    TypeDePret: TypeDePret,
+                    annualRate: annualRate,
+                    months: months,
+                    quotity: quotity,
+                    netSalary: netSalary,
+                    matricule: matricule,
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // Traitement en cas de succès
+                        $('#sendSimulationMessage').html("<div class=\"alert alert-success\" role=\"alert\"><h5 class=\"text-success \"> " + response.message + " </h5></div>");
+                         // Redirection vers la page suivante
+                        window.location.href = '@Url.Action("Create", "RHDemandeDePret")';
+                    } else {
+                        // Traitement en cas d'erreur
+                        $('#sendSimulationMessage').html("<div class=\"alert alert-danger\" role=\"alert\"><h4 class=\"text-danger \">" + response.message + "</h4></div>");
+                    }
+                },
+                error: function (response) {
+                    alert('Erreur de communication avec le serveur: ' + error);
+                    $('#sendSimulationMessage').html("<div class=\"alert alert-danger\" role=\"alert\"><h4 class=\"text-danger \"> Erreur de communication avec le serveur: " + error + "</h4></div>");
+                }
+            });
+        }
+
+        // Control du modal et du formulaire d'ajout des autres engagements
         var editIndex = -1;
 
         // Ajout de la ligne au tableau lors de la soumission du formulaire

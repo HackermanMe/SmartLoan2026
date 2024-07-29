@@ -3,12 +3,58 @@
     ViewData["Title"] = "Demande de prêt";
 }
 
-<h2>@ViewData["Title"]</h2>
+<h2>Demande de prêt</h2>
+<p>Vérifiez les informations complémentaires</p>
+<form id="loanCalculator" method="post">
+    <div class="row">
+        <div class="col m-3">
+            <div class="form-floating">
+                <select id="TypeDePret" name="TypeDePret" class="form-select">
+                    <option value="">Choisissez le type de prêt</option>
+                    <option value="Prêt automobile" data-rate="3" data-months="60" data-amount="20000000">Prêt automobile</option>
+                    <option value="Prêt Aménagement Habitat" data-rate="3" data-months="60" data-amount="15000000">Prêt Aménagement Habitat</option>
+                    <option value="Aménagement gros oeuvres" data-rate="3" data-months="120" data-amount="40000000">Prêt Aménagement gros oeuvres</option>
+                    <option value="Prêt immobilier" data-rate="3.5" data-months="180" data-amount="100000000">Prêt immobilier</option>
+                </select>
+                <label>Type de prêt</label>
+            </div>
+        </div>
 
-<form method="post">
-    <div class="form-group">
-        <label for="Amount">Montant</label>
-        <input type="number" class="form-control" id="Amount" name="Amount" asp-for="LoanRequest.Amount" required>
+        <div class="col m-3">
+            <div class="form-floating">
+                <input class="form-control" type="number" id="MontantEmprunte" name="MontantEmprunte" required>
+                <label for="MontantEmprunte">Montant Emprunté (F CFA) :</label>
+            </div>
+        </div>
     </div>
-    <button type="submit" class="btn btn-primary">Soumettre</button>
+
+    <div class="row">
+        <div class="col-4 m-3">
+            <div class="form-floating">
+                <input class="form-control" type="number" id="annualRate" name="annualRate" step="0.01" readonly required>
+                <label for="annualRate">Taux d'Intérêt Annuel (%) :</label>
+            </div>
+        </div>
+
+        <div class="col-4 m-3">
+            <div class="form-floating">
+                <input class="form-control" type="number" id="months" name="months" required>
+                <label for="months">Durée du Prêt (Mois) :</label>
+            </div>
+        </div>
+        <div class="col m-3">
+            <p>
+                <strong class="text-danger">Durée Maximale:  <span id="maxMonths"></span></strong>
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-6 m-3">
+            <div class="form-floating">
+                <input class="form-control" type="number" id="netSalary" name="netSalary" readonly required>
+                <label for="netSalary">Salaire Net (F CFA) :</label>
+            </div>
+        </div>
+    </div>
 </form>

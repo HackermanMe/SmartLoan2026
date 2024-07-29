@@ -131,6 +131,14 @@ namespace EcoService.Models
             return ExecuteReader(query);
         }
 
+        // Méthode pour récupérer les comptes
+        public SqlDataReader Accounts()
+        {
+            string query = "SELECT b.Matricule AS Matriculee, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee, b.SalaireNet AS SalaireNete " +
+                "FROM [EcoServiceDB].[dbo].RhAccounts a JOIN [EcoServiceDB].[dbo].[RHStaffs] b ON a.NumeroCompte = b.NumeroCompte";
+            return ExecuteReader(query);
+        }
+
         // Méthode pour récupérer un compte selon le matricule
         public SqlDataReader Account(int matricule)
         {
@@ -238,6 +246,12 @@ namespace EcoService.Models
             }
         }
 
+        // Méthode pour récupérer les prêts CARPLAN
+        public SqlDataReader GetCarPlans()
+        {
+            string query = "SELECT * FROM RHPretsExistants WHERE ReferencePret LIKE 'M61ACAS%' OR ReferencePret LIKE 'M61CASA%';";
+            return ExecuteReader(query);
+        }
 
         // Méthode pour récupérer une demande de prêt selon le matricule
         public async Task<Demande> GetLoanRequest(int matricule)
@@ -268,6 +282,32 @@ namespace EcoService.Models
                     };
                 }
                 return null;
+            }
+        }
+
+        // Méthode pour envoyer les simulations
+        public void SendSimulation(decimal MontantEmprunte, string TypePret, decimal annualRate, int months, decimal quotity, decimal netSalary, int matricule)
+        {
+
+            // Exemple de traitement des données de simulation (à adapter selon votre modèle et vos besoins)
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = new SqlCommand("INSERT INTO RHDemandes (Montant, TypePret, Taux, NbreEcheances, Quotity, SalaireNet, Matricule, CreatedAt) VALUES (@Montant, @TypePret, @Taux, @NbreEcheances, @Quotity, @SalaireNet, @Matricule, @CreatedAt)", connection);
+
+                command.Parameters.AddWithValue("@Montant", MontantEmprunte);
+                command.Parameters.AddWithValue("@TypePret", TypePret);
+                command.Parameters.AddWithValue("@Taux", annualRate);
+                command.Parameters.AddWithValue("@NbreEcheances", months);
+                command.Parameters.AddWithValue("@Quotity", quotity);
+                command.Parameters.AddWithValue("@SalaireNet", netSalary);
+                command.Parameters.AddWithValue("@Matricule", matricule);
+                command.Parameters.AddWithValue("@CreatedAt", DateTime.Now);
+                //command.Parameters.AddWithValue("@SelectedLoanIds", string.Join(",", selectedLoanIds)); // ou autre format si nécessaire
+                //command.Parameters.AddWithValue("@AutresPrets", string.Join(",", autresPrets)); // ou autre format si nécessaire
+
+                command.ExecuteNonQuery();
             }
         }
 

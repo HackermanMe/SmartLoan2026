@@ -45,7 +45,7 @@
                     <a href="" class="text-nowrap logo-img">
                         <img src="~/assets/images/logos/télécharger.png" width="180" alt="SmartLoan Logo" />
                     </a>
-                
+
                     <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                         <i class="ti ti-x fs-8"></i>
                     </div>
@@ -168,6 +168,26 @@
     <script src="~/assets/js/sidebarmenu.js"></script>
     <script src="~/assets/js/app.min.js"></script>
     <script src="~/assets/libs/simplebar/dist/simplebar.js"></script>
+    <script>
+    var timeout;
+    var logoutAfter = 10 * 60 * 1000; // 10 minutes en millisecondes
+
+    function resetTimer() {
+        clearTimeout(timeout);
+        timeout = setTimeout(logout, logoutAfter);
+    }
+
+    function logout() {
+        window.location.href = '@Url.Action("Logout", "Account")';
+    }
+
+    // Réinitialiser le timer sur les événements de l'utilisateur
+    window.onload = resetTimer;
+    document.onmousemove = resetTimer;
+    document.onkeypress = resetTimer;
+    document.onscroll = resetTimer;
+    document.onclick = resetTimer;
+    </script>
     @RenderSection("scripts", required: false)
 </body>
 </html>

@@ -74,8 +74,6 @@ namespace EcoService.Controllers
             }
 
         
-
-
             //Récupérer les informations du staff
             decimal salaireNet = Convert.ToDecimal(staff["SalaireNete"]);
                     

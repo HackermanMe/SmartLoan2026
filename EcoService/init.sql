@@ -63,3 +63,7 @@ CREATE TABLE [dbo].[RHDemandes] (
     [UpdatedAt]     DATETIME        DEFAULT (getdate()) NOT NULL,
     PRIMARY KEY CLUSTERED ([DemandeId] ASC)
 );
+
+SELECT * FROM RHPretsExistants WHERE ReferencePret LIKE 'M61ACAS%' OR ReferencePret LIKE 'M61CASA%';
+
+INSERT INTO RHSimulations (MontantEmprunte, Taux, Echeances, SalaireNet, SelectedLoansId, AutresPrets) VALUES (9000000, 3, 60, 500000, null, null);
