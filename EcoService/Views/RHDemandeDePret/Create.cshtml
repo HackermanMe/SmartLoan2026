@@ -1,11 +1,23 @@
-﻿
+﻿@model Dictionary<string, object>
 @{
     ViewData["Title"] = "Demande de prêt";
+    var staff = Model.ContainsKey("Staff") ? Model["Staff"] as Dictionary<string, object> : null;
+    var simulationData = Model.ContainsKey("SimulationData") ? Model["SimulationData"] as dynamic : null;
 }
 
 <h2>Demande de prêt</h2>
 <p>Vérifiez les informations complémentaires</p>
-<form id="loanCalculator" method="post">
+<h4>Informations sur la simulation</h4>
+<p>Montant: @simulationData.Montant F CFA</p>
+<p>Type de prêt: @simulationData.TypeDePret</p>
+<p>Taux annuel: @simulationData.AnnualRate %</p>
+<p>Durée (mois): @simulationData.Months</p>
+<p>Quotité: @simulationData.Quotity %</p>
+<p>Salaire net: @simulationData.NetSalary</p>
+<p>Matricule: @simulationData.Matricule</p>
+
+<h4>Entrez les informations complémentaires </h4>
+<form id="" method="post">
     <div class="row">
         <div class="col m-3">
             <div class="form-floating">

@@ -60,7 +60,7 @@ namespace Ecoservice.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public ActionResult Login(LoginViewModel model, string returnUrl)
+        public ActionResult Loginn(LoginViewModel model, string returnUrl)
         {
             if (ModelState.IsValid)
             {
@@ -151,7 +151,7 @@ namespace Ecoservice.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public ActionResult Loginn(LoginViewModel model, string userName, string userPwd, string returnUrl)
+        public ActionResult Login(LoginViewModel model, string userName, string userPwd, string returnUrl)
         //public ActionResult Loginnn(LoginViewModel model, string returnUrl)
         {
 

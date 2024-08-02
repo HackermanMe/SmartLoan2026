@@ -501,6 +501,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Scripts\img\" />
+    <Folder Include="Templates\" />
     <Folder Include="Views\RHRole\" />
     <Folder Include="Views\RHSqlquery\" />
   </ItemGroup>

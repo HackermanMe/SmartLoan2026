@@ -20,52 +20,18 @@ namespace EcoService.Controllers
             return View();
         }
 
-        public ActionResult Create()
+        
+        [HttpPost]
+        public ActionResult DemanderPret()
         {
-            var pretss = new List<Dictionary<string, object>>();
-            string loginStaff = (string)HttpContext.Session["accountName"];
-
-            RHSqlQuery st = new RHSqlQuery();
-            SqlDataReader staffreadere = st.AccountLogin(loginStaff);
-
-            var staff = new Dictionary<string, object>();
-
-            while (staffreadere.Read())
+            try
             {
-                for (int i = 0; i < staffreadere.FieldCount; i++)
-                {
-                    staff[staffreadere.GetName(i)] = staffreadere.GetValue(i);
-                }
+
+                return Json(new { success = true});
             }
-
-            string NumeroCompte = Convert.ToString(staff["NumeroComptee"]);
-
-            RHSqlQuery p = new RHSqlQuery();
-            SqlDataReader prets = p.PretExistantsStaff(NumeroCompte);
-
-            //Calculer le total des mensualités
-
-            while (prets.Read())
-            {
-                var mensualites = prets.GetOrdinal(("Mensualites"));
-
-                var Pret = new Dictionary<string, object>();
-
-                for (int i = 0; i < prets.FieldCount; i++)
-                {
-
-                    Pret[prets.GetName(i)] = prets.GetValue(i);
-                }
-
-                pretss.Add(Pret);
+            catch (Exception ex) { 
+                return Json(new { success = false});
             }
-
-            var staffInfo = new Dictionary<string, object>
-            {
-                { "Prets", pretss },
-                { "Staff", staff },
-            };
-            return View(staffInfo);
         }
 
         [HttpPost]
@@ -177,7 +143,40 @@ namespace EcoService.Controllers
 
             try
             {
+                // Enregistrement des données dans la base de données
                 _sqlQuery.SendSimulation(Montant, TypeDePret, annualRate, months, quotity, netSalary, matricule);
+
+                var remboursementAdmis = netSalary * 40 / 100;
+                                
+                var demandePretFormFile = "";
+                var fieldValues = new Dictionary<string, string>
+                {
+                    { "Montant", Montant.ToString("N0") },
+                    { "TypeDePret", TypeDePret},
+                    { "Months", months.ToString("N0") },
+                    { "Taux", annualRate.ToString("N0") },
+                    { "SalaireNet", netSalary.ToString("N0") },
+                    { "Remboursement", remboursementAdmis.ToString("N0") },
+                    //{ "",  }
+                };
+
+                // Générer le document
+                var documentService = new WordDocumentService();
+                var documentBytes = documentService.GenerateDocument(Server.MapPath("~/Templates/LoanTemplate.docx"), fieldValues);
+
+
+                // Stocker les données dans TempData pour les passer à la prochaine action
+                TempData["SimulationData"] = new SimulationViewModel
+                {
+                    Montant = Montant,
+                    TypeDePret = TypeDePret,
+                    AnnualRate = annualRate,
+                    Months = months,
+                    Quotity = quotity,
+                    NetSalary = netSalary,
+                    Matricule = matricule
+                };
+
                 return Json(new { success = true, message = "La simulation a été envoyée avec succès.", redirectUrl = Url.Action("Create", "RHDemandeDePret") });
             }
             catch (Exception ex) 
@@ -186,6 +185,61 @@ namespace EcoService.Controllers
                 // Logger.LogError(ex, "Error in SendSimulation");
                 return Json(new { success = false, message = "Une erreur est survenue lors de l'envoi de la demande. Veuillez réessayer." });
             }
+        }
+
+        public ActionResult Create()
+        {
+            var pretss = new List<Dictionary<string, object>>();
+            string loginStaff = (string)HttpContext.Session["accountName"];
+            var simulationData = TempData["SimulationData"] as SimulationViewModel;
+
+            RHSqlQuery st = new RHSqlQuery();
+            SqlDataReader staffreadere = st.AccountLogin(loginStaff);
+
+            var staff = new Dictionary<string, object>();
+
+            while (staffreadere.Read())
+            {
+                for (int i = 0; i < staffreadere.FieldCount; i++)
+                {
+                    staff[staffreadere.GetName(i)] = staffreadere.GetValue(i);
+                }
+            }
+
+            string NumeroCompte = Convert.ToString(staff["NumeroComptee"]);
+
+            RHSqlQuery p = new RHSqlQuery();
+            SqlDataReader prets = p.PretExistantsStaff(NumeroCompte);
+
+            //Calculer le total des mensualités
+
+            while (prets.Read())
+            {
+                var mensualites = prets.GetOrdinal(("Mensualites"));
+
+                var Pret = new Dictionary<string, object>();
+
+                for (int i = 0; i < prets.FieldCount; i++)
+                {
+
+                    Pret[prets.GetName(i)] = prets.GetValue(i);
+                }
+
+                pretss.Add(Pret);
+            }
+
+            if (simulationData == null)
+            {
+                return RedirectToAction("SendSimulation");
+            }
+            var staffInfo = new Dictionary<string, object>
+            {
+                { "Prets", pretss },
+                { "Staff", staff },
+                { "SimulationData", simulationData },
+            };
+
+            return View(staffInfo);
         }
 
         //[HttpPost]

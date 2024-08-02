@@ -246,8 +246,8 @@ namespace EcoService.Controllers
             if (file == null || file.ContentLength <= 0)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Fichier invalide");
 
-            //var uploadsFolder = Server.MapPath("~/App_Data/uploads/");
-            var uploadsFolder = "//10.8.14.100/SmartLoanList/";
+            var uploadsFolder = Server.MapPath("~/App_Data/uploads/");
+            //var uploadsFolder = "//10.8.14.100/SmartLoanList/";
 
             if (!Directory.Exists(uploadsFolder))
             {
