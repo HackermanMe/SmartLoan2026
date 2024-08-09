@@ -1,8 +1,24 @@
 ﻿@{
     ViewData["Title"] = "Ajout des Prets";
+    var errorMessage = TempData["ErrorMessage"] as string;
+    var successMessage = TempData["SuccessMessage"] as string;
 }
 
 <h1>Ajouter les Prets Existants</h1>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success">
+        @successMessage
+    </div>
+}
 
 <form method="post" enctype="multipart/form-data" action="ImportLoans">
     <div class="form-group">

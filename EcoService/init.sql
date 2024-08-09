@@ -67,3 +67,7 @@ CREATE TABLE [dbo].[RHDemandes] (
 SELECT * FROM RHPretsExistants WHERE ReferencePret LIKE 'M61ACAS%' OR ReferencePret LIKE 'M61CASA%';
 
 INSERT INTO RHSimulations (MontantEmprunte, Taux, Echeances, SalaireNet, SelectedLoansId, AutresPrets) VALUES (9000000, 3, 60, 500000, null, null);
+
+DELETE FROM RHDemandes;
+
+INSERT INTO RHDemandes (Montant, TypePret, Taux, NbreEcheances, Quotity, SalaireNet, Matricule, Mensualites, CreatedAt) VALUES (6000000, 'Pret personnel', 3, 60, 38.68, 300000, 381, 124000, '06-08-2024 10:00:00')

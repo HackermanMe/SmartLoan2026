@@ -13,7 +13,9 @@ namespace EcoService.Models
         public decimal Quotity { get; set; }
         public int Months { get; set; }
         public decimal NetSalary { get; set; }
+        public decimal Remboursement { get; set; }
         public int Matricule { get; set; }
+        public int Mensualites { get; set; }
         public List<int> SelectedLoanIds { get; set; }
         public List<decimal> AutresPrets { get; set; }
     }

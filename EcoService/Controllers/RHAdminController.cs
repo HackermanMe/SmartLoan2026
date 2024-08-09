@@ -242,16 +242,28 @@ namespace EcoService.Controllers
         [HttpPost]
         public ActionResult ImportLoans(HttpPostedFileBase file)
         {
-            // Implémentation de l'importation des prêts depuis un fichier Excel
+            // Vérification de la validité du fichier
             if (file == null || file.ContentLength <= 0)
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Fichier invalide");
+            {
+                TempData["ErrorMessage"] = "Fichier invalide ou vide.";
+                return RedirectToAction("UploadLoans");
+            }
 
             var uploadsFolder = Server.MapPath("~/App_Data/uploads/");
             //var uploadsFolder = "//10.8.14.100/SmartLoanList/";
 
+            // Vérification de l'existence du répertoire de téléchargement
             if (!Directory.Exists(uploadsFolder))
             {
-                Directory.CreateDirectory(uploadsFolder);
+                try
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = $"Erreur lors de la création du répertoire de téléchargement : {ex.Message}";
+                    return RedirectToAction("UploadLoans");
+                }
             }
 
             var uniqueFileName = $"{Path.GetFileNameWithoutExtension(file.FileName)}_{DateTime.Now:yyyyMMddHHmmssfff}{Path.GetExtension(file.FileName)}";
@@ -263,7 +275,8 @@ namespace EcoService.Controllers
             }
             catch (Exception ex)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, $"Erreur lors de l'écriture du fichier : {ex.Message}");
+                TempData["ErrorMessage"] = $"Erreur lors de l'écriture du fichier : {ex.Message}";
+                return RedirectToAction("UploadLoans");
             }
 
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -274,53 +287,75 @@ namespace EcoService.Controllers
                 {
                     var worksheet = package.Workbook.Worksheets.FirstOrDefault();
                     if (worksheet == null)
-                        return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Fichier Excel vide");
+                    {
+                        TempData["ErrorMessage"] = "Le fichier Excel est vide ou ne contient pas de feuille de calcul valide.";
+                        return RedirectToAction("UploadLoans");
+                    }
 
                     var rowCount = worksheet.Dimension.Rows;
 
-                    // Supprimer toutes les lignes existantes de la table PretsExistans
-                    RHSqlQuery lr = new RHSqlQuery();
-                    lr.DeleteRHLoans();
+                    // Supprimer toutes les lignes existantes de la table PretsExistants
+                    try
+                    {
+                        RHSqlQuery lr = new RHSqlQuery();
+                        lr.DeleteRHLoans();
+                    }
+                    catch (Exception ex)
+                    {
+                        return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, $"Erreur lors de la suppression des prêts existants : {ex.Message}");
+                    }
 
                     // Insérer les nouvelles lignes à partir du fichier Excel
                     for (int row = 2; row <= rowCount; row++)
                     {
-                        var numeroCompte = worksheet.Cells[row, 1].Value?.ToString();
-                        var reference = worksheet.Cells[row, 2].Value?.ToString();
-                        var type = worksheet.Cells[row, 3].Value?.ToString();
-                        var montantEmprunte = worksheet.Cells[row, 4].Value?.ToString();
-                        var enCours = worksheet.Cells[row, 5].Value?.ToString();
-                        var taux = worksheet.Cells[row, 6].Value?.ToString();
-                        var mensualites = worksheet.Cells[row, 7].Value?.ToString();
-                        var dateDebutStr = worksheet.Cells[row, 8].Value?.ToString();
-                        var finPretStr = worksheet.Cells[row, 9].Value?.ToString();
-
-                        var tauxFloat = float.Parse(taux);
-
-                        // Convertir les dates au format dmy
-                        DateTime dateDebut, finPret;
-
-                        if (!DateTime.TryParseExact(dateDebutStr, "dd/MM/yyyy HH:mm:ss", null, System.Globalization.DateTimeStyles.None, out dateDebut))
+                        try
                         {
-                            throw new Exception($"Format de date invalide pour DateDebut à la ligne {row}: {dateDebutStr}");
-                        }
-                        if (!DateTime.TryParseExact(finPretStr, "dd/MM/yyyy HH:mm:ss", null, System.Globalization.DateTimeStyles.None, out finPret))
-                        {
-                            throw new Exception($"Format de date invalide pour FinPret à la ligne {row}: {finPretStr}");
-                        }
+                            var numeroCompte = worksheet.Cells[row, 1].Value?.ToString();
+                            var reference = worksheet.Cells[row, 2].Value?.ToString();
+                            var type = worksheet.Cells[row, 3].Value?.ToString();
+                            var montantEmprunte = worksheet.Cells[row, 4].Value?.ToString();
+                            var enCours = worksheet.Cells[row, 5].Value?.ToString();
+                            var taux = worksheet.Cells[row, 6].Value?.ToString();
+                            var mensualites = worksheet.Cells[row, 7].Value?.ToString();
+                            var dateDebutStr = worksheet.Cells[row, 8].Value?.ToString();
+                            var finPretStr = worksheet.Cells[row, 9].Value?.ToString();
 
-                        RHSqlQuery Prets = new RHSqlQuery();
-                        Prets.InsertLoans(numeroCompte, reference, type, montantEmprunte, enCours, tauxFloat, mensualites, dateDebut, finPret);
+                            if (!float.TryParse(taux, out float tauxFloat))
+                            {
+                                throw new Exception($"Valeur de taux invalide à la ligne {row} : {taux}");
+                            }
+
+                            // Convertir les dates au format dmy
+                            if (!DateTime.TryParseExact(dateDebutStr, "dd/MM/yyyy HH:mm:ss", null, System.Globalization.DateTimeStyles.None, out DateTime dateDebut))
+                            {
+                                throw new Exception($"Format de date invalide pour DateDebut à la ligne {row} : {dateDebutStr}");
+                            }
+                            if (!DateTime.TryParseExact(finPretStr, "dd/MM/yyyy HH:mm:ss", null, System.Globalization.DateTimeStyles.None, out DateTime finPret))
+                            {
+                                throw new Exception($"Format de date invalide pour FinPret à la ligne {row} : {finPretStr}");
+                            }
+
+                            RHSqlQuery Prets = new RHSqlQuery();
+                            Prets.InsertLoans(numeroCompte, reference, type, montantEmprunte, enCours, tauxFloat, mensualites, dateDebut, finPret);
+                        }
+                        catch (Exception ex)
+                        {
+                            TempData["ErrorMessage"] = $"Erreur lors de l'insertion des données dans la base de données : {ex.Message}";
+                            return RedirectToAction("UploadLoans");
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, $"Erreur lors de la lecture du fichier Excel : {ex.Message}");
+                TempData["ErrorMessage"] = $"Erreur lors de la lecture du fichier Excel : {ex.Message}";
+                return RedirectToAction("UploadLoans");
             }
-            
-            return RedirectToAction("Index", "RHAdmin");
+
+            TempData["SuccessMessage"] = "Importation des prêts réussie.";
+            return RedirectToAction("UploadLoans");
         }
+
     }
 }
 

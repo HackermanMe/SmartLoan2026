@@ -288,13 +288,12 @@ namespace EcoService.Models
         // Méthode pour envoyer les simulations
         public void SendSimulation(decimal MontantEmprunte, string TypePret, decimal annualRate, int months, decimal quotity, decimal netSalary, int matricule)
         {
-
             // Exemple de traitement des données de simulation (à adapter selon votre modèle et vos besoins)
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
-                var command = new SqlCommand("INSERT INTO RHDemandes (Montant, TypePret, Taux, NbreEcheances, Quotity, SalaireNet, Matricule, CreatedAt) VALUES (@Montant, @TypePret, @Taux, @NbreEcheances, @Quotity, @SalaireNet, @Matricule, @CreatedAt)", connection);
+                var command = new SqlCommand("INSERT INTO RHDemandes (Montant, TypePret, Taux, NbreEcheances, Quotity, SalaireNet, Matricule, CreatedAt) VALUES (@Montant, @TypePret, @Taux, @NbreEcheances, @Quotity, @SalaireNet, @Matricule, @Mensualites, @CreatedAt)", connection);
 
                 command.Parameters.AddWithValue("@Montant", MontantEmprunte);
                 command.Parameters.AddWithValue("@TypePret", TypePret);

@@ -112,7 +112,6 @@ namespace EcoService.Controllers
                     monthlyPayment = (int)Math.Round(MontantEmprunte / months);
                     totalMonthlyPayments = monthlyPayment;
 
-
                     decimal quotity = totalMonthlyPayments / netSalary * 100;
 
                     var customCulture = (System.Globalization.CultureInfo)System.Globalization.CultureInfo.InvariantCulture.Clone();
@@ -148,7 +147,6 @@ namespace EcoService.Controllers
 
                 var remboursementAdmis = netSalary * 40 / 100;
                                 
-                var demandePretFormFile = "";
                 var fieldValues = new Dictionary<string, string>
                 {
                     { "Montant", Montant.ToString("N0") },
@@ -161,9 +159,8 @@ namespace EcoService.Controllers
                 };
 
                 // Générer le document
-                var documentService = new WordDocumentService();
-                var documentBytes = documentService.GenerateDocument(Server.MapPath("~/Templates/LoanTemplate.docx"), fieldValues);
-
+                //var documentService = new WordDocumentService();
+                //var documentBytes = documentService.GenerateDocument(Server.MapPath("~/Templates/LoanTemplate.docx"), fieldValues);
 
                 // Stocker les données dans TempData pour les passer à la prochaine action
                 TempData["SimulationData"] = new SimulationViewModel
@@ -174,12 +171,13 @@ namespace EcoService.Controllers
                     Months = months,
                     Quotity = quotity,
                     NetSalary = netSalary,
-                    Matricule = matricule
+                    Matricule = matricule,
+                    Remboursement = remboursementAdmis
                 };
 
                 return Json(new { success = true, message = "La simulation a été envoyée avec succès.", redirectUrl = Url.Action("Create", "RHDemandeDePret") });
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 // Log exception (ex) if necessary
                 // Logger.LogError(ex, "Error in SendSimulation");
@@ -212,7 +210,6 @@ namespace EcoService.Controllers
             SqlDataReader prets = p.PretExistantsStaff(NumeroCompte);
 
             //Calculer le total des mensualités
-
             while (prets.Read())
             {
                 var mensualites = prets.GetOrdinal(("Mensualites"));
@@ -221,7 +218,6 @@ namespace EcoService.Controllers
 
                 for (int i = 0; i < prets.FieldCount; i++)
                 {
-
                     Pret[prets.GetName(i)] = prets.GetValue(i);
                 }
 

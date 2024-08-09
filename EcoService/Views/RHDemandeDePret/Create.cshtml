@@ -8,16 +8,86 @@
 <h2>Demande de prêt</h2>
 <p>Vérifiez les informations complémentaires</p>
 <h4>Informations sur la simulation</h4>
-<p>Montant: @simulationData.Montant F CFA</p>
-<p>Type de prêt: @simulationData.TypeDePret</p>
-<p>Taux annuel: @simulationData.AnnualRate %</p>
-<p>Durée (mois): @simulationData.Months</p>
-<p>Quotité: @simulationData.Quotity %</p>
-<p>Salaire net: @simulationData.NetSalary</p>
-<p>Matricule: @simulationData.Matricule</p>
+<div class="row">
+    <div class="col">
+        <p>Nom et Prénoms: <strong> @staff["Nomm"] @staff["Prenomm"] </strong> </p>
+    </div>
+    <div class="col">
+        <p>Numéro de compte: <strong> @staff["NumeroComptee"] </strong> </p>
+    </div>
+
+</div>
+<div class="row">
+    <div class="col m-1">
+        <p>Type de prêt: <strong> @simulationData.TypeDePret </strong> </p>
+    </div>
+    <div class="col m-1">
+        <p>Taux annuel: <strong> @simulationData.AnnualRate % </strong> </p>
+    </div>
+    <div class="col m-1">
+        <p>Montant: <strong> @simulationData.Montant F CFA </strong> </p>
+    </div>
+    <div class="col m-1">
+        @*<p>Remboursement maximum mensuel admis: <strong> @simulationData.Remboursement F CFA </strong> </p>*@
+    </div>
+</div>
+
+<div class="row">
+    <div class="col m-1">
+        <p>Durée (mois): <strong> @simulationData.Months </strong> </p>
+    </div>
+    <div class="col m-1">
+        <p>Quotité: <strong> @simulationData.Quotity % </strong> </p>
+    </div>
+    <div class="col m-1">
+        <p>Salaire net: <strong> @simulationData.NetSalary </strong> </p>
+    </div>
+    <div class="col m-1">
+        <p>Matricule: <strong> @simulationData.Matricule </strong> </p>
+    </div>
+</div>
+
 
 <h4>Entrez les informations complémentaires </h4>
 <form id="" method="post">
+    <div class="row">
+        <div class="col m-3">
+            <div class="form-floating">
+                <input class="form-control" type="date" id="dateDebut" name="dateDebut" required>
+                <label for="dateDebut">Date de naissance :</label>
+            </div>
+        </div>
+
+        <div class="col m-3">
+            <div class="form-floating">
+                <input class="form-control" type="date" id="dateFin" name="dateFin" required>
+                <label for="dateFin">Date d'entrée à ECOBANK-TOGO :</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-4 m-3">
+            <div class="form-floating">
+                <input class="form-control" type="text" id="annualRate" name="annualRate" step="0.01" readonly required>
+                <label for="annualRate">Classe :</label>
+            </div>
+        </div>
+
+        <div class="col-4 m-3">
+            <div class="form-floating">
+                <input class="form-control" type="text" id="months" name="months" required>
+                <label for="months">Grade :</label>
+            </div>
+        </div>
+        <div class="col m-3">
+            <div class="form-floating">
+                <input class="form-control" value="@staff["Matriculee"]" type="number" id="months" name="months" readonly required>
+                <label for="months">N° Matricule :</label>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col m-3">
             <div class="form-floating">
@@ -61,12 +131,13 @@
         </div>
     </div>
 
+
     <div class="row">
-        <div class="col-6 m-3">
-            <div class="form-floating">
-                <input class="form-control" type="number" id="netSalary" name="netSalary" readonly required>
-                <label for="netSalary">Salaire Net (F CFA) :</label>
-            </div>
+        <div class="form-floating">
+            <textarea class="form-control" id="notes" name="notes" style="height: 175px;">
+    
+            </textarea>
+            <label for="notes">Notes Explicatives :</label>
         </div>
     </div>
 </form>

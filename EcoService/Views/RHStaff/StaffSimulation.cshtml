@@ -328,7 +328,8 @@
     <div id="loan">
         <button type="button" onclick="sendSimulation()" class="btn btn-primary btn-sm edit-btn">Demander un prêt</button>
     </div>
-    <div id="sendSimulationMessage">
+
+    <div class="m-3" id="sendSimulationMessage">
 
     </div>
 
@@ -578,7 +579,7 @@ else
             const netSalary = parseFloat($('#netSalary').val());
             const autreMensualites = parseFloat($('#mensualites').val());
             const TypeDePret = $('#TypeDePret').val();
-            @*const quotity = $('#quotity').val();*@
+            //const quotity = parseFloat($('#quotity').text().replace('%', ''));
             const quotity = 39;
             const matricule = @staff["Matriculee"];
 
@@ -592,7 +593,7 @@ else
                     months: months,
                     quotity: quotity,
                     netSalary: netSalary,
-                    matricule: matricule,
+                    matricule: matricule
                 },
                 success: function (response) {
                     if (response.success) {

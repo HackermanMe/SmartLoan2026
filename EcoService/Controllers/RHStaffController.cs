@@ -12,19 +12,15 @@ namespace EcoService.Controllers
 {
     public class RHStaffController : Controller
     {
-        // GET: RHStaff
-               
+        // GET: RHStaff               
         public ActionResult Index()
         {
           //return RedirectToAction("StaffSimulation", "RHStaff");
-
            return View();
         }
-
        
         public ActionResult StaffSimulation()
         {
-
             string loginStaff = (string)HttpContext.Session["accountName"];
            
             RHSqlQuery st = new RHSqlQuery();
@@ -34,18 +30,13 @@ namespace EcoService.Controllers
             SqlDataReader staffreadere = st.AccountLogin(loginStaff);
                   
             var staff = new Dictionary<string, object>();
-              
-
+            
             while (staffreadere.Read())
             {
-
                 for (int i = 0; i < staffreadere.FieldCount; i++)
                 {
-
                     staff[staffreadere.GetName(i)] = staffreadere.GetValue(i);
-
                 }
-
             }
 
             string NumeroCompte = Convert.ToString(staff["NumeroComptee"]);
@@ -54,7 +45,6 @@ namespace EcoService.Controllers
             SqlDataReader prets = p.PretExistantsStaff(NumeroCompte);
 
             //Calculer le total des mensualités
-
             while (prets.Read())
             {
                 var mensualites = prets.GetOrdinal(("Mensualites"));
@@ -63,16 +53,11 @@ namespace EcoService.Controllers
 
                 for (int i = 0; i < prets.FieldCount; i++)
                 {
-
                     Pret[prets.GetName(i)] = prets.GetValue(i);
                 }
-
                 pretss.Add(Pret);
-
                 totalMensualites += Convert.ToDecimal(Pret["Mensualites"]);
-
             }
-
         
             //Récupérer les informations du staff
             decimal salaireNet = Convert.ToDecimal(staff["SalaireNete"]);
@@ -84,7 +69,6 @@ namespace EcoService.Controllers
             // Préparer les données pour la vue
             var simulation = new Dictionary<string, object>
             {
-
                 { "Prets", pretss },
                 { "Staff", staff },
                 { "QuotiteResiduelle", quotiteResiduelle.ToString("0.00") },
@@ -94,10 +78,8 @@ namespace EcoService.Controllers
             return View(simulation);
         }
 
-
         public ActionResult Parametre(int id)
         {
-
             RHSqlQuery lr = new RHSqlQuery();
             SqlDataReader DbReader = lr.Rapport(id);
 
@@ -107,13 +89,9 @@ namespace EcoService.Controllers
                 Session["Act"] = DbReader.GetString(DbReader.GetOrdinal("action"));
                 Session["Cont"] = DbReader.GetString(DbReader.GetOrdinal("controller"));
                 Session["Nom"] = DbReader.GetString(DbReader.GetOrdinal("nom"));
-
             }
-
             return Json(new { redirect = 1 });
 
         }
-    }
-
-    
+    }    
 }
