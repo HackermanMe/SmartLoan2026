@@ -12,7 +12,7 @@ namespace EcoService.Controllers
 {
     public class RHStaffController : Controller
     {
-        // GET: RHStaff               
+        // GET: RHStaff              
         public ActionResult Index()
         {
           //return RedirectToAction("StaffSimulation", "RHStaff");
@@ -26,7 +26,6 @@ namespace EcoService.Controllers
             RHSqlQuery st = new RHSqlQuery();
             decimal totalMensualites = 0;
             var pretss = new List<Dictionary<string, object>>();
-
             SqlDataReader staffreadere = st.AccountLogin(loginStaff);
                   
             var staff = new Dictionary<string, object>();
@@ -48,7 +47,6 @@ namespace EcoService.Controllers
             while (prets.Read())
             {
                 var mensualites = prets.GetOrdinal(("Mensualites"));
-
                 var Pret = new Dictionary<string, object>();
 
                 for (int i = 0; i < prets.FieldCount; i++)

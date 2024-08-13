@@ -6,11 +6,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.UI.WebControls;
+using Microsoft.Extensions.Logging;
+using NLog;
 
 namespace EcoService.Controllers
 {
     public class RHDemandeDePretController : Controller
     {
+        // Logger NLog
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         // Instance unique de RHSqlQuery pour l'utilisation dans le contrôleur
         private readonly RHSqlQuery _sqlQuery = new RHSqlQuery();
 
@@ -18,20 +23,6 @@ namespace EcoService.Controllers
         public ActionResult Index()
         {
             return View();
-        }
-
-        
-        [HttpPost]
-        public ActionResult DemanderPret()
-        {
-            try
-            {
-
-                return Json(new { success = true});
-            }
-            catch (Exception ex) { 
-                return Json(new { success = false});
-            }
         }
 
         [HttpPost]
@@ -127,7 +118,7 @@ namespace EcoService.Controllers
             catch (Exception ex)
             {
                 var errorObject = new { error = "Une erreur est survenue lors du calcul des mensualités. Veuillez réessayer." };
-                // Log exception (ex) if necessary
+                Logger.Error(ex, "Error in CalculateMonthlyPayment");
                 return Json(errorObject, JsonRequestBehavior.AllowGet);
             }
         }
@@ -145,25 +136,10 @@ namespace EcoService.Controllers
                 // Enregistrement des données dans la base de données
                 _sqlQuery.SendSimulation(Montant, TypeDePret, annualRate, months, quotity, netSalary, matricule);
 
-                var remboursementAdmis = netSalary * 40 / 100;
-                                
-                var fieldValues = new Dictionary<string, string>
-                {
-                    { "Montant", Montant.ToString("N0") },
-                    { "TypeDePret", TypeDePret},
-                    { "Months", months.ToString("N0") },
-                    { "Taux", annualRate.ToString("N0") },
-                    { "SalaireNet", netSalary.ToString("N0") },
-                    { "Remboursement", remboursementAdmis.ToString("N0") },
-                    //{ "",  }
-                };
-
-                // Générer le document
-                //var documentService = new WordDocumentService();
-                //var documentBytes = documentService.GenerateDocument(Server.MapPath("~/Templates/LoanTemplate.docx"), fieldValues);
+                decimal remboursementAdmis = netSalary * 40 / 100;
 
                 // Stocker les données dans TempData pour les passer à la prochaine action
-                TempData["SimulationData"] = new SimulationViewModel
+                ViewBag.SimulationData = new SimulationViewModel
                 {
                     Montant = Montant,
                     TypeDePret = TypeDePret,
@@ -179,8 +155,7 @@ namespace EcoService.Controllers
             }
             catch (Exception ex)
             {
-                // Log exception (ex) if necessary
-                // Logger.LogError(ex, "Error in SendSimulation");
+                Logger.Error(ex, "Error in SendSimulation");
                 return Json(new { success = false, message = "Une erreur est survenue lors de l'envoi de la demande. Veuillez réessayer." });
             }
         }
@@ -189,7 +164,7 @@ namespace EcoService.Controllers
         {
             var pretss = new List<Dictionary<string, object>>();
             string loginStaff = (string)HttpContext.Session["accountName"];
-            var simulationData = TempData["SimulationData"] as SimulationViewModel;
+            var simulationData = ViewBag.SimulationData as SimulationViewModel;
 
             RHSqlQuery st = new RHSqlQuery();
             SqlDataReader staffreadere = st.AccountLogin(loginStaff);
@@ -238,10 +213,44 @@ namespace EcoService.Controllers
             return View(staffInfo);
         }
 
-        //[HttpPost]
-        //public ActionResult FillWordDocWSimulation()
-        //{
-        //    return ;
-        //}
+        [HttpPost]
+        public ActionResult GenerateDocument(
+            decimal Montant, string nom,
+            string TypeDePret, string numeroCompte,
+            decimal annualRate, string dateNaissance,
+            int months, string dateDebut,
+            decimal quotity, string ranking,
+            decimal netSalary, string grade,
+            int matricule, string notes
+            )
+        {
+            var remboursementAdmis = netSalary * 40 / 100;
+
+            var fieldValues = new Dictionary<string, string>
+            {
+                { "Nom", nom },
+                { "DateNaissance", dateNaissance },
+                { "DateEntree", dateDebut },
+                { "Classe", ranking },
+                { "Grade", grade },
+                { "Matricule", matricule.ToString("N0") },
+                { "Montant", Montant.ToString("N0") },
+                { "TypeDePret", TypeDePret },
+                { "Months", months.ToString("N0") },
+                { "Taux", annualRate.ToString("N0") },
+                { "SalaireNet", netSalary.ToString("N0") },
+                { "Remboursement", remboursementAdmis.ToString("N0") },
+                { "NumeroCompte", numeroCompte },
+                { "Notes", notes },
+                //{ "",  }
+            };
+
+            // Générer le document
+            var documentService = new WordDocumentService();
+            var documentBytes = documentService.GenerateDocument(Server.MapPath("~/Templates/LoanTemplate.docx"), fieldValues);
+
+            // Return the filled document for download
+            return File(documentBytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "FICHE_DEMANDE_PRET_Filled.docx");
+        }
     }
 }

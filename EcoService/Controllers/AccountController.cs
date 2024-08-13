@@ -14,15 +14,20 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
 using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
+using NLog;
 
 namespace Ecoservice.Controllers
 {
     public class AccountController : Controller
     {
-       // GET: Account
-       //[AllowAnonymous]
+
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+        // GET: Account
+        //[AllowAnonymous]
         public ActionResult Login(string returnUrl)
         {
+            Logger.Info("Accès à la page de connexion. URL de retour : {0}", returnUrl);
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
@@ -32,11 +37,14 @@ namespace Ecoservice.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Index(LoginViewModel model, string returnUrl)
         {
+            Logger.Info("Tentative de connexion pour l'utilisateur {0}", model.UserName);
+
             if (ModelState.IsValid)
             {
                 if (Membership.ValidateUser(model.UserName, model.Password))
                 {
                     FormsAuthentication.SetAuthCookie(model.UserName, model.RememberMe);
+                    Logger.Info("Connexion réussie pour l'utilisateur {0}", model.UserName);
                     if (Url.IsLocalUrl(returnUrl) && returnUrl.Length > 1 && returnUrl.StartsWith("/")
                         && !returnUrl.StartsWith("//") && !returnUrl.StartsWith("//\\"))
                     {
@@ -49,8 +57,13 @@ namespace Ecoservice.Controllers
                 }
                 else
                 {
+                    Logger.Warn("Échec de la connexion pour l'utilisateur {0}. Mot de passe ou nom d'utilisateur incorrect.", model.UserName);
                     ModelState.AddModelError("", "The user name or password provided is incorrect");
                 }
+            }
+            else
+            {
+                Logger.Warn("Échec de la validation du modèle pour l'utilisateur {0}", model.UserName);
             }
 
             // if we got this far, something failed, redisplay form
@@ -62,6 +75,8 @@ namespace Ecoservice.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Login(LoginViewModel model, string returnUrl)
         {
+            Logger.Info("Tentative de connexion via AD pour l'utilisateur {0}", model.UserName);
+
             if (ModelState.IsValid)
             {
                 try
@@ -89,6 +104,7 @@ namespace Ecoservice.Controllers
                         Session["accountName"] = accountName;
                         Session["userFullName"] = displayName;
 
+                        Logger.Info("Utilisateur {0} connecté avec succès via AD. Nom complet : {1}", accountName, displayName);
 
                         string accountNamel = Session["accountName"]?.ToString() ?? "DEFAULT";
 
@@ -100,6 +116,7 @@ namespace Ecoservice.Controllers
                             // Vérification de la présence de la colonne IDGroup
                             if (DbReader.IsDBNull(DbReader.GetOrdinal("IDGroup")))
                             {
+                                Logger.Warn("Groupe non attribué pour l'utilisateur {0}", accountName);
                                 ModelState.AddModelError("", "Groupe non attribué.");
                             }
                             else
@@ -108,6 +125,8 @@ namespace Ecoservice.Controllers
                                 Session["idGroup"] = idgroup;
 
                                 FormsAuthentication.SetAuthCookie(model.UserName, model.RememberMe);
+
+                                Logger.Info("Groupe {0} attribué à l'utilisateur {1}", idgroup, accountName);
 
                                 if (idgroup == 100)
                                 {
@@ -121,6 +140,7 @@ namespace Ecoservice.Controllers
                         }
                         else
                         {
+                            Logger.Error("Erreur de rôle utilisateur pour l'utilisateur {0}", accountName);
                             // Gérer le cas où aucune donnée n'est lue
                             ModelState.AddModelError("", "Erreur de rôle utilisateur.");
                         }
@@ -128,6 +148,7 @@ namespace Ecoservice.Controllers
                     }
                     else
                     {
+                        Logger.Warn("Utilisateur {0} non trouvé dans l'annuaire AD", accountName);
                         // user not found
                         Session["domainName"] = "";
                         Session["accountName"] = "";
@@ -136,13 +157,18 @@ namespace Ecoservice.Controllers
 
                     //return RedirectToAction("StaffSimulation", "RHStaff");
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Logger.Error(ex, "Erreur lors de la tentative de connexion pour l'utilisateur {0}", model.UserName);
                     // If we got this far, something failed, redisplay form
                     ModelState.AddModelError("", "Le nom d'utilisateur ou le mot de passe fourni est incorrect.");
                     //return RedirectToAction("Index", "RHAdmin");
                 }
                 
+            }
+            else
+            {
+                Logger.Warn("Échec de la validation du modèle pour l'utilisateur {0}", model.UserName);
             }
             
             return View(model);
@@ -154,9 +180,11 @@ namespace Ecoservice.Controllers
         public ActionResult Loginn(LoginViewModel model, string userName, string userPwd, string returnUrl)
         //public ActionResult Loginnn(LoginViewModel model, string returnUrl)
         {
+            Logger.Info("Tentative de connexion avec utilisateur local {0}", model.UserName);
 
             if (!ModelState.IsValid)
             {
+                Logger.Warn("Échec de la validation du modèle pour l'utilisateur {0}", model.UserName);
                 return View(model);
             }
 
@@ -164,6 +192,8 @@ namespace Ecoservice.Controllers
             
             if (model.UserName == utilisateur.userName && model.Password == utilisateur.userPwd)
             {
+
+                Logger.Info("Connexion réussie pour l'utilisateur local {0}", model.UserName);
 
                 //if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
                 //    return Redirect(returnUrl);
@@ -190,17 +220,22 @@ namespace Ecoservice.Controllers
                 // return Json(new { connexion = 1 });
 
             }
-            ModelState.AddModelError("", "Le nom d'utilisateur ou le mot de passe fourni est incorrect.");
-            return View(model);
-            // return Redirect(returnUrl);
+            else
+            {
+                Logger.Warn("Échec de la connexion pour l'utilisateur local {0}", model.UserName);
+                ModelState.AddModelError("", "Le nom d'utilisateur ou le mot de passe fourni est incorrect.");
+                return View(model);
+                // return Redirect(returnUrl);
 
-            //  return Json(new { connexion = 0 });
+                //  return Json(new { connexion = 0 });
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Logout()
         {
+            Logger.Info("Déconnexion de l'utilisateur {0}", User.Identity.Name);
             FormsAuthentication.SignOut();
             return Redirect("/");
         }

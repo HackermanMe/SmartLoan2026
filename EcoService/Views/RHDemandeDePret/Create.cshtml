@@ -1,4 +1,5 @@
 ﻿@model Dictionary<string, object>
+
 @{
     ViewData["Title"] = "Demande de prêt";
     var staff = Model.ContainsKey("Staff") ? Model["Staff"] as Dictionary<string, object> : null;
@@ -28,7 +29,7 @@
         <p>Montant: <strong> @simulationData.Montant F CFA </strong> </p>
     </div>
     <div class="col m-1">
-        @*<p>Remboursement maximum mensuel admis: <strong> @simulationData.Remboursement F CFA </strong> </p>*@
+        <p>Remboursement maximum mensuel admis: <strong> @simulationData.Remboursement F CFA </strong> </p>
     </div>
 </div>
 
@@ -47,21 +48,20 @@
     </div>
 </div>
 
-
 <h4>Entrez les informations complémentaires </h4>
 <form id="" method="post">
     <div class="row">
         <div class="col m-3">
             <div class="form-floating">
+                <input class="form-control" type="date" id="dateNaissance" name="dateNaissance" required>
+                <label for="dateNaissance">Date de naissance :</label>
+            </div>
+        </div>
+
+        <div class="col m-3">
+            <div class="form-floating">
                 <input class="form-control" type="date" id="dateDebut" name="dateDebut" required>
-                <label for="dateDebut">Date de naissance :</label>
-            </div>
-        </div>
-
-        <div class="col m-3">
-            <div class="form-floating">
-                <input class="form-control" type="date" id="dateFin" name="dateFin" required>
-                <label for="dateFin">Date d'entrée à ECOBANK-TOGO :</label>
+                <label for="dateDebut">Date d'entrée à ECOBANK-TOGO :</label>
             </div>
         </div>
     </div>
@@ -69,68 +69,24 @@
     <div class="row">
         <div class="col-4 m-3">
             <div class="form-floating">
-                <input class="form-control" type="text" id="annualRate" name="annualRate" step="0.01" readonly required>
-                <label for="annualRate">Classe :</label>
+                <input class="form-control" type="text" id="ranking" name="ranking" required>
+                <label for="ranking">Classe :</label>
             </div>
         </div>
 
         <div class="col-4 m-3">
             <div class="form-floating">
-                <input class="form-control" type="text" id="months" name="months" required>
-                <label for="months">Grade :</label>
+                <input class="form-control" type="text" id="grade" name="grade" required>
+                <label for="grade">Grade :</label>
             </div>
         </div>
         <div class="col m-3">
             <div class="form-floating">
-                <input class="form-control" value="@staff["Matriculee"]" type="number" id="months" name="months" readonly required>
-                <label for="months">N° Matricule :</label>
+                <input class="form-control" value="@staff["Matriculee"]" type="number" id="matricule" name="matricule" readonly required>
+                <label for="matricule">N° Matricule :</label>
             </div>
         </div>
     </div>
-
-    <div class="row">
-        <div class="col m-3">
-            <div class="form-floating">
-                <select id="TypeDePret" name="TypeDePret" class="form-select">
-                    <option value="">Choisissez le type de prêt</option>
-                    <option value="Prêt automobile" data-rate="3" data-months="60" data-amount="20000000">Prêt automobile</option>
-                    <option value="Prêt Aménagement Habitat" data-rate="3" data-months="60" data-amount="15000000">Prêt Aménagement Habitat</option>
-                    <option value="Aménagement gros oeuvres" data-rate="3" data-months="120" data-amount="40000000">Prêt Aménagement gros oeuvres</option>
-                    <option value="Prêt immobilier" data-rate="3.5" data-months="180" data-amount="100000000">Prêt immobilier</option>
-                </select>
-                <label>Type de prêt</label>
-            </div>
-        </div>
-
-        <div class="col m-3">
-            <div class="form-floating">
-                <input class="form-control" type="number" id="MontantEmprunte" name="MontantEmprunte" required>
-                <label for="MontantEmprunte">Montant Emprunté (F CFA) :</label>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-4 m-3">
-            <div class="form-floating">
-                <input class="form-control" type="number" id="annualRate" name="annualRate" step="0.01" readonly required>
-                <label for="annualRate">Taux d'Intérêt Annuel (%) :</label>
-            </div>
-        </div>
-
-        <div class="col-4 m-3">
-            <div class="form-floating">
-                <input class="form-control" type="number" id="months" name="months" required>
-                <label for="months">Durée du Prêt (Mois) :</label>
-            </div>
-        </div>
-        <div class="col m-3">
-            <p>
-                <strong class="text-danger">Durée Maximale:  <span id="maxMonths"></span></strong>
-            </p>
-        </div>
-    </div>
-
 
     <div class="row">
         <div class="form-floating">
@@ -140,4 +96,60 @@
             <label for="notes">Notes Explicatives :</label>
         </div>
     </div>
+
+    <button type="submit" class="btn btn-primary">
+        Envoyer
+    </button>
 </form>
+
+
+<script>
+
+    $(document).ready(function () {
+        $('#submitRequest').on('submit', function () {
+            sendRequest();
+        });
+    });
+
+    $('#complementaryForm').on('submit', function(event) {
+        event.preventDefault();
+
+        var remboursement = @staff["SalaireNete"] * 40 / 100;
+
+        var data = {
+            nom: '@staff["Nomm"] @staff["Prenomm"]',
+            Montant: '@simulationData.Montant',
+            TypeDePret: '@simulationData.TypeDePret',
+            annualRate: '@simulationData.AnnualRate',
+            months: '@simulationData.Months',
+            quotity: '@simulationData.Quotity',
+            netSalary: '@simulationData.NetSalary',
+            remboursement: remboursement,
+            numeroCompte: '@staff["NumeroComptee"]',
+            matricule: '@simulationData.Matricule',
+            dateNaissance: $('#dateNaissance').val(),
+            dateDebut: $('#dateDebut').val(),
+            ranking: $('#ranking').val(),
+            grade: $('#grade').val(),
+            notes: $('#notes').val(),
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("GenerateDocument", "RHDemandeDePret")',
+            data: data,
+            success: function (response) {
+                if (response.success) {
+                    alert(response.message || 'Succès!');
+                    window.location.href = response.redirectUrl;
+                } else {
+                    alert(response.message || 'Erreur!');
+                }
+            },
+            error: function (xhr, status, error) {
+                alert('Erreur de communication avec le serveur: ' + error);
+            }
+        });
+    });
+
+</script>
