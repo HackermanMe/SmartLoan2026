@@ -1,5 +1,4 @@
 ﻿@model Dictionary<string, object>
-
 @{
     ViewData["Title"] = "Demande de prêt";
     var staff = Model.ContainsKey("Staff") ? Model["Staff"] as Dictionary<string, object> : null;
@@ -26,10 +25,10 @@
         <p>Taux annuel: <strong> @simulationData.AnnualRate % </strong> </p>
     </div>
     <div class="col m-1">
-        <p>Montant: <strong> @simulationData.Montant F CFA </strong> </p>
+        <p>Montant: <strong> @string.Format("{0:N0}", @simulationData.Montant) F CFA </strong> </p>
     </div>
     <div class="col m-1">
-        <p>Remboursement maximum mensuel admis: <strong> @simulationData.Remboursement F CFA </strong> </p>
+        <p>Mensualités maximum: <strong>@string.Format("{0:N0}", @simulationData.Remboursement) F CFA </strong> </p>
     </div>
 </div>
 
@@ -41,7 +40,7 @@
         <p>Quotité: <strong> @simulationData.Quotity % </strong> </p>
     </div>
     <div class="col m-1">
-        <p>Salaire net: <strong> @simulationData.NetSalary </strong> </p>
+        <p>Salaire net: <strong>@string.Format("{0:N0}", @simulationData.NetSalary) F CFA </strong> </p>
     </div>
     <div class="col m-1">
         <p>Matricule: <strong> @simulationData.Matricule </strong> </p>
@@ -49,7 +48,7 @@
 </div>
 
 <h4>Entrez les informations complémentaires </h4>
-<form id="" method="post">
+<form id="complementaryForm" method="post">
     <div class="row">
         <div class="col m-3">
             <div class="form-floating">
@@ -89,49 +88,40 @@
     </div>
 
     <div class="row">
+        <label for="notes">Notes Explicatives :</label>
         <div class="form-floating">
             <textarea class="form-control" id="notes" name="notes" style="height: 175px;">
     
             </textarea>
-            <label for="notes">Notes Explicatives :</label>
         </div>
     </div>
 
-    <button type="submit" class="btn btn-primary">
+    <button type="button" onclick="sendRequest()" class="btn btn-primary mt-3">
         Envoyer
     </button>
 </form>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<script>
-
-    $(document).ready(function () {
-        $('#submitRequest').on('submit', function () {
-            sendRequest();
-        });
-    });
-
-    $('#complementaryForm').on('submit', function(event) {
-        event.preventDefault();
-
-        var remboursement = @staff["SalaireNete"] * 40 / 100;
+    <script>
+        function sendRequest() {
+        var remboursement = @staff?["SalaireNet"] * 40 / 100;
 
         var data = {
-            nom: '@staff["Nomm"] @staff["Prenomm"]',
-            Montant: '@simulationData.Montant',
-            TypeDePret: '@simulationData.TypeDePret',
-            annualRate: '@simulationData.AnnualRate',
-            months: '@simulationData.Months',
-            quotity: '@simulationData.Quotity',
-            netSalary: '@simulationData.NetSalary',
-            remboursement: remboursement,
-            numeroCompte: '@staff["NumeroComptee"]',
-            matricule: '@simulationData.Matricule',
+            Montant: @simulationData?.Montant,
+            nom: '@staff?["Nom"] @staff?["Prenom"]',
+            TypeDePret: '@simulationData?.TypeDePret',
+            numeroCompte: '@staff?["NumeroCompte"]',
+            annualRate: @simulationData?.AnnualRate,
             dateNaissance: $('#dateNaissance').val(),
+            months: @simulationData?.Months,
             dateDebut: $('#dateDebut').val(),
+            quotity: @simulationData?.Quotity,
             ranking: $('#ranking').val(),
+            netSalary: @simulationData?.NetSalary,
             grade: $('#grade').val(),
-            notes: $('#notes').val(),
+            matricule: @simulationData?.Matricule,
+            notes: $('#notes').val()
         };
 
         $.ajax({
@@ -146,10 +136,9 @@
                     alert(response.message || 'Erreur!');
                 }
             },
-            error: function (xhr, status, error) {
+            error: function (error) {
                 alert('Erreur de communication avec le serveur: ' + error);
             }
         });
-    });
-
-</script>
+    }
+    </script>

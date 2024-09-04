@@ -88,17 +88,9 @@
                         Modifier
                     </button>
                     <ul class="dropdown-menu">
-                        <li>
-                            <form action="@Url.Action("ChangeRole", "RHAccounts")" method="post">
-                                <input type="hidden" name="role" value="2" />
-                                <input type="hidden" name="matricule" value="@row[0]" />
-                                <button type="submit" class="dropdown-item">Staff</button>
-                            </form>
-                        </li>
-                        <li>
-                            <a href="#" class="dropdown-item" onclick="changeRole(100, '@row[0]')"> Admin Staff</a>
-                        </li>
-                        <li>@Html.ActionLink("Admin Accounts", "ChangeRole", "RHAccounts", new { role = 101, matricule = @row[0] }, new { @class = "dropdown-item" })</li>
+                        <li>@Html.ActionLink("Staff", "ChangeRole", "RHAdmin", new { role = 2, matricule = @row[0] }, new { @class = "dropdown-item" })</li>
+                        <li>@Html.ActionLink("Admin Staffs", "ChangeRole", "RHAdmin", new { role = 100, matricule = @row[0] }, new { @class = "dropdown-item" })</li>
+                        <li>@Html.ActionLink("Admin Accounts", "ChangeRole", "RHAdmin", new { role = 101, matricule = @row[0] }, new { @class = "dropdown-item" })</li>
                     </ul>
                 </td>
             </tr>
@@ -129,35 +121,36 @@
                     resultsTable.empty();
 
                     if (data.length === 0) {
-                    resultsTable.append('<tr><td colspan="5">Aucun résultat trouvé.</td></tr>');
-                } else {
-                    data.forEach(function (staff) {
-                        var badgeClass = "";
-                        var badgeLabel = "";
+                        resultsTable.append('<tr><td colspan="5">Aucun résultat trouvé.</td></tr>');
+                    }
+                    else {
+                        data.forEach(function (staff) {
+                            var badgeClass = "";
+                            var badgeLabel = "";
 
-                        // Déterminez le badge à afficher en fonction de IDGroup
-                        switch (staff["IDGroup"]) {
-                            case 1:
-                                badgeClass = "bg-danger";
-                                badgeLabel = "User";
-                                break;
-                            case 2:
-                                badgeClass = "bg-secondary";
-                                badgeLabel = "Staff";
-                                break;
-                            case 100:
-                                badgeClass = "bg-primary";
-                                badgeLabel = "RH";
-                                break;
-                            case 101:
-                                badgeClass = "bg-success";
-                                badgeLabel = "Contrôleur";
-                                break;
-                            default:
-                                badgeClass = "bg-dark";
-                                badgeLabel = "N/A";
-                                break;
-                        }
+                            // Déterminez le badge à afficher en fonction de IDGroup
+                            switch (staff["IDGroup"]) {
+                                case 1:
+                                    badgeClass = "bg-danger";
+                                    badgeLabel = "User";
+                                    break;
+                                case 2:
+                                    badgeClass = "bg-secondary";
+                                    badgeLabel = "Staff";
+                                    break;
+                                case 100:
+                                    badgeClass = "bg-primary";
+                                    badgeLabel = "RH";
+                                    break;
+                                case 101:
+                                    badgeClass = "bg-success";
+                                    badgeLabel = "Contrôleur";
+                                    break;
+                                default:
+                                    badgeClass = "bg-dark";
+                                    badgeLabel = "N/A";
+                                    break;
+                    }
 
                         // Construisez la ligne du tableau
                         var row = '<tr>' +
@@ -188,22 +181,6 @@
                 }
             });
         });
-
-        function changeRole(role, matricule) {
-            $.ajax({
-                url: '@Url.Action("ChangeRole", "RHAccounts")',
-                type: 'POST',
-                data: { role: role, matricule: matricule },
-                success: function (response) {
-                    // Gérer la réponse, par exemple afficher un message de succès
-                    alert('Rôle mis à jour avec succès.');
-                },
-                error: function () {
-                    // Gérer l'erreur
-                    alert('Erreur lors de la mise à jour du rôle.');
-                }
-            });
-        }
     });
     </script>
 }

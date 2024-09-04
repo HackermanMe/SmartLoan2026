@@ -4,6 +4,8 @@ using System.Data.SqlClient;
 using System.Threading.Tasks;
 using System.Web.Configuration;
 using System.Web.Mvc;
+using DocumentFormat.OpenXml.Office.Word;
+using NLog;
 
 namespace EcoService.Models
 {
@@ -18,6 +20,10 @@ namespace EcoService.Models
             using (SqlCommand command = new SqlCommand(query, connection))
             {
                 parameterizeCommand?.Invoke(command);
+
+                // Log avant l'ouverture de la connexion
+                LogManager.GetCurrentClassLogger().Info($"Tentative de connexion à la base de données avec la requête : {command.CommandText}");
+
                 connection.Open();
                 command.ExecuteNonQuery();
             }
@@ -78,11 +84,11 @@ namespace EcoService.Models
         }
 
         // Méthode pour insérer des prêts existants dans la base
-        public void InsertLoans(string numeroCompte, string reference, string type, string montantEmprunte, string enCours, float taux, string mensualites, DateTime dateDebut, DateTime dateFin)
+        public void InsertLoans(string numeroCompte, string reference, string type, decimal montantEmprunte, decimal enCours, float taux, decimal mensualites, DateTime dateDebut, DateTime dateFin)
         {
             string query = "INSERT INTO RHPretsExistants (" +
-                "NumeroCompte, ReferencePret, TypeCredit, Montant, EnCours, Taux, Mensualites, StartDate, EndDate)" +
-                " VALUES (@NumeroCompte, @ReferencePret, @TypeCredit, @Montant, @EnCours, @Taux, @Mensualites, @StartDate, @EndDate)";
+                "NumeroCompte, ReferencePret, TypeCredit, Montant, EnCours, Taux, Mensualites, StartDate, EndDate, CreatedAt)" +
+                " VALUES (@NumeroCompte, @ReferencePret, @TypeCredit, @Montant, @EnCours, @Taux, @Mensualites, @StartDate, @EndDate, @CreatedAt)";
             ExecuteNonQuery(query, cmd =>
             {
                 cmd.Parameters.AddWithValue("@NumeroCompte", numeroCompte);
@@ -94,6 +100,7 @@ namespace EcoService.Models
                 cmd.Parameters.AddWithValue("@Mensualites", mensualites);
                 cmd.Parameters.AddWithValue("@StartDate", dateDebut);
                 cmd.Parameters.AddWithValue("@EndDate", dateFin);
+                cmd.Parameters.AddWithValue("@CreatedAt", DateTime.Now);
             });
         }
 
@@ -101,7 +108,7 @@ namespace EcoService.Models
         [HttpPost]
         public SqlDataReader PretExistants(int matricule)
         {
-            string query = "SELECT p.PretId, p.ReferencePret, p.NumeroCompte, p.Montant, p.EnCours, p.Taux, p.TypeCredit, p.StartDate, p.EndDate, p.Mensualites " +
+            string query = "SELECT p.PretId, p.ReferencePret, p.NumeroCompte, p.Montant, p.EnCours, p.Taux, p.TypeCredit, p.StartDate, p.EndDate, p.Mensualites, p.CreatedAt " +
                 " FROM RHPretsExistants p " +
                 "JOIN RHStaffs s ON p.NumeroCompte = s.NumeroCompte WHERE s.Matricule = @Matricule ORDER BY p.ReferencePret";
             return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@Matricule", matricule));
@@ -110,7 +117,7 @@ namespace EcoService.Models
         // Méthode pour récupérer les prêts selon le numéro de compte
         public SqlDataReader PretExistantsStaff(string numeroCompte)
         {
-            string query = "SELECT p.PretId, p.ReferencePret, p.NumeroCompte, p.Montant, p.EnCours, p.Taux, p.TypeCredit, p.StartDate, p.EndDate, p.Mensualites " +
+            string query = "SELECT p.PretId, p.ReferencePret, p.NumeroCompte, p.Montant, p.EnCours, p.Taux, p.TypeCredit, p.StartDate, p.EndDate, p.Mensualites, p.CreatedAt " +
                 " FROM RHPretsExistants p JOIN RHStaffs s ON p.NumeroCompte = s.NumeroCompte " +
                 " WHERE p.NumeroCompte = @NumeroCompte ORDER BY p.ReferencePret";
             return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@NumeroCompte", numeroCompte));
@@ -126,7 +133,7 @@ namespace EcoService.Models
         // Méthode pour récupérer les comptes
         public SqlDataReader Accounts(string login)
         {
-            string query = "SELECT b.Matricule AS Matriculee, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee, b.SalaireNet AS SalaireNete " +
+            string query = "SELECT b.Matricule AS Matriculee, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.IDGroup AS IDGroupe, a.NumeroCompte AS NumeroComptee, b.SalaireNet AS SalaireNete " +
                 "FROM [EcoServiceDB].[dbo].RhAccounts a JOIN [EcoServiceDB].[dbo].[RHStaffs] b ON a.NumeroCompte = b.NumeroCompte";
             return ExecuteReader(query);
         }
@@ -222,6 +229,28 @@ namespace EcoService.Models
             }
             return staffList;
         }
+        
+        // Méthode pour rechercher un compte staff selon le matricule, le numéro de compte, le nom ou le prénom 
+        public List<Dictionary<string, object>> SearchAccounts(string searchTerm)
+        {
+            var staffList = new List<Dictionary<string, object>>();
+            string query = "SELECT b.Matricule, a.Nom, a.Prenom, a.IDGroup FROM RHAccounts a " +
+                "JOIN RHStaffs b ON a.NumeroCompte = b.NumeroCompte WHERE b.Matricule LIKE @SearchTerm OR a.Nom LIKE @SearchTerm " +
+                "OR a.NumeroCompte LIKE @SearchTerm OR a.Prenom LIKE @SearchTerm";
+            using (SqlDataReader reader = ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@SearchTerm", "%" + searchTerm + "%")))
+            {
+                while (reader.Read())
+                {
+                    var staff = new Dictionary<string, object>();
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        staff[reader.GetName(i)] = reader.GetValue(i);
+                    }
+                    staffList.Add(staff);
+                }
+            }
+            return staffList;
+        }
 
         // Méthode pour ajouter une demande de prêt à la base de données
         public async Task<int> CreerDemande(Demande demande)
@@ -293,7 +322,7 @@ namespace EcoService.Models
             {
                 connection.Open();
 
-                var command = new SqlCommand("INSERT INTO RHDemandes (Montant, TypePret, Taux, NbreEcheances, Quotity, SalaireNet, Matricule, CreatedAt) VALUES (@Montant, @TypePret, @Taux, @NbreEcheances, @Quotity, @SalaireNet, @Matricule, @Mensualites, @CreatedAt)", connection);
+                var command = new SqlCommand("INSERT INTO RHDemandes (Montant, TypePret, Taux, NbreEcheances, Quotity, SalaireNet, Matricule, CreatedAt) VALUES (@Montant, @TypePret, @Taux, @NbreEcheances, @Quotity, @SalaireNet, @Matricule, @CreatedAt)", connection);
 
                 command.Parameters.AddWithValue("@Montant", MontantEmprunte);
                 command.Parameters.AddWithValue("@TypePret", TypePret);
@@ -357,5 +386,89 @@ namespace EcoService.Models
                 return rowsAffected > 0;
             }
         }
+
+        // Méthode pour autoriser l'accès à un utilisateur 
+        public async Task<bool> ApproveUser(int matricule) {
+            using (SqlConnection connection = new SqlConnection(connectionString)) {
+                string query = "UPDATE RHAccounts SET IDGroup = 2 WHERE Matricule = @Matricule";
+                SqlCommand cmd = new SqlCommand (query, connection);
+                cmd.Parameters.AddWithValue("@Matricule", matricule);
+
+                await connection.OpenAsync();
+                int rowsAffected = await cmd.ExecuteNonQueryAsync();
+                return rowsAffected > 0;
+            }
+        }
+
+        // Méthode pour supprimer l'accès à un utilisateur 
+        public async Task<bool> RevokeUser(int matricule)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "UPDATE RHAccounts SET IDGroup = 1 WHERE Matricule = @Matricule";
+                SqlCommand cmd = new SqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@Matricule", matricule);
+
+                await connection.OpenAsync();
+                int rowsAffected = await cmd.ExecuteNonQueryAsync();
+                return rowsAffected > 0;
+            }
+        }
+
+        // Méthode pour autoriser l'accès à l'administration staff 
+        public async Task<bool> ApproveStaffAdmin(int matricule)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "UPDATE RHAccounts SET IDGroup = 100 WHERE Matricule = @Matricule";
+                SqlCommand cmd = new SqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@Matricule", matricule);
+
+                await connection.OpenAsync();
+                int rowsAffected = await cmd.ExecuteNonQueryAsync();
+                return rowsAffected > 0;
+            }
+        }
+
+        // Méthode pour autoriser l'accès à l'administration des comptes
+        public async Task<bool> ApproveAccountsAdmin(int matricule)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "UPDATE RHAccounts SET IDGroup = 101 WHERE Matricule = @Matricule";
+                SqlCommand cmd = new SqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@Matricule", matricule);
+
+                await connection.OpenAsync();
+                int rowsAffected = await cmd.ExecuteNonQueryAsync();
+                return rowsAffected > 0;
+            }
+        }
+
+        // Méthode pour changer le rôle de l'utilisateur 
+        public async Task<bool> UpdateUserRole(int matricule, int role)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    string query = "UPDATE RHAccounts SET IDGroup = @IDGroup WHERE Matricule = @Matricule";
+                    SqlCommand cmd = new SqlCommand(query, connection);
+                    cmd.Parameters.AddWithValue("@Matricule", matricule);
+                    cmd.Parameters.AddWithValue("@IDGroup", role);
+
+                    await connection.OpenAsync();
+                    int rowsAffected = await cmd.ExecuteNonQueryAsync();
+                    return rowsAffected > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log de l'exception
+                NLog.LogManager.GetCurrentClassLogger().Error(ex, "Erreur lors de la mise à jour du rôle de l'utilisateur.");
+                return false; // Retourne false en cas d'échec
+            }
+        }
+
     }
 }

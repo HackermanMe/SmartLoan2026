@@ -20,7 +20,14 @@
     </div>
 }
 
-<form method="post" enctype="multipart/form-data" action="ImportLoans">
+<a href="@Url.Action("DownloadLoansTemplate", "RHAdmin", new { fileName = "LoansTemplate.xlsx" })">
+    <span>
+        <i class="fas fa-download"></i>
+    </span>
+    <span class="hide-menu">Template</span>
+</a>
+
+<form method="post" id="importLoans" enctype="multipart/form-data" action="ImportLoans">
     <div class="form-group">
         <label for="file">Choisir Fichier Excel:</label>
         <input type="file" name="file" id="file" class="form-control">

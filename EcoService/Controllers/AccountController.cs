@@ -128,13 +128,17 @@ namespace Ecoservice.Controllers
 
                                 Logger.Info("Groupe {0} attribué à l'utilisateur {1}", idgroup, accountName);
 
-                                if (idgroup == 100)
+                                if (idgroup == 100 || idgroup == 101)
                                 {
                                     return RedirectToAction("Index", "RHAdmin");
                                 }
-                                else
+                                else if (idgroup == 2)
                                 {
                                     return RedirectToAction("StaffSimulation", "RHStaff");
+                                }
+                                else 
+                                {
+                                    ModelState.AddModelError("", "Vous n'avez pas accès à la plateforme.");
                                 }
                             }
                         }
@@ -195,6 +199,9 @@ namespace Ecoservice.Controllers
 
                 Logger.Info("Connexion réussie pour l'utilisateur local {0}", model.UserName);
 
+                var idgroup = 101;
+                Session["idGroup"] = idgroup;
+
                 //if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
                 //    return Redirect(returnUrl);
                 FormsAuthentication.SetAuthCookie(model.UserName.ToString(), false);
@@ -210,7 +217,19 @@ namespace Ecoservice.Controllers
                     Session["accountName"] = "admin";
                     Session["userFullName"] = model.UserName;
                     //return RedirectToAction("Index", "RHAdmin");
-                    return RedirectToAction("Index", "RHAdmin");
+                    if (idgroup == 100 || idgroup == 101)
+                    {
+                        return RedirectToAction("Index", "RHAdmin");
+                    }
+                    else if (idgroup == 2)
+                    {
+                        return RedirectToAction("StaffSimulation", "RHStaff");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Vous n'avez pas accès à la plateforme.");
+                        return View(model);
+                    }
                 }
 
                 // return RedirectToAction("Index", "RHAdmin");

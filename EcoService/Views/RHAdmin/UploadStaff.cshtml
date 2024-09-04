@@ -1,10 +1,34 @@
 ﻿@{
     ViewData["Title"] = "Ajout du Staff";
+    var errorMessage = TempData["ErrorMessage"] as string;
+    var successMessage = TempData["SuccessMessage"] as string;
 }
 
 <h1>Ajouter les Staffs</h1>
 
-<form method="post" enctype="multipart/form-data" action="ImportStaffs">
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success">
+        @successMessage
+    </div>
+}
+
+<a href="@Url.Action("DownloadLoansTemplate", "RHAdmin", new { fileName = "StaffsTemplate.xlsx" })">
+    <span>
+        <i class="fas fa-download"></i>
+    </span>
+    <span class="hide-menu">Template</span>
+</a>
+
+<form method="post" enctype="multipart/form-data" id="uploadStaff" action="ImportStaffs">
     <div class="form-group">
         <label for="file">Choisir Fichier Excel:</label>
         <input type="file" name="file" id="file" class="form-control">
@@ -12,3 +36,7 @@
     <button type="submit" class="btn btn-primary m3">Télécharger</button>
 
 </form>
+
+<script>
+    //$('#uploadStaff')
+</script>

@@ -16,15 +16,29 @@
 
     <h1>    @Session["NumeroCompte"]</h1>
 
-    <p>
-        <strong>Numéro De Compte :</strong> @staff["NumeroComptee"] <br>
-    </p>
-
+    <div class="row">
+        <div class="col-9">
+            <p>
+                <strong>Numéro De Compte :</strong> @staff["NumeroComptee"] <br>
+            </p>
+        </div>
+    </div>
+    
     <!-- Tableau des prêts existants du staff -->
     <div class="col d-flex align-items-stretch">
         <div class="card w-100">
             <div class="card-body p-4">
-                <h5 class="card-title fw-semibold mb-4">Prêts Existants</h5>
+                <div class="row">
+                    <div class="col-6">
+                        <h5 class="card-title fw-semibold mb-4">Prêts Existants</h5>
+                    </div>
+                    <div class="col-6">
+                        @if (ViewBag.CreatedAt != null)
+                        {
+                            <p class="text-danger"><strong>Dernière mise à jour :</strong> @((DateTime)ViewBag.CreatedAt)</p>
+                        }
+                    </div>
+                </div>
                 <div class="rachat">
                 </div>
                 <div id="rachat">
@@ -63,7 +77,7 @@
                             @foreach (var pret in prets)
                             {
                                 <tr>
-                                    <td><input type="checkbox" class="border-bottom-0 pretCheckbox" data-loan-mensualite="@pret["Mensualites"]" data-loan-id="@pret["PretId"]"></td>
+                                    <td><input name="rachatInput" id="rachatInput" type="checkbox" class="border-bottom-0  pretCheckbox" data-loan-mensualite="@pret["Mensualites"]" data-loan-id="@pret["PretId"]"></td>
                                     <td class="border-bottom-0">@pret["ReferencePret"]</td>
                                     <td class="border-bottom-0">
                                         <h6 class="fw-semibold mb-1">@pret["TypeCredit"]</h6>
@@ -72,18 +86,18 @@
                                     <td class="border-bottom-0" id="montant">@string.Format("{0:N0}", pret["Montant"])</td>
                                     <td class="border-bottom-0" id="Encours">@string.Format("{0:N0}", pret["EnCours"])</td>
                                     <td class="border-bottom-0">@string.Format("{0:N0}", pret["Mensualites"])</td>
-                                    <td class="border-bottom-0">@pret["StartDate"]</td>
-                                    <td class="border-bottom-0">@pret["EndDate"]</td>
+                                    @*<td class="border-bottom-0">@pret["StartDate"]</td>
+                                    <td class="border-bottom-0">@pret["EndDate"]</td>*@
+                                    <td class="border-bottom-0">@(((DateTime?)pret["StartDate"])?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                    <td class="border-bottom-0">@(((DateTime?)pret["EndDate"])?.ToString("dd/MM/yyyy") ?? "N/A")</td>
                                 </tr>
                             }
-
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
-
 
     <!-- Tableau des engagements autres banques du staff (Ajoutés dynamiquement) -->
     <div class="card w-100">
@@ -330,9 +344,7 @@
     </div>
 
     <div class="m-3" id="sendSimulationMessage">
-
     </div>
-
 }
 else
 {
@@ -571,7 +583,6 @@ else
 
         // Fonction d'envoi des informations de simulation
         function sendSimulation() {
-
             // Envoi des informations du prêt simulé au serveur
             const Montant = parseFloat($('#MontantEmprunte').val());
             const annualRate = parseFloat($('#annualRate').val());

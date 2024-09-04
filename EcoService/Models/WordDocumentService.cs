@@ -12,24 +12,36 @@ namespace EcoService.Models
     {
         public byte[] GenerateDocument(string templatePath, Dictionary<string, string> fieldValues)
         {
+            // Créer un flux mémoire pour le document
             using (var stream = new MemoryStream())
             {
-                // Ouvrir le document modèle
-                using (var wordDoc = WordprocessingDocument.Open(templatePath, true))
+                // Ouvrir le modèle de document en lecture
+                using (var wordDoc = WordprocessingDocument.Open(templatePath, false))
                 {
-                    var docText = File.ReadAllText(templatePath);
+                    // Créer une copie du document dans le flux mémoire
+                    wordDoc.Clone(stream);
 
-                    // Remplacer les champs de fusion par les valeurs fournies
-                    foreach (var field in fieldValues)
+                    // Manipuler le document en utilisant le flux mémoire
+                    using (var newDoc = WordprocessingDocument.Open(stream, true))
                     {
-                        docText = docText.Replace($"<<{field.Key}>>", field.Value);
-                    }
+                        // Accéder au corps du document
+                        var docText = newDoc.MainDocumentPart.Document.InnerText;
 
-                    File.WriteAllText(templatePath, docText);
+                        // Remplacer les champs de fusion par les valeurs fournies
+                        foreach (var field in fieldValues)
+                        {
+                            docText = docText.Replace($"<<{field.Key}>>", field.Value);
+                        }
+
+                        // Enregistrer les modifications
+                        newDoc.MainDocumentPart.Document.Save();
+                    }
                 }
 
+                // Retourner le document généré sous forme de tableau d'octets
                 return stream.ToArray();
             }
         }
+
     }
 }

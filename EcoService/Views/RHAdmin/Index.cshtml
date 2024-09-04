@@ -2,51 +2,60 @@
 @using System.Data;
 @{
     ViewData["Title"] = "Administration";
+    int idgroup = Convert.ToInt32(Session["idGroup"]);
 }
 
-<h5>Liste du Personnel</h5>
+@if (idgroup == 101)
+{
+    // TODO: Terminer la vue Index des contrôleurs
+    <h5>Users Administration</h5>
+    @Html.ActionLink("Gestion des Profils", "Index", "RHAccounts", null, new { @class = "btn btn-sm btn-primary" })
+}
+else if (idgroup == 100)
+{
+    <h5>Liste du Personnel</h5>
 
-<div class="row">
-    <div class="col-9">
-        <form class="" id="searchForm" asp-action="Search" method="post">
-            <div class="form-group has-search">
-                <input class="form-control" id="searchTerm" type="text" name="searchTerm" placeholder="Rechercher..." onsubmit="return false;">
-            </div>
-        </form>
+    <div class="row">
+        <div class="col-9">
+            <form class="" id="searchForm" asp-action="Search" method="post">
+                <div class="form-group has-search">
+                    <input class="form-control" id="searchTerm" type="text" name="searchTerm" placeholder="Rechercher..." onsubmit="return false;">
+                </div>
+            </form>
+        </div>
+        <div class="col-3 btn-group" role="group">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                Ajouter
+            </button>
+            <ul class="dropdown-menu">
+                <li>@Html.ActionLink("Ajouter Staff", "UploadStaff", "RHAdmin", null, new { @class = "dropdown-item" })</li>
+                <li>@Html.ActionLink("Ajouter Prêts", "UploadLoans", "RHAdmin", null, new { @class = "dropdown-item" })</li>
+            </ul>
+        </div>
     </div>
-    <div class="col-3 btn-group" role="group">
-        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-            Ajouter
-        </button>
-        <ul class="dropdown-menu">
-            <li>@Html.ActionLink("Ajouter Staff", "UploadStaff", "RHAdmin", null, new { @class = "dropdown-item" })</li>
-            <li>@Html.ActionLink("Ajouter Prêts", "UploadLoans", "RHAdmin", null, new { @class = "dropdown-item" })</li>
-        </ul>
-    </div>
-</div>
 
-<table id="loansTable" class="table">
-    <thead>
-        <tr>
-            <th>Matricule</th>
-            <th>Nom & Prénoms</th>
-            <th>Numéro de Compte</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody id="resultsTable">
-        @foreach (DataRow row in Model.Rows)
-        {
+    <table id="loansTable" class="table">
+        <thead>
             <tr>
-                <td>@Html.DisplayFor(modelItem => @row[0])</td>
-                <td>@Html.DisplayFor(modelItem => @row[3]) @Html.DisplayFor(modelItem => @row[4])</td>
-                <td>@Html.DisplayFor(modelItem => @row[5])</td>
-                <td><a href="../RHAdmin/Simulation/@row[0]" class="btn btn-sm btn-primary">Simulation</a></td>
+                <th>Matricule</th>
+                <th>Nom & Prénoms</th>
+                <th>Numéro de Compte</th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
-
+        </thead>
+        <tbody id="resultsTable">
+            @foreach (DataRow row in Model.Rows)
+            {
+                <tr>
+                    <td>@row[0]</td>
+                    <td>@Html.DisplayFor(modelItem => @row[3]) @Html.DisplayFor(modelItem => @row[4])</td>
+                    <td>@Html.DisplayFor(modelItem => @row[6])</td>
+                    <td><a href="../RHAdmin/Simulation/@row[0]" class="btn btn-sm btn-primary">Simulation</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 @section Scripts
 {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

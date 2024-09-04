@@ -43,7 +43,10 @@ namespace EcoService.Controllers
             RHSqlQuery p = new RHSqlQuery();
             SqlDataReader prets = p.PretExistantsStaff(NumeroCompte);
 
-            //Calculer le total des mensualités
+            // Calculer le total des mensualités et récupérer CreatedAt
+            DateTime? createdAt = null;
+            DateTime tempDate;
+
             while (prets.Read())
             {
                 var mensualites = prets.GetOrdinal(("Mensualites"));
@@ -53,6 +56,12 @@ namespace EcoService.Controllers
                 {
                     Pret[prets.GetName(i)] = prets.GetValue(i);
                 }
+
+                if (Pret["CreatedAt"] != null && DateTime.TryParse(Pret["CreatedAt"].ToString(), out tempDate))
+                {
+                    createdAt = tempDate;
+                }
+
                 pretss.Add(Pret);
                 totalMensualites += Convert.ToDecimal(Pret["Mensualites"]);
             }
@@ -64,13 +73,16 @@ namespace EcoService.Controllers
             var quotiteConsommee = (totalMensualites / salaireNet) * 100;
             var quotiteResiduelle = 40 - quotiteConsommee;
 
+
+            ViewBag.CreatedAt = createdAt;
             // Préparer les données pour la vue
             var simulation = new Dictionary<string, object>
             {
                 { "Prets", pretss },
                 { "Staff", staff },
                 { "QuotiteResiduelle", quotiteResiduelle.ToString("0.00") },
-                { "QuotiteConsommee", quotiteConsommee.ToString("F", System.Globalization.CultureInfo.InvariantCulture) }
+                { "QuotiteConsommee", quotiteConsommee.ToString("F", System.Globalization.CultureInfo.InvariantCulture) },
+                { "CreatedAt", createdAt }
             };
 
             return View(simulation);

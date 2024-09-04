@@ -9,6 +9,7 @@ using System.Web.Mvc;
 using System.Web.UI.WebControls;
 using Microsoft.Extensions.Logging;
 using NLog;
+using NLog.Fluent;
 
 namespace EcoService.Controllers
 {
@@ -92,6 +93,8 @@ namespace EcoService.Controllers
                     var customCulture = (System.Globalization.CultureInfo)System.Globalization.CultureInfo.InvariantCulture.Clone();
                     customCulture.NumberFormat.NumberGroupSeparator = "  ";
 
+                    Logger.Info("Simulation faite pour le numéro de compte: ", Session["NumeroCompte"]);
+
                     return Json(new
                     {
                         monthlyPayment = monthlyPayment.ToString("N0", customCulture),
@@ -108,6 +111,8 @@ namespace EcoService.Controllers
                     var customCulture = (System.Globalization.CultureInfo)System.Globalization.CultureInfo.InvariantCulture.Clone();
                     customCulture.NumberFormat.NumberGroupSeparator = " ";
 
+                    Logger.Info("Simulation faite pour le numéro de compte: ", Session["NumeroCompte"]);
+
                     return Json(new
                     {
                         monthlyPayment = monthlyPayment.ToString("N0", customCulture),
@@ -118,7 +123,7 @@ namespace EcoService.Controllers
             catch (Exception ex)
             {
                 var errorObject = new { error = "Une erreur est survenue lors du calcul des mensualités. Veuillez réessayer." };
-                Logger.Error(ex, "Error in CalculateMonthlyPayment");
+                Logger.Error(ex, "Erreur dans le calcul des mensualités");
                 return Json(errorObject, JsonRequestBehavior.AllowGet);
             }
         }
@@ -138,8 +143,8 @@ namespace EcoService.Controllers
 
                 decimal remboursementAdmis = netSalary * 40 / 100;
 
-                // Stocker les données dans TempData pour les passer à la prochaine action
-                ViewBag.SimulationData = new SimulationViewModel
+                // Stocker les données dans une session pour les passer à la prochaine action
+                HttpContext.Session["SimulationData"] = new SimulationViewModel
                 {
                     Montant = Montant,
                     TypeDePret = TypeDePret,
@@ -151,6 +156,8 @@ namespace EcoService.Controllers
                     Remboursement = remboursementAdmis
                 };
 
+                //Logger.
+                Logger.Info("Simulation envoyée pour le numero de compte : ", Session["NumeroCompte"]);
                 return Json(new { success = true, message = "La simulation a été envoyée avec succès.", redirectUrl = Url.Action("Create", "RHDemandeDePret") });
             }
             catch (Exception ex)
@@ -164,7 +171,7 @@ namespace EcoService.Controllers
         {
             var pretss = new List<Dictionary<string, object>>();
             string loginStaff = (string)HttpContext.Session["accountName"];
-            var simulationData = ViewBag.SimulationData as SimulationViewModel;
+            var simulationData = HttpContext.Session["SimulationData"] as SimulationViewModel;
 
             RHSqlQuery st = new RHSqlQuery();
             SqlDataReader staffreadere = st.AccountLogin(loginStaff);
@@ -203,6 +210,7 @@ namespace EcoService.Controllers
             {
                 return RedirectToAction("SendSimulation");
             }
+
             var staffInfo = new Dictionary<string, object>
             {
                 { "Prets", pretss },
@@ -215,42 +223,59 @@ namespace EcoService.Controllers
 
         [HttpPost]
         public ActionResult GenerateDocument(
-            decimal Montant, string nom,
-            string TypeDePret, string numeroCompte,
-            decimal annualRate, string dateNaissance,
-            int months, string dateDebut,
-            decimal quotity, string ranking,
-            decimal netSalary, string grade,
-            int matricule, string notes
-            )
+             decimal Montant, string nom,
+             string TypeDePret, string numeroCompte,
+             decimal annualRate, string dateNaissance,
+             int months, string dateDebut,
+             decimal quotity, string ranking,
+             decimal netSalary, string grade,
+             int matricule, string notes)
         {
-            var remboursementAdmis = netSalary * 40 / 100;
-
-            var fieldValues = new Dictionary<string, string>
+            if (string.IsNullOrEmpty(nom) || string.IsNullOrEmpty(numeroCompte) || string.IsNullOrEmpty(dateNaissance))
             {
-                { "Nom", nom },
-                { "DateNaissance", dateNaissance },
-                { "DateEntree", dateDebut },
-                { "Classe", ranking },
-                { "Grade", grade },
-                { "Matricule", matricule.ToString("N0") },
-                { "Montant", Montant.ToString("N0") },
-                { "TypeDePret", TypeDePret },
-                { "Months", months.ToString("N0") },
-                { "Taux", annualRate.ToString("N0") },
-                { "SalaireNet", netSalary.ToString("N0") },
-                { "Remboursement", remboursementAdmis.ToString("N0") },
-                { "NumeroCompte", numeroCompte },
-                { "Notes", notes },
-                //{ "",  }
-            };
+                return Json(new { success = false, message = "Les champs obligatoires sont manquants." });
+            }
 
-            // Générer le document
-            var documentService = new WordDocumentService();
-            var documentBytes = documentService.GenerateDocument(Server.MapPath("~/Templates/LoanTemplate.docx"), fieldValues);
+            try
+            {
+                var remboursementAdmis = netSalary * 40 / 100;
 
-            // Return the filled document for download
-            return File(documentBytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "FICHE_DEMANDE_PRET_Filled.docx");
+                var fieldValues = new Dictionary<string, string>
+                {
+                    { "Nom", nom },
+                    { "DateNaissance", dateNaissance },
+                    { "DateEntree", dateDebut },
+                    { "Classe", ranking },
+                    { "Grade", grade },
+                    { "Matricule", matricule.ToString("N0") },
+                    { "Montant", Montant.ToString("N0") },
+                    { "TypeDePret", TypeDePret },
+                    { "Months", months.ToString("N0") },
+                    { "Taux", annualRate.ToString("N0") },
+                    { "SalaireNet", netSalary.ToString("N0") },
+                    { "Remboursement", remboursementAdmis.ToString("N0") },
+                    { "NumeroCompte", numeroCompte },
+                    { "Notes", notes }
+                };
+
+                string templatePath = Server.MapPath("~/Templates/LoanTemplate.docx");
+                if (!System.IO.File.Exists(templatePath))
+                {
+                    return Json(new { success = false, message = "Le modèle de document est introuvable." });
+                }
+
+                var documentService = new WordDocumentService();
+                var documentBytes = documentService.GenerateDocument(templatePath, fieldValues);
+
+                return File(documentBytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "FICHE_DEMANDE_PRET_Filled.docx");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception 
+                Logger.Error("Erreur lors de la génération du document : ", ex);
+                return Json(new { success = false, message = "Erreur lors de la génération du document : " + ex.Message });
+            }
         }
+
     }
 }

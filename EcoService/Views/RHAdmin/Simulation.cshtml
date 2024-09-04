@@ -28,7 +28,17 @@
     <div class="col d-flex align-items-stretch">
         <div class="card w-100">
             <div class="card-body p-4">
-                <h5 class="card-title fw-semibold mb-4">Prêts Existants</h5>
+                <div class="row">
+                    <div class="col-6">
+                        <h5 class="card-title fw-semibold mb-4">Prêts Existants</h5>
+                    </div>
+                    <div class="col-6">
+                        @if (ViewBag.CreatedAt != null)
+                        {
+                            <p class="text-danger"><strong>Dernière mise à jour :</strong> @((DateTime)ViewBag.CreatedAt)</p>
+                        }
+                    </div>
+                </div>
                 <div id="rachat">
                 </div>
                 <div class="table-responsive">
@@ -648,7 +658,6 @@ else
             setQuotity();
             calculateMonthlyPayment();
         });
-
 
     </script>
 }
