@@ -1,20 +1,14 @@
 ﻿@using GridMvc.Html
-@*@model System.Data.DataTable*@
 @using System.Data;
 @using Ecoservice.Models;
 @model Dictionary<string, object>
 @{
-    //var prets = ViewBag.Prets as List<EcoService.Models.PretExistants>;
-    //var staff = ViewBag.Staff;
-    //var quotiteResiduelle = ViewBag.quotiteResiduelle;
-    //var quotiteConsommee = ViewBag.quotiteConsommee;
     var staff = Model.ContainsKey("Staff") ? Model["Staff"] as Dictionary<string, object> : null;
     var prets = Model.ContainsKey("Prets") ? Model["Prets"] as List<Dictionary<string, object>> : new List<Dictionary<string, object>>();
+    var autresPrets = Model.ContainsKey("AutresPrets") ? Model["AutresPrets"] as List<Dictionary<string, object>> : new List<Dictionary<string, object>>();
     var quotiteResiduelle = Model.ContainsKey("QuotiteResiduelle") ? Model["QuotiteResiduelle"] : null;
     var quotiteConsommee = Model.ContainsKey("QuotiteConsommee") ? Model["QuotiteConsommee"] : null;
 }
-
-
 
 @if (staff != null)
 {
@@ -143,6 +137,22 @@
                     </thead>
                     <tbody id="tableBody">
                         <!-- Informations des autres engagements ajoutés dynamiquement -->
+                        @foreach (var autresPret in autresPrets)
+                        {
+                            <tr data-id="@autresPret["APretId"]">
+                                <td><input type="checkbox" class="border-bottom-0 autrePretCheckbox" data-otherloan-mensualite="@autresPret["Mensualites"]" data-id="@autresPret["APretId"]"></td>
+                                <td>@autresPret["TypeDeCredit"]</td>
+                                <td>@(((DateTime?)autresPret["StartDate"])?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                <td>@string.Format("{0:N0}", autresPret["Montant"])</td>
+                                <td>@string.Format("{0:N0}", autresPret["EnCours"])</td>
+                                <td>@string.Format("{0:N0}", autresPret["Mensualites"])</td>
+                                <td>@(((DateTime?)autresPret["EndDate"])?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                <td>@autresPret["NomBanque"]</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm delete-btn">Supprimer</button>
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
@@ -213,55 +223,6 @@
                                     </div>
                                 </div>
                                 <button type="submit" class="btn btn-primary m-3">Ajouter</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- Modal de modification -->
-            <div class="modal fade" id="editRowModal" tabindex="-1" role="dialog" aria-labelledby="editRowModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="editRowModalLabel">Modifier Prêt</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <form id="editRowForm">
-                                <div class="form-group">
-                                    <label for="editObjet">Objet</label>
-                                    <input type="text" class="form-control" id="editObjet" name="Objet" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="editDateDebut">Date Début</label>
-                                    <input type="date" class="form-control" id="editDateDebut" name="DateDebut" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="editMontantInitial">Montant Initial</label>
-                                    <input type="number" class="form-control" id="editMontantInitial" name="MontantInitial" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="editEncours">Encours</label>
-                                    <input type="number" class="form-control" id="editEncours" name="Encours" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="editMensualites">Mensualités</label>
-                                    <input type="number" class="form-control" id="editMensualites" name="Mensualites" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="editDateFin">Date Fin</label>
-                                    <input type="date" class="form-control" id="editDateFin" name="DateFin" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="editBanque">Banque</label>
-                                    <input type="text" class="form-control" id="editBanque" name="Banque" required>
-                                </div>
-                                <input type="hidden" id="editId" name="Id">
-                                <button type="submit" class="btn btn-primary">Modifier</button>
                             </form>
                         </div>
                     </div>
@@ -421,64 +382,84 @@ else
 
         // Fonction d'actualisation de la quotité actuelle
         function setQuotity() {
-            var mensualites = [];
-            var allmensualites = 0;
-            var quotite = @quotiteConsommee;
-            var selectedLoanMensualites = [];
-            var otherLoanMensualites = [];
-            var loansQuotity = 0;
-            var sumSelected = 0;
-            var sumOther = 0;
-            var sum = 0;
+    var mensualites = [];
+    var allmensualites = 0;
+    var quotite = parseFloat(@quotiteConsommee) || 0; // Convertir en nombre ou mettre 0 par défaut
+    var selectedLoanMensualites = [];
+    var otherLoanMensualites = [];
+    var loansQuotity = 0;
+    var sumSelected = 0;
+    var sumOther = 0;
+    var sum = 0;
+    var salaireNete = parseFloat(@staff["SalaireNete"]) || 1; // Assurer un salaire non nul pour éviter la division par 0
 
-            // Parcourir chaque ligne du tableau des autres engagements pour récupérer les mensualités
-            $('#tableBody tr').each(function () {
-                var row = $(this);
-                var mensualite = row.find('td').eq(5).html(); // Récupérer la mensualité à la 6eme colonne
-                if (mensualite) {
-                    mensualites.push(parseFloat(mensualite)); // Convertir en nombre avant d'ajouter au tableau
-                }
-            });
-
-            // Additionner toutes les mensualités des
-            if (mensualites.length > 0) {
-                for (let mensualite of mensualites) {
-                    allmensualites += mensualite;
-                }
-            }
-
-            // Récupérer les mensualités des prêts sélectionnés
-            $('.pretCheckbox:checked').each(function () {
-                // selectedLoanMensualites.push(parseFloat($(this).data('loan-mensualite')));
-                selectedLoanMensualites.push($(this).data('loan-mensualite'));
-            });
-
-            $('.autrePretCheckbox:checked').each(function () {
-                otherLoanMensualites.push(parseFloat($(this).data('otherloan-mensualite')));
-            });
-
-            // Calcul de la somme des mensualités sélectionnées (Engagements Ecobank)
-            for (let monthly of selectedLoanMensualites) {
-                sumSelected += monthly;
-            }
-            // Calcul de la somme des mensualités sélectionnées (Autres engagements)
-            for (let monthly of otherLoanMensualites) {
-                sumOther += monthly;
-            }
-
-            sum = sumOther + sumSelected
-            num = "40"
-
-            // Calcul de la quotité
-            quotite = parseFloat(@quotiteConsommee) - (sum / @staff["SalaireNete"]) * 100 + ((allmensualites / @staff["SalaireNete"]) * 100);
-            engagements = parseFloat(num) - (parseFloat(@quotiteConsommee) - (sum / @staff["SalaireNete"]) * 100 + ((allmensualites / @staff["SalaireNete"]) * 100));
-
-
-            // Afficher la quotité
-            $('#engagement').text(engagements.toFixed(2) + '%');
-            $('#quot').text(quotite.toFixed(2) + '%');
-            return [quotite, allmensualites];
+    // Parcourir chaque ligne du tableau des autres engagements pour récupérer les mensualités
+    $('.autrePretCheckbox').each(function () {
+        var row = $(this);
+        var mensualite = $(this).data('otherloan-mensualite'); 
+        if (mensualite && !isNaN(parseFloat(mensualite))) {
+            mensualites.push(parseFloat(mensualite)); // Convertir en nombre avant d'ajouter au tableau
         }
+    });
+
+    // Additionner toutes les mensualités des engagements
+    if (mensualites.length > 0) {
+        for (let mensualite of mensualites) {
+            allmensualites += mensualite;
+        }
+    }
+
+    // Récupérer les mensualités des prêts sélectionnés
+    $('.pretCheckbox:checked').each(function () {
+        var mensualite = $(this).data('loan-mensualite');
+        if (mensualite && !isNaN(parseFloat(mensualite))) {
+            selectedLoanMensualites.push(parseFloat(mensualite));
+        }
+    });
+
+    $('.autrePretCheckbox:checked').each(function () {
+        var mensualite = $(this).data('otherloan-mensualite');
+        if (mensualite && !isNaN(parseFloat(mensualite))) {
+            otherLoanMensualites.push(parseFloat(mensualite));
+        }
+    });
+
+    // Calcul de la somme des mensualités sélectionnées (Engagements Ecobank)
+    for (let monthly of selectedLoanMensualites) {
+        sumSelected += monthly;
+    }
+
+    // Calcul de la somme des mensualités sélectionnées (Autres engagements)
+    for (let monthly of otherLoanMensualites) {
+        sumOther += monthly;
+    }
+
+    sum = sumOther + sumSelected;
+
+    var num = 40; // Conversion implicite en nombre
+
+    // Calcul de la quotité
+    quotite = parseFloat(@quotiteConsommee) - (sum / salaireNete) * 100 + ((allmensualites / salaireNete) * 100);
+
+    // Calcul des engagements restants
+    var engagements = num - (parseFloat(@quotiteConsommee) - (sum / salaireNete) * 100 + ((allmensualites / salaireNete) * 100));
+
+    // Vérification des NaN avant l'affichage
+    if (!isNaN(quotite)) {
+        $('#quot').text(quotite.toFixed(2) + '%');
+    } else {
+        $('#quot').text('N/A');
+    }
+
+    if (!isNaN(engagements)) {
+        $('#engagement').text(engagements.toFixed(2) + '%');
+    } else {
+        $('#engagement').text('N/A');
+    }
+
+    return [quotite, allmensualites];
+}
+
 
         // Fonction du choix du taux selon le type de prêt sélectionné
         function setInterestRate() {
@@ -592,71 +573,99 @@ else
             var mensualites = $('#mensualites').val();
             var dateFin = $('#dateFin').val();
             var banque = $('#banque').val();
+            var numeroCompte = '@staff["NumeroComptee"]';
 
-            if (editIndex === -1) {
-                // Création d'une nouvelle ligne de tableau
-                var newRow = `
-                <tr>
-                    <td><input type="checkbox" class="border-bottom-0 autrePretCheckbox" data-otherloan-mensualite="${mensualites}"></td>
-                    <td>${objet}</td>
-                    <td>${dateDebut}</td>
-                    <td>${montantInitial}</td>
-                    <td>${encours}</td>
-                    <td>${mensualites}</td>
-                    <td>${dateFin}</td>
-                    <td>${banque}</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm edit-btn">Modifier</button>
-                        <button class="btn btn-danger btn-sm delete-btn">Supprimer</button>
-                    </td>
-                </tr>
-            `;
+            // Préparer les données pour l'envoi au serveur
+            var formData = {
+                TypePret: objet,
+                NomBanque: banque,
+                StartDate: dateDebut,
+                EndDate: dateFin,
+                MontantStr: montantInitial,
+                MensualitesStr: mensualites,
+                EncoursStr: encours,
+                NumeroCompte: numeroCompte
+            };
 
-                // Ajout de la nouvelle ligne au tableau
-                $('#tableBody').append(newRow);
-            } else {
-                // Modification d'une ligne existante
-                var row = $('#tableBody tr').eq(editIndex);
-                row.find('td').eq(1).html(objet);
-                row.find('td').eq(2).html(dateDebut);
-                row.find('td').eq(3).html(montantInitial);
-                row.find('td').eq(4).html(encours);
-                row.find('td').eq(5).html(mensualites);
-                row.find('td').eq(6).html(dateFin);
-                row.find('td').eq(7).html(banque);
-                editIndex = -1;
-            }
+            $.ajax({
+                url: '@Url.Action("AjouterAutresPretsExistants", "RHDemandeDePret")', // Remplacez cette URL par celle de votre contrôleur et action
+                method: 'POST',
+                data: formData,
+                success: function (response) {
+                    // Si tout s'est bien passé côté serveur
 
-            // Réinitialisation du formulaire et fermeture du modal
-            $('#addRowForm')[0].reset();
-            $('#addRowModal').modal('hide');
-            setQuotity();
-            calculateMonthlyPayment();
+                    if (editIndex === -1) {
+                        // Création d'une nouvelle ligne de tableau
+                        var newRow = `
+                            <tr>
+                                <td><input type="checkbox" class="border-bottom-0 autrePretCheckbox" data-otherloan-mensualite="${mensualites}"></td>
+                                <td>${objet}</td>
+                                <td>${dateDebut}</td>
+                                <td>${montantInitial}</td>
+                                <td>${encours}</td>
+                                <td>${mensualites}</td>
+                                <td>${dateFin}</td>
+                                <td>${banque}</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm delete-btn">Supprimer</button>
+                                </td>
+                            </tr>
+                            `;
+
+                        // Ajout de la nouvelle ligne au tableau
+                        $('#tableBody').append(newRow);
+                    } else {
+                        // Modification d'une ligne existante
+                        var row = $('#tableBody tr').eq(editIndex);
+                        row.find('td').eq(1).html(objet);
+                        row.find('td').eq(2).html(dateDebut);
+                        row.find('td').eq(3).html(montantInitial);
+                        row.find('td').eq(4).html(encours);
+                        row.find('td').eq(5).html(mensualites);
+                        row.find('td').eq(6).html(dateFin);
+                        row.find('td').eq(7).html(banque);
+                        editIndex = -1;
+                    }
+
+                    // Réinitialisation du formulaire et fermeture du modal
+                    $('#addRowForm')[0].reset();
+                    $('#addRowModal').modal('hide');
+                    setQuotity();
+                    calculateMonthlyPayment();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Erreur lors de l\'enregistrement des données: ', error);
+                    alert('Une erreur s\'est produite lors de l\'enregistrement. Veuillez réessayer.');
+                }
+            });
+
         });
 
         // Suppression de la ligne lors du clic sur le bouton "Supprimer"
         $('#tableBody').on('click', '.delete-btn', function () {
-            $(this).closest('tr').remove();
-            setQuotity();
-            calculateMonthlyPayment();
-        });
-
-        // Modification de la ligne lors du clic sur le bouton "Modifier"
-        $('#tableBody').on('click', '.edit-btn', function () {
             var row = $(this).closest('tr');
-            editIndex = row.index();
+            var engagementId = row.data('id'); // Utiliser un attribut data-id sur la ligne pour stocker l'ID de l'engagement
 
-            $('#objet').val(row.find('td').eq(1).html());
-            $('#dateDebut').val(row.find('td').eq(2).html());
-            $('#montantInitial').val(row.find('td').eq(3).html());
-            $('#encours').val(row.find('td').eq(4).html());
-            $('#mensualites').val(row.find('td').eq(5).html());
-            $('#dateFin').val(row.find('td').eq(6).html());
-            $('#banque').val(row.find('td').eq(7).html());
-
-            $('#addRowModal').modal('show');
-            setQuotity();
-            calculateMonthlyPayment();
+            // Requête AJAX pour supprimer l'engagement dans la base de données
+            $.ajax({
+                url: '@Url.Action("SupprimerAutresPretsExistants", "RHDemandeDePret")', // URL de votre action côté serveur
+                method: 'POST',
+                data: { id: engagementId }, // Envoie de l'ID au serveur
+                success: function (response) {
+                    if (response.success) {
+                        // Si la suppression est réussie côté serveur, on supprime la ligne de l'interface
+                        row.remove();
+                        setQuotity();
+                        calculateMonthlyPayment();
+                    } else {
+                        alert('Erreur lors de la suppression: ' + response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Erreur lors de la suppression de l\'engagement: ', error);
+                    alert('Une erreur s\'est produite. Veuillez réessayer.');
+                }
+            });
         });
 
     </script>

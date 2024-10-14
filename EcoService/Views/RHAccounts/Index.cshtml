@@ -1,5 +1,5 @@
 ﻿@model System.Data.DataTable
-@using System.Data;
+@using System.Data
 @{
     ViewData["Title"] = "Gestion des Profils";
     int idgroup = Convert.ToInt32(Session["idGroup"]);
@@ -9,34 +9,34 @@
 
 @if (TempData["SuccessMessage"] != null)
 {
-    <div class="alert alert-success">
-        @TempData["SuccessMessage"]
-    </div>
+<div class="alert alert-success">
+    @TempData["SuccessMessage"]
+</div>
 }
 
 @if (TempData["ErrorMessage"] != null)
 {
-    <div class="alert alert-danger">
-        @TempData["ErrorMessage"]
-    </div>
+<div class="alert alert-danger">
+    @TempData["ErrorMessage"]
+</div>
 }
 
 <div class="row">
     <div class="col-9">
-        <form class="" id="searchForm" asp-action="Search" method="post">
+        <form id="searchForm" asp-action="Search" method="post">
             <div class="form-group has-search">
                 <input class="form-control" id="searchTerm" type="text" name="searchTerm" placeholder="Rechercher..." onsubmit="return false;">
             </div>
         </form>
     </div>
     <div class="col-3 btn-group" role="group">
-        <a href="" class="btn btn-primary">
+        <a href="@Url.Action("Create", "RHAccounts")" class="btn btn-primary">
             Ajouter
         </a>
     </div>
 </div>
 
-<table id="loansTable" class="table">
+<table id="accountsTable" class="table">
     <thead>
         <tr>
             <th>Matricule</th>
@@ -48,76 +48,56 @@
     <tbody id="resultsTable">
         @foreach (DataRow row in Model.Rows)
         {
-            <tr>
-                <td class="border-bottom-0">@row[0]</td> b
-                <td class="border-bottom-0">@Html.DisplayFor(modelItem => @row[3]) @Html.DisplayFor(modelItem => @row[4])</td>
-                <td class="border-bottom-0">
-                    @if (row[5]?.ToString() == "1")
-                    {
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-danger rounded-3 fw-semibold">User</span>
-                        </div>
-                    }
-                    else if (row[5]?.ToString() == "2")
-                    {
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-secondary rounded-3 fw-semibold">Staff</span>
-                        </div>
-                    }
-                    else if (row[5]?.ToString() == "100")
-                    {
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-primary rounded-3 fw-semibold">RH</span>
-                        </div>
-                    }
-                    else if (row[5]?.ToString() == "101")
-                    {
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-success rounded-3 fw-semibold">Contrôleur</span>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-dark rounded-3 fw-semibold">N/A</span>
-                        </div>
-                    }
-                </td>
-                <td class="border-bottom-0">
-                    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                        Modifier
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <form action="@Url.Action("ChangeRole", "RHAccounts")" method="post">
-                                <input type="hidden" name="role" value="2" />
-                                <input type="hidden" name="matricule" value="@row[0]" />
-                                <button type="submit" class="dropdown-item">Staff</button>
-                            </form>
-                        </li>
-                        <li>
-                            <a href="#" class="dropdown-item" onclick="changeRole(100, '@row[0]')"> Admin Staff</a>
-                        </li>
-                        <li>@Html.ActionLink("Admin Accounts", "ChangeRole", "RHAccounts", new { role = 101, matricule = @row[0] }, new { @class = "dropdown-item" })</li>
-                    </ul>
-                </td>
-            </tr>
+        <tr>
+            <td>@row[0]</td>
+            <td>@Html.DisplayFor(modelItem => row[3]) @Html.DisplayFor(modelItem => row[4])</td>
+            <td>
+                @switch (row[5]?.ToString())
+                {
+                case "1":
+                <span class="badge bg-danger rounded-3">User</span>
+                break;
+                case "2":
+                <span class="badge bg-secondary rounded-3">Staff</span>
+                break;
+                case "100":
+                <span class="badge bg-primary rounded-3">RH</span>
+                break;
+                case "101":
+                <span class="badge bg-success rounded-3">Contrôleur</span>
+                break;
+                default:
+                <span class="badge bg-dark rounded-3">N/A</span>
+                break;
+                }
+            </td>
+            <td>
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                    Modifier
+                </button>
+                <ul class="dropdown-menu">
+                    <li>@Html.ActionLink("Staff", "ProposeChangeRole", "RHAccounts", new { role = 2, matricule = row[0] }, new { @class = "dropdown-item" })</li>
+                    <li>@Html.ActionLink("Admin Staffs", "ProposeChangeRole", "RHAccounts", new { role = 100, matricule = row[0] }, new { @class = "dropdown-item" })</li>
+                    <li>@Html.ActionLink("Admin Accounts", "ProposeChangeRole", "RHAccounts", new { role = 101, matricule = row[0] }, new { @class = "dropdown-item" })</li>
+                </ul>
+            </td>
+        </tr>
         }
     </tbody>
 </table>
 
 @section Scripts
 {
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script>
     $(document).ready(function () {
         $('#searchTerm').on('input', function () {
             var searchTerm = $(this).val();
             var resultsTable = $('#resultsTable');
 
             if (searchTerm === '') {
-                resultsTable.empty(); // Vider le tableau si la barre de recherche est vide
+                resultsTable.empty();
                 return;
             }
 
@@ -129,81 +109,55 @@
                     resultsTable.empty();
 
                     if (data.length === 0) {
-                    resultsTable.append('<tr><td colspan="5">Aucun résultat trouvé.</td></tr>');
-                } else {
-                    data.forEach(function (staff) {
-                        var badgeClass = "";
-                        var badgeLabel = "";
+                        resultsTable.append('<tr><td colspan="5">Aucun résultat trouvé.</td></tr>');
+                    } else {
+                        data.forEach(function (staff) {
+                            var badgeClass = "";
+                            var badgeLabel = "";
 
-                        // Déterminez le badge à afficher en fonction de IDGroup
-                        switch (staff["IDGroup"]) {
-                            case 1:
-                                badgeClass = "bg-danger";
-                                badgeLabel = "User";
-                                break;
-                            case 2:
-                                badgeClass = "bg-secondary";
-                                badgeLabel = "Staff";
-                                break;
-                            case 100:
-                                badgeClass = "bg-primary";
-                                badgeLabel = "RH";
-                                break;
-                            case 101:
-                                badgeClass = "bg-success";
-                                badgeLabel = "Contrôleur";
-                                break;
-                            default:
-                                badgeClass = "bg-dark";
-                                badgeLabel = "N/A";
-                                break;
-                        }
+                            switch (staff["IDGroup"]) {
+                                case 1:
+                                    badgeClass = "bg-danger";
+                                    badgeLabel = "User";
+                                    break;
+                                case 2:
+                                    badgeClass = "bg-secondary";
+                                    badgeLabel = "Staff";
+                                    break;
+                                case 100:
+                                    badgeClass = "bg-primary";
+                                    badgeLabel = "RH";
+                                    break;
+                                case 101:
+                                    badgeClass = "bg-success";
+                                    badgeLabel = "Contrôleur";
+                                    break;
+                                default:
+                                    badgeClass = "bg-dark";
+                                    badgeLabel = "N/A";
+                                    break;
+                            }
 
-                        // Construisez la ligne du tableau
-                        var row = '<tr>' +
-                            '<td>' + staff.Matricule + '</td>' +
-                            '<td>' + staff.Nom + " " + staff.Prenom + '</td>' +
-                            '<td>' +
-                            '<div class="d-flex align-items-center gap-2">' +
-                            '<span class="badge ' + badgeClass + ' rounded-3 fw-semibold">' + badgeLabel + '</span>' +
-                            '</div>' +
-                            '</td>' +
-                            '<td>' +
-                            '<button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">' +
-                            'Modifier' +
-                            '</button>' +
-                            '<ul class="dropdown-menu">' +
-                            '<li><a class="dropdown-item" href="/RHAdmin/ChangeRole?role=2&matricule='+staff.Matricule+'">Staff</a></li>' +
-                                '<li><a class="dropdown-item" href="#">Admin Staffs</a></li>' +
-                                '<li><a class="dropdown-item" href="#">Admin Accounts</a></li>' +
-                            '</ul>' +
-                            '</td>' +
-                            '</tr>';
-                        resultsTable.append(row);
-                    });
-                }
+                            var row = '<tr>' +
+                                '<td>' + staff.Matricule + '</td>' +
+                                '<td>' + staff.Nom + " " + staff.Prenom + '</td>' +
+                                '<td><span class="badge ' + badgeClass + ' rounded-3">' + badgeLabel + '</span></td>' +
+                                '<td><button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">Modifier</button>' +
+                                '<ul class="dropdown-menu">' +
+                                '<li><a class="dropdown-item" href="/RHAccounts/ProposeChangeRole?role=2&matricule=' + staff.Matricule + '">Staff</a></li>' +
+                                '<li><a class="dropdown-item" href="/RHAccounts/ProposeChangeRole?role=100&matricule=' + staff.Matricule + '">Admin Staffs</a></li>' +
+                                '<li><a class="dropdown-item" href="/RHAccounts/ProposeChangeRole?role=101&matricule=' + staff.Matricule + '">Admin Accounts</a></li>' +
+                                '</ul></td>' +
+                                '</tr>';
+                            resultsTable.append(row);
+                        });
+                    }
                 },
                 error: function () {
                     $('#resultsTable').html('<tr><td colspan="5">Une erreur s\'est produite lors de la recherche.</td></tr>');
                 }
             });
         });
-
-        function changeRole(role, matricule) {
-            $.ajax({
-                url: '@Url.Action("ChangeRole", "RHAccounts")',
-                type: 'POST',
-                data: { role: role, matricule: matricule },
-                success: function (response) {
-                    // Gérer la réponse, par exemple afficher un message de succès
-                    alert('Rôle mis à jour avec succès.');
-                },
-                error: function () {
-                    // Gérer l'erreur
-                    alert('Erreur lors de la mise à jour du rôle.');
-                }
-            });
-        }
     });
-    </script>
+</script>
 }

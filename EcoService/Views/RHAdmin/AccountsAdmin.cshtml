@@ -30,7 +30,7 @@
         </form>
     </div>
     <div class="col-3 btn-group" role="group">
-        <a href="" class="btn btn-primary">
+        <a href="@Url.Action("Create", "RHAccounts")" class="btn btn-primary">
             Ajouter
         </a>
     </div>
@@ -49,10 +49,12 @@
         @foreach (DataRow row in Model.Rows)
         {
             <tr>
-                <td class="border-bottom-0">@row[0]</td> b
+                <td class="border-bottom-0">@row[0]</td> 
                 <td class="border-bottom-0">@Html.DisplayFor(modelItem => @row[3]) @Html.DisplayFor(modelItem => @row[4])</td>
                 <td class="border-bottom-0">
-                    @if (row[5]?.ToString() == "1")
+
+
+                   @if (row[5]?.ToString() == "1")
                     {
                         <div class="d-flex align-items-center gap-2">
                             <span class="badge bg-danger rounded-3 fw-semibold">User</span>
@@ -74,6 +76,12 @@
                     {
                         <div class="d-flex align-items-center gap-2">
                             <span class="badge bg-success rounded-3 fw-semibold">Contrôleur</span>
+                        </div>
+                    }
+                    else if (row[5]?.ToString() == "102")
+                    {
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-info rounded-3 fw-semibold">Approbation</span>
                         </div>
                     }
                     else
@@ -106,80 +114,83 @@
     $(document).ready(function () {
         $('#searchTerm').on('input', function () {
             var searchTerm = $(this).val();
-            var resultsTable = $('#resultsTable');
+                    var resultsTable = $('#resultsTable');
 
-            if (searchTerm === '') {
-                resultsTable.empty(); // Vider le tableau si la barre de recherche est vide
-                return;
-            }
+                    if (searchTerm === '') {
+                        resultsTable.empty(); // Vider le tableau si la barre de recherche est vide
+                        return;
+                    }
 
             $.ajax({
-                url: '@Url.Action("SearchAccounts", "RHAdmin")',
+                    url: '@Url.Action("SearchAccounts", "RHAdmin")',
                 type: 'POST',
                 data: { searchTerm: searchTerm },
                 success: function (data) {
-                    resultsTable.empty();
+                            resultsTable.empty();
 
-                    if (data.length === 0) {
-                        resultsTable.append('<tr><td colspan="5">Aucun résultat trouvé.</td></tr>');
-                    }
-                    else {
-                        data.forEach(function (staff) {
-                            var badgeClass = "";
-                            var badgeLabel = "";
+                            if (data.length === 0) {
+                                resultsTable.append('<tr><td colspan="5">Aucun résultat trouvé.</td></tr>');
+                            }
+                            else {
+                                data.forEach(function (staff) {
+                                    var badgeClass = "";
+                                    var badgeLabel = "";
 
-                            // Déterminez le badge à afficher en fonction de IDGroup
-                            switch (staff["IDGroup"]) {
-                                case 1:
-                                    badgeClass = "bg-danger";
-                                    badgeLabel = "User";
-                                    break;
-                                case 2:
-                                    badgeClass = "bg-secondary";
-                                    badgeLabel = "Staff";
-                                    break;
-                                case 100:
-                                    badgeClass = "bg-primary";
-                                    badgeLabel = "RH";
-                                    break;
-                                case 101:
-                                    badgeClass = "bg-success";
-                                    badgeLabel = "Contrôleur";
-                                    break;
-                                default:
-                                    badgeClass = "bg-dark";
-                                    badgeLabel = "N/A";
-                                    break;
-                    }
+                                    // Déterminez le badge à afficher en fonction de IDGroup
+                                    switch (staff["IDGroup"]) {
+                                        case 1:
+                                            badgeClass = "bg-danger";
+                                            badgeLabel = "User";
+                                            break;
+                                        case 2:
+                                            badgeClass = "bg-secondary";
+                                            badgeLabel = "Staff";
+                                            break;
+                                        case 100:
+                                            badgeClass = "bg-primary";
+                                            badgeLabel = "RH";
+                                            break;
+                                        case 101:
+                                            badgeClass = "bg-success";
+                                            badgeLabel = "Contrôleur";
+                                            break;
+                                        case 102:
+                                            badgeClass = "bg-info";
+                                            badgeLabel = "Approbation"
+                                        default:
+                                            badgeClass = "bg-dark";
+                                            badgeLabel = "N/A";
+                                            break;
+                                    }
 
-                        // Construisez la ligne du tableau
-                        var row = '<tr>' +
-                            '<td>' + staff.Matricule + '</td>' +
-                            '<td>' + staff.Nom + " " + staff.Prenom + '</td>' +
-                            '<td>' +
-                            '<div class="d-flex align-items-center gap-2">' +
-                            '<span class="badge ' + badgeClass + ' rounded-3 fw-semibold">' + badgeLabel + '</span>' +
-                            '</div>' +
-                            '</td>' +
-                            '<td>' +
-                            '<button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">' +
-                            'Modifier' +
-                            '</button>' +
-                            '<ul class="dropdown-menu">' +
-                            '<li><a class="dropdown-item" href="/RHAdmin/ChangeRole?role=2&matricule='+staff.Matricule+'">Staff</a></li>' +
-                                '<li><a class="dropdown-item" href="#">Admin Staffs</a></li>' +
-                                '<li><a class="dropdown-item" href="#">Admin Accounts</a></li>' +
-                            '</ul>' +
-                            '</td>' +
-                            '</tr>';
-                        resultsTable.append(row);
-                    });
-                }
-                },
+                                    // Construisez la ligne du tableau
+                                    var row = '<tr>' +
+                                        '<td>' + staff.Matricule + '</td>' +
+                                        '<td>' + staff.Nom + " " + staff.Prenom + '</td>' +
+                                        '<td>' +
+                                        '<div class="d-flex align-items-center gap-2">' +
+                                        '<span class="badge ' + badgeClass + ' rounded-3 fw-semibold">' + badgeLabel + '</span>' +
+                                        '</div>' +
+                                        '</td>' +
+                                        '<td>' +
+                                        '<button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">' +
+                                        'Modifier' +
+                                        '</button>' +
+                                        '<ul class="dropdown-menu">' +
+                                        '<li><a class="dropdown-item" href="/RHAdmin/ChangeRole?role=2&matricule='+staff.Matricule+'">Staff</a></li>' +
+                                            '<li><a class="dropdown-item" href="#">Admin Staffs</a></li>' +
+                                            '<li><a class="dropdown-item" href="#">Admin Accounts</a></li>' +
+                                        '</ul>' +
+                                        '</td>' +
+                                        '</tr>';
+                                    resultsTable.append(row);
+                                });
+                            }
+                        },
                 error: function () {
                     $('#resultsTable').html('<tr><td colspan="5">Une erreur s\'est produite lors de la recherche.</td></tr>');
-                }
-            });
+                        }
+                    });
         });
     });
     </script>

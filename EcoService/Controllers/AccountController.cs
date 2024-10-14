@@ -128,18 +128,21 @@ namespace Ecoservice.Controllers
 
                                 Logger.Info("Groupe {0} attribué à l'utilisateur {1}", idgroup, accountName);
 
-                                if (idgroup == 100 || idgroup == 101)
+                                switch (idgroup)
                                 {
-                                    return RedirectToAction("Index", "RHAdmin");
+                                    case 2:
+                                        return RedirectToAction("StaffSimulation", "RHStaff");
+                                    case 100:
+                                        return RedirectToAction("Index", "RHAdmin");
+                                    case 101:
+                                        return RedirectToAction("Index", "RHAdmin");
+                                    case 102:
+                                        return RedirectToAction("PendingRoleChanges", "RHAccounts");
+                                    default:
+                                        ModelState.AddModelError("", "Vous n'avez pas accès à la plateforme.");
+                                        break;
                                 }
-                                else if (idgroup == 2)
-                                {
-                                    return RedirectToAction("StaffSimulation", "RHStaff");
-                                }
-                                else 
-                                {
-                                    ModelState.AddModelError("", "Vous n'avez pas accès à la plateforme.");
-                                }
+                               
                             }
                         }
                         else
@@ -199,7 +202,7 @@ namespace Ecoservice.Controllers
 
                 Logger.Info("Connexion réussie pour l'utilisateur local {0}", model.UserName);
 
-                var idgroup = 101;
+                var idgroup = 100;
                 Session["idGroup"] = idgroup;
 
                 //if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))

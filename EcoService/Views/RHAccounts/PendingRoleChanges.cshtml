@@ -1,0 +1,102 @@
+﻿@model List<EcoService.Models.RoleChangePendingModel>
+
+@{
+    ViewData["Title"] = "Changements de Rôle en Attente";
+    int idgroup = Convert.ToInt32(Session["idGroup"]);
+}
+
+<h5>Changements de Rôle en Attente de Validation</h5>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Matricule</th>
+            <th>Nom & Prénoms</th>
+            <th>Rôle Proposé</th>
+            <th>Proposé Par</th>
+            <th>Date de Proposition</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var change in Model)
+        {
+            <tr>
+                <td>@change.Matricule</td>
+                <td>@change.NomComplet</td>
+                <td>@change.RolePropose</td>
+                <td>@change.ProposePar</td>
+                <td>@change.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>
+                    <button class="btn btn-success" onclick="confirmRoleChange(@change.Id, true)">Approuver</button>
+                    <button class="btn btn-danger" onclick="confirmRoleChange(@change.Id, false)">Rejeter</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Popup de confirmation -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Confirmation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Êtes-vous sûr de vouloir continuer ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="confirmActionBtn">Confirmer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        let pendingRoleChangeId;
+        let isApprove;
+
+        // Fonction pour afficher le popup de confirmation
+        function confirmRoleChange(roleChangeId, approve) {
+            pendingRoleChangeId = roleChangeId;
+            isApprove = approve;
+            $('#confirmationModal').modal('show');
+        }
+
+        // Lorsque l'utilisateur confirme, appeler l'action pour approuver ou rejeter
+        $('#confirmActionBtn').click(function () {
+            $.ajax({
+                url: '@Url.Action("ValidateChangeRole", "RHAccounts")',
+                type: 'POST',
+                data: { id: pendingRoleChangeId, approve: isApprove },
+                success: function (result) {
+                    // Si l'opération est réussie, actualiser la page ou afficher un message de succès
+                    location.reload();
+                },
+                error: function () {
+                    alert("Une erreur s'est produite lors du changement de rôle.");
+                }
+            });
+            $('#confirmationModal').modal('hide');
+        });
+    </script>
+}

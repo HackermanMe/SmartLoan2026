@@ -1,8 +1,10 @@
 ﻿@model Dictionary<string, object>
+@using Newtonsoft.Json
 @{
     ViewData["Title"] = "Demande de prêt";
     var staff = Model.ContainsKey("Staff") ? Model["Staff"] as Dictionary<string, object> : null;
     var simulationData = Model.ContainsKey("SimulationData") ? Model["SimulationData"] as dynamic : null;
+    var prets = Model.ContainsKey("Prets") ? Model["Prets"] as List<Dictionary<string, object>> : null;
 }
 
 <h2>Demande de prêt</h2>
@@ -96,49 +98,69 @@
         </div>
     </div>
 
-    <button type="button" onclick="sendRequest()" class="btn btn-primary mt-3">
+    <button type="submit" class="btn btn-primary mt-3">
         Envoyer
     </button>
 </form>
 
+@section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-        function sendRequest() {
-        var remboursement = @staff?["SalaireNet"] * 40 / 100;
 
-        var data = {
-            Montant: @simulationData?.Montant,
-            nom: '@staff?["Nom"] @staff?["Prenom"]',
-            TypeDePret: '@simulationData?.TypeDePret',
-            numeroCompte: '@staff?["NumeroCompte"]',
-            annualRate: @simulationData?.AnnualRate,
-            dateNaissance: $('#dateNaissance').val(),
-            months: @simulationData?.Months,
-            dateDebut: $('#dateDebut').val(),
-            quotity: @simulationData?.Quotity,
-            ranking: $('#ranking').val(),
-            netSalary: @simulationData?.NetSalary,
-            grade: $('#grade').val(),
-            matricule: @simulationData?.Matricule,
-            notes: $('#notes').val()
-        };
+        $(document).ready(function () {
+            $('#complementaryForm').on('submit', function (event) {
+                //event.preventDefault();
 
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("GenerateDocument", "RHDemandeDePret")',
-            data: data,
-            success: function (response) {
-                if (response.success) {
-                    alert(response.message || 'Succès!');
-                    window.location.href = response.redirectUrl;
-                } else {
-                    alert(response.message || 'Erreur!');
-                }
-            },
-            error: function (error) {
-                alert('Erreur de communication avec le serveur: ' + error);
-            }
+                var data = {
+                    Montant: encodeURIComponent(@simulationData.Montant),
+                    nom: encodeURIComponent('@staff["Nomm"] @staff["Prenomm"]'),
+                    TypeDePret: encodeURIComponent('@simulationData.TypeDePret'),
+                    numeroCompte: encodeURIComponent('@staff["NumeroComptee"]'),
+                    annualRate: encodeURIComponent(@simulationData.AnnualRate),
+                    dateNaissance: encodeURIComponent($('#dateNaissance').val()),
+                    months: encodeURIComponent(@simulationData.Months),
+                    dateDebut: encodeURIComponent($('#dateDebut').val()),
+                    quotity: encodeURIComponent(@simulationData.Quotity),
+                    ranking: encodeURIComponent($('#ranking').val()),
+                    netSalary: encodeURIComponent(@simulationData.NetSalary),
+                    grade: encodeURIComponent($('#grade').val()),
+                    matricule: encodeURIComponent(@simulationData.Matricule),
+                    notes: encodeURIComponent($('#notes').val()),
+                    prets: @Html.Raw(JsonConvert.SerializeObject(@prets)),
+
+                };
+
+                console.log('Données soumises:', data);
+                console.log('Prêts:', JSON.stringify(@Html.Raw(JsonConvert.SerializeObject(@prets))));
+
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("GenerateDocument", "RHDemandeDePret")',
+                    xhrFields: {
+                        responseType: 'blob'  // Important pour gérer les blobs (fichiers)
+                    },
+                    data: data,
+                    success: function (blob, status, xhr) {
+                        // Crée un lien pour télécharger le fichier
+                        var link = document.createElement('a');
+                        var url = window.URL.createObjectURL(blob);
+                        var fileName = xhr.getResponseHeader('Content-Disposition').split('filename=')[1].replace(/"/g, '');
+
+                        // Télécharge automatiquement le fichier
+                        link.href = url;
+                        link.download = fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        window.URL.revokeObjectURL(url);
+                    },
+                    error: function (error) {
+                        console.error('Erreur de communication avec le serveur:', error); // Affiche l'objet complet dans la console
+                        alert('Erreur de communication avec le serveur: ' + (error.responseText || error.statusText || 'Erreur inconnue'));
+                    }
+                });
+            });
         });
-    }
+
     </script>
+}

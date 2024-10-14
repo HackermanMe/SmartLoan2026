@@ -4,7 +4,9 @@ using System.Data.SqlClient;
 using System.Threading.Tasks;
 using System.Web.Configuration;
 using System.Web.Mvc;
+using System.Web.UI.WebControls;
 using DocumentFormat.OpenXml.Office.Word;
+using Microsoft.Office.Core;
 using NLog;
 
 namespace EcoService.Models
@@ -123,7 +125,16 @@ namespace EcoService.Models
             return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@NumeroCompte", numeroCompte));
         }
 
-        // Méthode pou récupérer un staff selon le matricule 
+        // Méthode pour récupérer les prêts autres banques selon le numéro de compte
+        public SqlDataReader AutresPretExistantsStaff(string numeroCompte)
+        {
+            string query = "SELECT p.ReferencePret, p.NumeroCompte, p.Montant, p.EnCours, p.Taux, p.TypeCredit, p.StartDate, p.EndDate, p.Mensualites, p.CreatedAt " +
+                " FROM RHAutresPretsExistants p JOIN RHStaffs s ON p.NumeroCompte = s.NumeroCompte " +
+                " WHERE p.NumeroCompte = @NumeroCompte ORDER BY p.ReferencePret";
+            return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@NumeroCompte", numeroCompte));
+        }
+
+        // Méthode pou récupérer un staff selon le matricule
         public SqlDataReader GetStaff(int matricule)
         {
             string query = "SELECT SalaireNet FROM RHStaffs WHERE Matricule = @Matricule";
@@ -229,7 +240,72 @@ namespace EcoService.Models
             }
             return staffList;
         }
-        
+
+        // Méthode pour récupérer les prêts autres banques
+        public List<Dictionary<string, object>> GetExistingLoans(string accountNumber)
+        {
+            var loansList = new List<Dictionary<string, object>>();
+            string query = "SELECT TypeDeCredit, StartDate, Montant, EnCours, Mensualites, EndDate, NomBanque " +
+                           "FROM RHAutresPretsExistants WHERE NumeroCompte = @AccountNumber";
+
+            using (SqlDataReader reader = ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@AccountNumber", accountNumber)))
+            {
+                while (reader.Read())
+                {
+                    var loan = new Dictionary<string, object>();
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        loan[reader.GetName(i)] = reader.GetValue(i);
+                    }
+                    loansList.Add(loan);
+                }
+            }
+            return loansList;
+        }
+
+        // Méthode pour récupérer les prêts autres banques
+        public List<Dictionary<string, object>> GetExistingLoansWithID(string accountNumber)
+        {
+            var loansList = new List<Dictionary<string, object>>();
+            string query = "SELECT APretId, TypeDeCredit, StartDate, Montant, EnCours, Mensualites, EndDate, NomBanque " +
+                           "FROM RHAutresPretsExistants WHERE NumeroCompte = @AccountNumber";
+
+            using (SqlDataReader reader = ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@AccountNumber", accountNumber)))
+            {
+                while (reader.Read())
+                {
+                    var loan = new Dictionary<string, object>();
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        loan[reader.GetName(i)] = reader.GetValue(i);
+                    }
+                    loansList.Add(loan);
+                }
+            }
+            return loansList;
+        }
+
+        // Méthode pour supprimer les prêts existants autres banques selon l'id
+        public bool SupprimerPretExistant(int pretId)
+        {
+            string query = "DELETE FROM RHAutresPretsExistants WHERE APretId = @PretId";
+
+            try
+            {
+                ExecuteNonQuery(query, cmd =>
+                {
+                    cmd.Parameters.AddWithValue("@PretId", pretId); // Ajout du paramètre à la commande
+                });
+
+                return true; // Si la commande s'exécute sans erreur, on retourne true
+            }
+            catch (Exception ex)
+            {
+                return false; // En cas d'erreur, on retourne false
+            }
+        }
+
+
         // Méthode pour rechercher un compte staff selon le matricule, le numéro de compte, le nom ou le prénom 
         public List<Dictionary<string, object>> SearchAccounts(string searchTerm)
         {
@@ -317,7 +393,7 @@ namespace EcoService.Models
         // Méthode pour envoyer les simulations
         public void SendSimulation(decimal MontantEmprunte, string TypePret, decimal annualRate, int months, decimal quotity, decimal netSalary, int matricule)
         {
-            // Exemple de traitement des données de simulation (à adapter selon votre modèle et vos besoins)
+          
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
@@ -338,6 +414,32 @@ namespace EcoService.Models
                 command.ExecuteNonQuery();
             }
         }
+
+        // Méthode pour ajouter les Prets existant autres banques
+        public void InsertAutresPretsExistants(string TypePret, string nomBanque, DateTime StartDate, DateTime EndDate, decimal Montant, decimal Mensualites, decimal EnCours, string numeroCompte)
+        {
+           
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = new SqlCommand("INSERT INTO RHAutresPretsExistants (TypeDeCredit, NomBanque, StartDate, EndDate, Montant, Mensualites, EnCours, NumeroCompte) VALUES (@TypeDeCredit, @NomBanque, @StartDate, @EndDate, @Montant, @Mensualites, @EnCours, @NumeroCompte)", connection);
+
+                command.Parameters.AddWithValue("@TypeDeCredit", TypePret);
+                command.Parameters.AddWithValue("@NomBanque", nomBanque);
+                command.Parameters.AddWithValue("@StartDate", StartDate);
+                command.Parameters.AddWithValue("@EndDate", EndDate);
+                command.Parameters.AddWithValue("@Montant", Montant);
+                command.Parameters.AddWithValue("@Mensualites", Mensualites);
+                command.Parameters.AddWithValue("@EnCours", EnCours);
+                command.Parameters.AddWithValue("@NumeroCompte", numeroCompte);
+                
+                command.ExecuteNonQuery();
+            }
+        }
+
+        // Méthode pour supprimer un prêt existants autres banques
+
 
         // Méthode pour récupérer la liste des demandes de prêt
         public async Task<List<Demande>> GetLoanRequests()
@@ -446,29 +548,216 @@ namespace EcoService.Models
         }
 
         // Méthode pour changer le rôle de l'utilisateur 
-        public async Task<bool> UpdateUserRole(int matricule, int role)
+        public bool UpdateUserRole(int matricule, int role)
         {
+            string query = "UPDATE RHAccounts SET IDGroup = @IDGroup WHERE Matricule = @Matricule";
+            
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                ExecuteNonQuery(query, cmd =>
                 {
-                    string query = "UPDATE RHAccounts SET IDGroup = @IDGroup WHERE Matricule = @Matricule";
-                    SqlCommand cmd = new SqlCommand(query, connection);
                     cmd.Parameters.AddWithValue("@Matricule", matricule);
                     cmd.Parameters.AddWithValue("@IDGroup", role);
+                });
 
-                    await connection.OpenAsync();
-                    int rowsAffected = await cmd.ExecuteNonQueryAsync();
-                    return rowsAffected > 0;
-                }
+                return true; // Si la commande s'exécute sans erreur, on retourne true
             }
             catch (Exception ex)
             {
                 // Log de l'exception
-                NLog.LogManager.GetCurrentClassLogger().Error(ex, "Erreur lors de la mise à jour du rôle de l'utilisateur.");
+                LogManager.GetCurrentClassLogger().Error(ex, "Erreur lors de la mise à jour du rôle de l'utilisateur.");
                 return false; // Retourne false en cas d'échec
             }
         }
+
+        // Méthode pour 
+        public bool ProposeUserRoleChange(int matricule, int newRole, int proposedBy)
+        {
+            string query = "INSERT INTO RHRoleChangesPending (Matricule, NewRole, ProposedBy) VALUES (@Matricule, @NewRole, @ProposedBy)";
+
+            try
+            {
+                ExecuteNonQuery(query, cmd =>
+                {
+                    cmd.Parameters.AddWithValue("@Matricule", matricule);
+                    cmd.Parameters.AddWithValue("@NewRole", newRole);
+                    cmd.Parameters.AddWithValue("@ProposedBy", proposedBy);
+                });
+
+                return true; // Si la proposition s'exécute sans erreur, on retourne true
+            }
+            catch (Exception ex)
+            {
+                // Log de l'exception
+                LogManager.GetCurrentClassLogger().Error(ex, "Erreur lors de la proposition de changement de rôle.");
+                return false; // Retourne false en cas d'échec
+            }
+        }
+
+        // Méthode pour obtenir les changements de rôle en attente
+        public List<RoleChangePendingModel> GetPendingRoleChanges()
+        {
+            List<RoleChangePendingModel> pendingChanges = new List<RoleChangePendingModel>();
+
+            string query = "SELECT Id, Matricule, NewRole, ProposedBy, CreatedAt FROM RHRoleChangesPending WHERE Status = 'Pending'";
+
+            try
+            {
+                SqlDataReader reader = ExecuteReader(query, cmd =>
+                {
+                    // Pas de paramètres à ajouter ici
+                });
+
+                while (reader.Read())
+                {
+                    RoleChangePendingModel change = new RoleChangePendingModel
+                    {
+                        Id = reader.GetInt32(0),
+                        Matricule = reader.GetInt32(1),
+                        NewRole = reader.GetInt32(2),
+                        ProposedBy = reader.GetInt32(3),
+                        CreatedAt = reader.GetDateTime(4)
+                    };
+                    // Optionnel : récupérer le nom complet de l'utilisateur et de celui qui propose
+                    change.NomComplet = GetUserFullName(change.Matricule);
+                    change.ProposePar = GetUserFullName(change.ProposedBy);
+                    pendingChanges.Add(change);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogManager.GetCurrentClassLogger().Error(ex, "Erreur lors de la récupération des changements de rôle en attente.");
+            }
+
+            return pendingChanges;
+        }
+
+        // Méthode pour obtenir le nom complet d'un utilisateur à partir de son Matricule
+        private string GetUserFullName(int matricule)
+        {
+            string fullName = "N/A";
+            string query = "SELECT Nom, Prenom FROM RHAccounts WHERE Matricule = @Matricule";
+
+            SqlDataReader reader = ExecuteReader(query, cmd =>
+            {
+                cmd.Parameters.AddWithValue("@Matricule", matricule);
+            });
+
+            if (reader.Read())
+            {
+                fullName = reader["Nom"].ToString() + " " + reader["Prenom"].ToString();
+            }
+            
+            return fullName;
+        }
+
+
+        // Méthode pour valider l'attribution de rôle 
+        public bool ValidateUserRoleChange(int changeId, bool isApproved)
+        {
+            try
+            {
+                if (isApproved)
+                {
+                    // Récupérer la proposition
+                    var querySelect = "SELECT Matricule, NewRole FROM RHRoleChangesPending WHERE Id = @Id";
+                    var reader = ExecuteReader(querySelect, cmd => cmd.Parameters.AddWithValue("@Id", changeId));
+
+                    if (reader.Read())
+                    {
+                        int matricule = reader.GetInt32(0);
+                        int newRole = reader.GetInt32(1);
+
+                        // Appliquer le changement de rôle
+                        var queryUpdate = "UPDATE RHAccounts SET IDGroup = @NewRole WHERE Matricule = @Matricule";
+                        ExecuteNonQuery(queryUpdate, cmd =>
+                        {
+                            cmd.Parameters.AddWithValue("@NewRole", newRole);
+                            cmd.Parameters.AddWithValue("@Matricule", matricule);
+                        });
+
+                        // Mettre à jour le statut de la proposition
+                        var queryStatus = "UPDATE RHRoleChangesPending SET Status = 'Approved' WHERE Id = @Id";
+                        ExecuteNonQuery(queryStatus, cmd => cmd.Parameters.AddWithValue("@Id", changeId));
+                    }
+                }
+                else
+                {
+                    // Rejet de la proposition
+                    var queryStatus = "UPDATE RHRoleChangesPending SET Status = 'Rejected' WHERE Id = @Id";
+                    ExecuteNonQuery(queryStatus, cmd => cmd.Parameters.AddWithValue("@Id", changeId));
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogManager.GetCurrentClassLogger().Error(ex, "Erreur lors de la validation du changement de rôle.");
+                return false;
+            }
+        }
+
+        // Méthode pour créer un utilisateur
+        public int CreateUser(int matricule, string nom, string email, int roleId)
+        {
+            string query = "INSERT INTO RHAccounts (Matricule, Nom, Email, IDGroup) OUTPUT INSERTED.Id VALUES (@Matricule, @Nom, @Email, @RoleId)";
+            int userId = 0;
+
+            SqlDataReader reader = ExecuteReader(query, cmd =>
+                {
+                    cmd.Parameters.AddWithValue("@Matricule", matricule);
+                    cmd.Parameters.AddWithValue("@Nom", nom);
+                    cmd.Parameters.AddWithValue("@Email", email);
+                    cmd.Parameters.AddWithValue("@RoleId", roleId);
+                }
+            );
+
+            if (reader.Read())
+            {
+                userId = reader.GetInt32(0);
+            }
+            
+            return userId;
+        }
+
+        // Méthode pour ajouter un changement de rôle en attente
+        public void AddPendingRoleChange(int userId, int newRoleId)
+        {
+            string query = "INSERT INTO PendingRoleChanges (Matricule, NewRole, RequestDate) VALUES (@Matricule, @NewRole, GETDATE())";
+
+            ExecuteNonQuery(query, cmd =>
+            {
+                cmd.Parameters.AddWithValue("@Matricule", userId);
+                cmd.Parameters.AddWithValue("@NewRole", newRoleId);
+            });
+        }
+
+        // Méthode qui récupère la liste des rôles 
+        public List<SelectListItem> GetAllRoles()
+        {
+            var roles = new List<SelectListItem>();
+            string query = "SELECT IDGroup, RoleName FROM RHRoles";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    roles.Add(new SelectListItem
+                    {
+                        Value = reader["IDGroup"].ToString(),
+                        Text = reader["RoleName"].ToString()
+                    });
+                }
+            }
+
+            return roles;
+        }
+
+
 
     }
 }

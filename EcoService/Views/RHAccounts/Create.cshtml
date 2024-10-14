@@ -1,0 +1,52 @@
+﻿@model UserCreateViewModel
+
+@{
+    ViewData["Title"] = "Ajouter un Utilisateur";
+}
+
+<h2>Créer un Utilisateur</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+@using (Html.BeginForm("Create", "RHAdmin", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        <label for="Matricule">Matricule</label>
+        @Html.TextBoxFor(model => model.Matricule, new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.Matricule)
+    </div>
+
+    <div class="form-group">
+        <label for="Nom">Nom</label>
+        @Html.TextBoxFor(model => model.Nom, new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.Nom)
+    </div>
+
+    <div class="form-group">
+        <label for="Email">Email</label>
+        @Html.TextBoxFor(model => model.Email, new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.Email)
+    </div>
+
+    <div class="form-group">
+        <label for="RoleId">Rôle</label>
+        @Html.DropDownListFor(model => model.RoleId, new SelectList(ViewBag.Roles, "Id", "RoleName"), "Sélectionnez un rôle", new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.RoleId)
+    </div>
+
+    <button type="submit" class="btn btn-primary">Créer</button>
+}

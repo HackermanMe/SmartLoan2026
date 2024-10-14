@@ -2,16 +2,24 @@
 using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Infrastructure;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using NLog;
+using NLog.Fluent;
 using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace EcoService.Controllers
 {
     public class RHStaffController : Controller
     {
+        // Logger NLog
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        // Instance unique de RHSqlQuery pour l'utilisation dans le contrôleur
+        private readonly RHSqlQuery _sqlQuery = new RHSqlQuery();
+
         // GET: RHStaff              
         public ActionResult Index()
         {
@@ -25,9 +33,12 @@ namespace EcoService.Controllers
            
             RHSqlQuery st = new RHSqlQuery();
             decimal totalMensualites = 0;
+
+            // Récupérer les prêts Ecobank
             var pretss = new List<Dictionary<string, object>>();
             SqlDataReader staffreadere = st.AccountLogin(loginStaff);
-                  
+            
+            // récupérer les informations du staff
             var staff = new Dictionary<string, object>();
             
             while (staffreadere.Read())
@@ -39,6 +50,8 @@ namespace EcoService.Controllers
             }
 
             string NumeroCompte = Convert.ToString(staff["NumeroComptee"]);
+            // Récupérer les prêts autres banques 
+            List<Dictionary<string, object>> existingLoans = _sqlQuery.GetExistingLoansWithID(NumeroCompte);
 
             RHSqlQuery p = new RHSqlQuery();
             SqlDataReader prets = p.PretExistantsStaff(NumeroCompte);
@@ -79,6 +92,7 @@ namespace EcoService.Controllers
             var simulation = new Dictionary<string, object>
             {
                 { "Prets", pretss },
+                { "AutresPrets", existingLoans },
                 { "Staff", staff },
                 { "QuotiteResiduelle", quotiteResiduelle.ToString("0.00") },
                 { "QuotiteConsommee", quotiteConsommee.ToString("F", System.Globalization.CultureInfo.InvariantCulture) },

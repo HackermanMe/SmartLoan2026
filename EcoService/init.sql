@@ -42,9 +42,6 @@ ADD NumeroCompte VARCHAR(255);
 ALTER TABLE ECOSERVICEDB.dbo.RHAccounts
 ALTER COLUMN Email VARCHAR(255);
 
---SELECT * FROM RHAccounts WHERE Nom LIKE '%EPSE%';
-SELECT * FROM RHStaffs WHERE Email LIKE 'ftchangai';
-
 SELECT b.IDGroup, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee
 FROM [EcoServiceDB].[dbo].RhAccounts a JOIN [EcoServiceDB].[dbo].[RHRoles] b ON a.IDGroup = b.IDGroup WHERE a.Login = 'FTCHANGAI'
 
@@ -64,10 +61,14 @@ CREATE TABLE [dbo].[RHDemandes] (
     PRIMARY KEY CLUSTERED ([DemandeId] ASC)
 );
 
-SELECT * FROM RHPretsExistants WHERE ReferencePret LIKE 'M61ACAS%' OR ReferencePret LIKE 'M61CASA%';
+CREATE TABLE RHRoleChangesPending (
+    Id INT PRIMARY KEY IDENTITY,
+    Matricule INT NOT NULL,
+    NewRole INT NOT NULL,
+    ProposedBy INT NOT NULL,
+    Status VARCHAR(20) DEFAULT 'Pending',
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+GO
 
-INSERT INTO RHSimulations (MontantEmprunte, Taux, Echeances, SalaireNet, SelectedLoansId, AutresPrets) VALUES (9000000, 3, 60, 500000, null, null);
-
-DELETE FROM RHDemandes;
-
-INSERT INTO RHDemandes (Montant, TypePret, Taux, NbreEcheances, Quotity, SalaireNet, Matricule, Mensualites, CreatedAt) VALUES (6000000, 'Pret personnel', 3, 60, 38.68, 300000, 381, 124000, '06-08-2024 10:00:00')
+SELECT * FROM dbo.RHAccounts;

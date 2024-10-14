@@ -50,7 +50,7 @@ else if (idgroup == 100)
                     <td>@row[0]</td>
                     <td>@Html.DisplayFor(modelItem => @row[3]) @Html.DisplayFor(modelItem => @row[4])</td>
                     <td>@Html.DisplayFor(modelItem => @row[6])</td>
-                    <td><a href="../RHAdmin/Simulation/@row[0]" class="btn btn-sm btn-primary">Simulation</a></td>
+                    <td>@Html.ActionLink("Simuler", "Simulation", "RHAdmin", @row[0], new { @class = "btn btn-sm btn-primary" })</td>
                 </tr>
             }
         </tbody>
@@ -86,7 +86,7 @@ else if (idgroup == 100)
                                 '<td>' + staff["Matricule"] + '</td>' +
                                 '<td>' + staff["Nom"]+ " " + staff["Prenom"] +'</td>' +
                                 '<td>' + staff["NumeroCompte"] + '</td>' +
-                                '<td><a href="/RHAdmin/Simulation/' + staff["Matricule"] + '">Simulation</a></td>' +
+                                '<td><a href="../RHAdmin/Simulation/' + staff["Matricule"] + '">Simuler</a></td>' +
                                 '</tr>';
                             resultsTable.append(row);
                         });

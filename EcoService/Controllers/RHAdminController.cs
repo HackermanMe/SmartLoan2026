@@ -108,18 +108,23 @@ namespace EcoService.Controllers
         {
             try
             {
-                Task<bool> task = _sqlQuery.UpdateUserRole(matricule, role);
-                // Envoyer un message de succès
-                TempData["SuccessMessage"] = "Le rôle de l'utilisateur a été mis à jour avec succès.";
+                bool isModified = _sqlQuery.UpdateUserRole(matricule, role);
+                if (isModified)
+                {
+                    TempData["SuccessMessage"] = "Le rôle de l'utilisateur a été mis à jour avec succès.";
+                    return RedirectToAction("Index"); // Redirection vers une autre vue si nécessaire
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Échec de la mise à jour du rôle.";
+                    return RedirectToAction("Index");
+                }
             }
             catch (Exception ex)
             {
-                // Log l'exception si nécessaire
                 TempData["ErrorMessage"] = $"Erreur lors de l'attribution du rôle : {ex.Message}";
                 return RedirectToAction("Index");
             }
-            
-            return View();
         }
 
         // Action pour rechercher les comptes
@@ -185,10 +190,14 @@ namespace EcoService.Controllers
             var quotiteResiduelle = 40 - quotiteConsommee;
 
             ViewBag.CreatedAt = createdAt;
+            // Récupérer les prêts autres banques
+            string NumeroCompte = Convert.ToString(staff["NumeroComptee"]);
+            List<Dictionary<string, object>> existingLoans = _sqlQuery.GetExistingLoansWithID(NumeroCompte);
             // Préparer les données pour la vue
             var simulation = new Dictionary<string, object>
             {
                 { "Prets", pretss },
+                { "AutresPrets", existingLoans },
                 { "Staff", staff },
                 { "QuotiteResiduelle", quotiteResiduelle.ToString("0.00") },
                 { "QuotiteConsommee", quotiteConsommee.ToString("F", System.Globalization.CultureInfo.InvariantCulture) },
@@ -197,64 +206,7 @@ namespace EcoService.Controllers
 
             return View(simulation);
         }
-
-        public ActionResult Parametre(int id)
-        {
-            SqlDataReader DbReader = _sqlQuery.Rapport(id);
-
-            while (DbReader.Read())
-            {
-                Session["id"] = id;
-                Session["Act"] = DbReader.GetString(DbReader.GetOrdinal("action"));
-                Session["Cont"] = DbReader.GetString(DbReader.GetOrdinal("controller"));
-                Session["Nom"] = DbReader.GetString(DbReader.GetOrdinal("nom"));
-            }
-
-            return Json(new { redirect = 1 });
-        }
-
-        // GET: RHAdmin/Create
-        public ActionResult Create()
-        {
-            List<RHRole> RHroles = _sqlQuery.Role();
-            ViewBag.roles = new SelectList(RHroles, "Iduser", "NumeroCompte");
-            return View();
-        }
-
-        // POST: RHAdmin/Create
-        [HttpPost]
-        public ActionResult Create(FormCollection collection)
-        {
-            try
-            {
-                var user = new User
-                {
-                    Nom = collection["Name"],
-                    Prenom = collection["Prenom"],
-                    Email = collection["Email"],
-                    IdRole = Int32.Parse(collection["role"]),
-                    Status = collection["isActive"] == "checked" ? "OUI" : "NON"
-                };
-
-                _sqlQuery.InsertUser(user);
-
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                // Gestion des erreurs ici
-                return View();
-            }
-        }
-
-        // GET: RHAdmin/CreateAvis
-        public ActionResult CreateAvis()
-        {
-            List<RHRole> RHroles = _sqlQuery.Role();
-            ViewBag.roles = new SelectList(RHroles, "Matricule", "NumeroCpte");
-            return View();
-        }
-
+                        
         public ActionResult UploadStaff()
         {
             return View();
@@ -469,7 +421,7 @@ namespace EcoService.Controllers
                                 throw new Exception($"Valeur de mensualités invalide à la ligne {row} : {mensualites}");
                             }
 
-                            // Convertir les dates au format dmy
+                            // Convertir les dates au format date
                             if (!DateTime.TryParse(dateDebutStr, out DateTime dateDebut))
                             {
                                 throw new Exception($"Format de date invalide pour DateDebut à la ligne {row} : {dateDebutStr}");
@@ -503,7 +455,9 @@ namespace EcoService.Controllers
         public ActionResult DownloadLoansTemplate(string fileName)
         {
             // Chemin du fichier sur le serveur
-            string filePath = Server.MapPath("~/Content/Files/"+fileName);
+            //string filePath = "//10.8.14.65/SmartLoanList/Content/Files/"+fileName;
+
+            string filePath = Server.MapPath("~/Content/Files/" + fileName);
             // C:\Users\ftchangai\source\repos\EcoService\EcoService\Content\Files\Prets.xlsx
 
             // Définir le type de contenu en fonction de l'extension du fichier

@@ -76,6 +76,25 @@
                                 </a>
                             </li>
                         }
+                        else if (idgroup == 102)
+                        {
+                            <li class="sidebar-item">
+                                <a class="sidebar-link" href="@Url.Action("PendingRoleChanges", "RHAccounts")" aria-expanded="false">
+                                    <span>
+                                        <i class="fas fa-cogs"></i>
+                                    </span>
+                                    <span class="hide-menu">Administration</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a class="sidebar-link" href="@Url.Action("StaffSimulation", "RHStaff")" aria-expanded="false">
+                                    <span>
+                                        <i class="fas fa-tachometer-alt"></i>
+                                    </span>
+                                    <span class="hide-menu">Tableau de Bord</span>
+                                </a>
+                            </li>
+                        }
                         else
                         {
                             <li class="sidebar-item">
@@ -178,7 +197,7 @@
     }
 
     function logout() {
-        window.location.href = '@Url.Action("Logout", "Account")';
+        document.getElementById('logoutForm').submit()
     }
 
     // Réinitialiser le timer sur les événements de l'utilisateur
