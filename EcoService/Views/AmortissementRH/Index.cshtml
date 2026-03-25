@@ -1,0 +1,458 @@
+@model EcoService.Models.EtatPretsPersonnelInput
+@{
+    ViewData["Title"] = "Amortissement Personnel";
+    var typesPret = ViewBag.TypesPret as string[] ?? new string[0];
+}
+
+<link rel="stylesheet" href="~/assets/css/amortissement.css" />
+<style>
+    .rh-card        { background: #fff; border-radius:4px; border:1px solid #e0e0e0; padding:20px; margin-bottom:12px; }
+    .rh-hdr         { background: #7687994d; color: #000000b5; font-weight:600; padding:8px 14px; border-radius:3px; margin-bottom:14px; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; }
+    .rh-grid        { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
+    .rh-grid-3      { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    .rh-grid-2      { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .fg label       { font-weight:600; font-size:11px; color: #6c757d; margin-bottom:4px; display:block; text-transform:uppercase; letter-spacing:0.3px; }
+    .fg input,
+    .fg select      { width:100%; padding:6px 10px; border:1px solid #ced4da; border-radius:3px; font-size:13px; background:#fff; }
+    .fg input:focus,
+    .fg select:focus { border-color:#6c757d; outline:none; box-shadow:0 0 0 2px rgba(108,117,125,0.15); }
+    .badge-quotite  { display:inline-block; padding:4px 14px; border-radius:3px; font-weight:600; font-size:13px; }
+    .q-ok   { background:#e8f5e9; color:#2e7d32; }
+    .q-warn { background:#fff8e1; color:#f57f17; }
+    .q-bad  { background:#ffebee; color:#c62828; }
+    .btn-dl { background:#343a40; color:#fff; border:none; padding:9px 28px; border-radius:3px; font-size:13px; font-weight:600; cursor:pointer; letter-spacing:0.3px; }
+    .btn-dl:hover { background:#23272b; }
+    .btn-billet { background:#6c757d; }
+    .btn-billet:hover { background:#545b62; }
+    .mensualite-val { font-size:20px; font-weight:700; color:#343a40; }
+    .kpi-label { font-size:11px; color:#6c757d; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+    .fg input[readonly],
+    .fg select[readonly] { background:#f0f0f0; color:#6c757d; cursor:not-allowed; border-color:#ddd; }
+</style>
+
+<div style="margin-bottom:20px;">
+    <h5 style="font-weight:600;color:#343a40;margin-bottom:4px;">Tableau d'amortissement - Personnel</h5>
+    <p style="font-size:13px;color:#6c757d;margin:0;">Etat des prets et tableau d'amortissement officiel</p>
+</div>
+
+@using (Html.BeginForm("Generer", "AmortissementRH", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="rh-card" style="display:flex;align-items:center;gap:32px;flex-wrap:wrap;border-left:3px solid #343a40;">
+        <div>
+            <div class="kpi-label">Mensualite calculee</div>
+            <div class="mensualite-val" id="previewMensualite">-- FCFA</div>
+        </div>
+        <div>
+            <div class="kpi-label">Quotite</div>
+            <span class="badge-quotite q-ok" id="previewQuotite">-- %</span>
+            <span style="font-size:11px;color:#6c757d;margin-left:6px;">(cible &le; 40%)</span>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px;">
+            <button type="submit" formaction="@Url.Action("Generer", "AmortissementRH")" class="btn-dl"><i class="fas fa-file-excel" style="margin-right:6px;"></i>Etat Excel</button>
+            <button type="submit" formaction="@Url.Action("GenererBillet", "AmortissementRH")" class="btn-dl btn-billet"><i class="fas fa-file-alt" style="margin-right:6px;"></i>Billet d'Ordre</button>
+        </div>
+    </div>
+
+    <div class="rh-card">
+        <div class="rh-hdr">Informations du demandeur</div>
+        <div class="rh-grid">
+            <div class="fg">
+                @Html.LabelFor(m => m.NomDemandeur, "Nom du demandeur")
+                @Html.TextBoxFor(m => m.NomDemandeur, new { @class = "form-control", placeholder = "NOM Prenom" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.ClasseCategorie, "Classe / Categorie")
+                @Html.TextBoxFor(m => m.ClasseCategorie, new { @class = "form-control" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.Departement, "Departement")
+                @Html.TextBoxFor(m => m.Departement, new { @class = "form-control" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.NbreAnnees, "Nbre d'annees dans la banque")
+                @Html.TextBoxFor(m => m.NbreAnnees, new { @class = "form-control", type = "number", min = "0" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.Fonction, "Fonction")
+                @Html.TextBoxFor(m => m.Fonction, new { @class = "form-control" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.Adresse, "Adresse")
+                @Html.TextBoxFor(m => m.Adresse, new { @class = "form-control", placeholder = "Adresse du souscripteur" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.BP, "BP")
+                @Html.TextBoxFor(m => m.BP, new { @class = "form-control" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.Telephone, "Telephone")
+                @Html.TextBoxFor(m => m.Telephone, new { @class = "form-control", placeholder = "Ex: 22 21 72 14" })
+            </div>
+        </div>
+    </div>
+
+    <div class="rh-card">
+        <div class="rh-hdr">Pret sollicite</div>
+        <div class="rh-grid">
+            <div class="fg">
+                @Html.LabelFor(m => m.TypePret, "Type de pret")
+                @Html.DropDownListFor(m => m.TypePret,
+                    new SelectList(typesPret, Model != null ? Model.TypePret : ""),
+                    new { @class = "form-control" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.NumeroCompte, "Numero de compte (12 chiffres)")
+                @Html.TextBoxFor(m => m.NumeroCompte, new { @class = "form-control", pattern = "\\d{12}", maxlength = "12", minlength = "12", title = "Le numero de compte doit contenir exactement 12 chiffres", placeholder = "Ex: 012345678901" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.Montant, "Montant (FCFA)")
+                @Html.TextBoxFor(m => m.Montant, new { @class = "form-control", id = "inp_montant", type = "number", min = "1", step = "1", required = "required" })
+                @Html.ValidationMessageFor(m => m.Montant, "", new { @class = "text-danger" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.NbreDifferes, "Nbre de differes")
+                @Html.TextBoxFor(m => m.NbreDifferes, new { @class = "form-control", id = "inp_differes", type = "number", min = "0", disabled = "disabled" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.NbreEcheances, "Nbre d'echeances")
+                @Html.TextBoxFor(m => m.NbreEcheances, new { @class = "form-control", id = "inp_echeances", type = "number", min = "1", max = "60", required = "required" })
+                <small id="info-max-echeances" style="color:#0082bb;font-size:11px;">Max : 60 mois pour ce type de prêt</small>
+                @Html.ValidationMessageFor(m => m.NbreEcheances, "", new { @class = "text-danger" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.TauxAnnuel, "Taux annuel HT (%) - auto")
+                @Html.TextBoxFor(m => m.TauxAnnuel, new { @class = "form-control", id = "inp_taux", type = "number", min = "0", max = "100", step = "0.01", @readonly = "readonly", tabindex = "-1" })
+                @Html.ValidationMessageFor(m => m.TauxAnnuel, "", new { @class = "text-danger" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.TauxTAF, "Taxe / TAF (%) - auto")
+                @Html.TextBoxFor(m => m.TauxTAF, new { @class = "form-control", id = "inp_taf", type = "number", min = "0", max = "100", step = "0.01", @readonly = "readonly", tabindex = "-1" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.DateDebut, "Date debut remboursement")
+                @Html.TextBoxFor(m => m.DateDebut, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+            </div>
+        </div>
+    </div>
+
+    <div class="rh-card">
+        <div class="rh-hdr">Assurance (optionnel)</div>
+        <div class="rh-grid-2">
+            <div class="fg">
+                @Html.LabelFor(m => m.TauxAssurance, "Taux assurance (%)")
+                @Html.TextBoxFor(m => m.TauxAssurance, new { @class = "form-control", type = "number", min = "0", step = "0.0001" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.AssuranceFixe, "Assurance fixe (FCFA/mois)")
+                @Html.TextBoxFor(m => m.AssuranceFixe, new { @class = "form-control", type = "number", min = "0" })
+            </div>
+        </div>
+    </div>
+
+    <div class="rh-card">
+        <div class="rh-hdr">Prets existants Ecobank</div>
+        <div class="rh-grid-3">
+            <div class="fg">
+                @Html.LabelFor(m => m.TypePretExistant, "Type")
+                @Html.DropDownListFor(m => m.TypePretExistant,
+                    new SelectList(typesPret, Model != null ? Model.TypePretExistant : ""),
+                    new { @class = "form-control" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.MontantPretExistant, "Montant")
+                @Html.TextBoxFor(m => m.MontantPretExistant, new { @class = "form-control", type = "number", min = "0" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.MensualitesPretExistant, "Mensualites (Interets) (2)")
+                @Html.TextBoxFor(m => m.MensualitesPretExistant, new { @class = "form-control", id = "inp_mens2", type = "number", min = "0" })
+            </div>
+        </div>
+    </div>
+
+    <div class="rh-card">
+        <div class="rh-hdr">Autres credits (1)</div>
+        <div class="rh-grid-3">
+            <div class="fg">
+                @Html.LabelFor(m => m.TypeAutresCredits1, "Type")
+                @Html.DropDownListFor(m => m.TypeAutresCredits1,
+                    new SelectList(typesPret, Model != null ? Model.TypeAutresCredits1 : ""),
+                    new { @class = "form-control" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.MontantAutresCredits1, "Montant")
+                @Html.TextBoxFor(m => m.MontantAutresCredits1, new { @class = "form-control", type = "number", min = "0" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.MensualitesAutresCredits1, "Mensualites (Interets) (3)")
+                @Html.TextBoxFor(m => m.MensualitesAutresCredits1, new { @class = "form-control", id = "inp_mens3a", type = "number", min = "0" })
+            </div>
+        </div>
+    </div>
+
+    <div class="rh-card">
+        <div class="rh-hdr">Autres credits (2)</div>
+        <div class="rh-grid-3">
+            <div class="fg">
+                @Html.LabelFor(m => m.TypeAutresCredits2, "Type")
+                @Html.DropDownListFor(m => m.TypeAutresCredits2,
+                    new SelectList(typesPret, Model != null ? Model.TypeAutresCredits2 : ""),
+                    new { @class = "form-control" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.MontantAutresCredits2, "Montant")
+                @Html.TextBoxFor(m => m.MontantAutresCredits2, new { @class = "form-control", type = "number", min = "0" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.MensualitesAutresCredits2, "Mensualites (Interets) (3)")
+                @Html.TextBoxFor(m => m.MensualitesAutresCredits2, new { @class = "form-control", id = "inp_mens3b", type = "number", min = "0" })
+            </div>
+        </div>
+    </div>
+
+    <div class="rh-card">
+        <div class="rh-hdr">Situation globale des credits</div>
+        <div class="rh-grid">
+            <div class="fg">
+                @Html.LabelFor(m => m.SalaireNetActuel, "Salaire net actuel (FCFA)")
+                @Html.TextBoxFor(m => m.SalaireNetActuel, new { @class = "form-control", id = "inp_salaire", type = "number", min = "0" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.CumulPretPersonnelA, "Cumul Pret Personnel (A)")
+                @Html.TextBoxFor(m => m.CumulPretPersonnelA, new { @class = "form-control", type = "number", min = "0" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.FPE_B, "FPE (B)")
+                @Html.TextBoxFor(m => m.FPE_B, new { @class = "form-control", type = "number", min = "0", disabled = "disabled" })
+            </div>
+            <div class="fg">
+                @Html.LabelFor(m => m.CumulPretPersonnelFPE, "Cumul Pret Personnel / FPE")
+                @Html.TextBoxFor(m => m.CumulPretPersonnelFPE, new { @class = "form-control", type = "number", min = "0", disabled = "disabled" })
+            </div>
+        </div>
+    </div>
+
+    if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            @Html.ValidationSummary(false)
+        </div>
+    }
+}
+
+<div class="rh-card" id="apercu-tableau" style="display:none;">
+    <div class="rh-hdr">Apercu du tableau d'amortissement</div>
+    <div style="overflow-x:auto;">
+        <table id="tbl-amort" style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead>
+                <tr style="background:#343a40;color:#fff;font-weight:600;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:0.3px;">
+                    <th style="padding:8px 10px;border:1px solid #454d55;">N</th>
+                    <th style="padding:8px 10px;border:1px solid #454d55;">Capital restant</th>
+                    <th style="padding:8px 10px;border:1px solid #454d55;">Interets</th>
+                    <th style="padding:8px 10px;border:1px solid #454d55;">TAF</th>
+                    <th style="padding:8px 10px;border:1px solid #454d55;">Capital remb.</th>
+                    <th style="padding:8px 10px;border:1px solid #454d55;">Mensualite</th>
+                    <th style="padding:8px 10px;border:1px solid #454d55;">Capital restant du</th>
+                </tr>
+            </thead>
+            <tbody id="tbl-body"></tbody>
+            <tfoot id="tbl-foot"></tfoot>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+<script>
+$(function () {
+    var fmt = function(v) {
+        return Math.round(v).toLocaleString('fr-FR');
+    };
+
+    // ── Configuration par type de prêt (par index du select) ────────
+    // Ordre : Néant, Prêt d'urgence, Prêt personnel, Prêt auto occasion,
+    //         Prêt auto neuf, Achat terrain, Prêt scolarisation,
+    //         Prêt immobilier, Aménagement habitat, Aménagement gros oeuvres
+    var configParIndex = [
+        { maxMois: 0,   taux: 0, taf: 0  },  // 0 = Néant
+        { maxMois: 12,  taux: 0, taf: 0  },  // 1 = Prêt d'urgence
+        { maxMois: 60,  taux: 3, taf: 10 },  // 2 = Prêt personnel
+        { maxMois: 60,  taux: 3, taf: 10 },  // 3 = Prêt automobile (véhicule d'occasion)
+        { maxMois: 60,  taux: 3, taf: 10 },  // 4 = Prêt automobile (véhicule neuf)
+        { maxMois: 60,  taux: 3, taf: 10 },  // 5 = Achat de terrain
+        { maxMois: 12,  taux: 0, taf: 0  },  // 6 = Prêt de scolarisation
+        { maxMois: 180, taux: 3, taf: 0  },  // 7 = Prêt immobilier
+        { maxMois: 60,  taux: 3, taf: 10 },  // 8 = Prêt aménagement habitat
+        { maxMois: 120, taux: 3, taf: 0  }   // 9 = Prêt aménagement gros oeuvres
+    ];
+
+    var defaultCfg = { maxMois: 0, taux: 0, taf: 0 };
+
+    function getConfig() {
+        var idx = $('select[name="TypePret"]')[0].selectedIndex;
+        return configParIndex[idx] || defaultCfg;
+    }
+
+    function appliquerConfigType() {
+        var cfg     = getConfig();
+        var sel     = $('select[name="TypePret"]')[0];
+        var idx     = sel.selectedIndex;
+        var inp     = $('#inp_echeances');
+        var inpTaux = $('#inp_taux');
+        var inpTaf  = $('#inp_taf');
+
+        // Remplir automatiquement taux et TAF (champs grisés)
+        inpTaux.val(cfg.taux);
+        inpTaf.val(cfg.taf);
+
+        // Mettre à jour max des échéances et pré-remplir au max
+        inp.attr('max', cfg.maxMois);
+        var valAct = parseInt(inp.val()) || 0;
+        if (valAct === 0 || valAct > cfg.maxMois) {
+            inp.val(cfg.maxMois);
+        }
+
+        // Message d'info
+        var info = $('#info-max-echeances');
+        if (idx > 0 && cfg.maxMois > 0) {
+            info.text('Max : ' + cfg.maxMois + ' mois | Taux : ' + cfg.taux + '% | TAF : ' + cfg.taf + '%').css('color', '#6c757d');
+        } else {
+            info.text('');
+        }
+
+        recalc();
+    }
+
+    function capEcheances() {
+        var cfg = getConfig();
+        var inp = $('#inp_echeances');
+        var val = parseInt(inp.val()) || 0;
+        if (val > cfg.maxMois) {
+            inp.val(cfg.maxMois);
+            $('#info-max-echeances')
+                .text('Limite a ' + cfg.maxMois + ' mois pour ce type de pret !')
+                .css('color', '#dc3545');
+            setTimeout(function() {
+                $('#info-max-echeances')
+                    .text('Max : ' + cfg.maxMois + ' mois | Taux : ' + cfg.taux + '% | TAF : ' + cfg.taf + '%')
+                    .css('color', '#6c757d');
+            }, 3000);
+        }
+    }
+
+    $('select[name="TypePret"]').on('change', appliquerConfigType);
+    $('#inp_echeances').on('input change blur keyup', capEcheances);
+
+    function calculerLignes(M, n, d, rMoisHT, tauxTAF, pmt) {
+        var lignes = [];
+        var cap = M;  // pleine précision
+        for (var i = 1; i <= n; i++) {
+            var differe  = i <= d;
+            // Calculs en pleine précision — pas d'arrondi intermédiaire (comme Excel)
+            var interets = cap * rMoisHT;
+            var taf      = interets * tauxTAF / 100;
+            var capRmb;
+            if (differe) {
+                capRmb = 0;
+            } else if (i === n) {
+                capRmb = cap;
+            } else {
+                capRmb = Math.max(0, pmt - interets - taf);
+            }
+            var mensEff = differe ? (interets + taf) : pmt;
+            var capFin  = cap - capRmb;
+            // Stocker en pleine précision — fmt() arrondira pour l'affichage
+            lignes.push({
+                num:      i,
+                capDeb:   cap,
+                interets: interets,
+                taf:      taf,
+                capRmb:   capRmb,
+                mens:     mensEff,
+                capFin:   capFin
+            });
+            cap = capFin;  // mise à jour en pleine précision
+            if (cap < 0) cap = 0;
+        }
+        return lignes;
+    }
+
+    function recalc() {
+        var M   = parseFloat($('#inp_montant').val())   || 0;
+        var n   = parseInt($('#inp_echeances').val())   || 0;
+        var d   = parseInt($('#inp_differes').val())    || 0;
+        var tA  = parseFloat($('#inp_taux').val())      || 0;
+        var tf  = parseFloat($('#inp_taf').val())       || 0;
+        var sal = parseFloat($('#inp_salaire').val())   || 0;
+        var m2  = parseFloat($('#inp_mens2').val())     || 0;
+        var m3a = parseFloat($('#inp_mens3a').val())    || 0;
+        var m3b = parseFloat($('#inp_mens3b').val())    || 0;
+
+        var nEff    = Math.max(1, n - d);
+        var rMoisTC = tA * (1 + tf / 100) / 12 / 100;
+        var rMoisHT = tA / 12 / 100;
+        var pmt     = 0;
+
+        if (M > 0 && nEff > 0) {
+            pmt = rMoisTC === 0
+                ? M / nEff
+                : (M * rMoisTC) / (1 - Math.pow(1 + rMoisTC, -nEff));
+            // Pas d'arrondi — pleine précision pour les calculs, fmt() arrondit l'affichage
+        }
+
+        // Mensualite + Quotite
+        $('#previewMensualite').text(pmt > 0 ? fmt(pmt) + ' FCFA' : '-- FCFA');
+        var totalDed = pmt + m2 + m3a + m3b;
+        var q = sal > 0 ? (totalDed / sal * 100) : 0;
+        var badge = $('#previewQuotite');
+        badge.text(q > 0 ? q.toFixed(2) + ' %' : '-- %');
+        badge.removeClass('q-ok q-warn q-bad');
+        if      (q <= 40) badge.addClass('q-ok');
+        else if (q <= 53) badge.addClass('q-warn');
+        else              badge.addClass('q-bad');
+
+        // Apercu tableau
+        if (M > 0 && n > 0 && tA >= 0) {
+            var lignes = calculerLignes(M, n, d, rMoisHT, tf, pmt);
+            var totI = 0, totT = 0, totC = 0, totM = 0;
+            var rows = '';
+            for (var i = 0; i < lignes.length; i++) {
+                var l = lignes[i];
+                var bg = (i % 2 === 0) ? '#fff' : '#f8f9fa';
+                totI += l.interets; totT += l.taf; totC += l.capRmb; totM += l.mens;
+                rows += '<tr style="background:' + bg + ';text-align:right;">'
+                    + '<td style="padding:4px 8px;border:1px solid #e0e0e0;text-align:center;color:#343a40;font-weight:600;">' + l.num + '</td>'
+                    + '<td style="padding:4px 8px;border:1px solid #e0e0e0;">' + fmt(l.capDeb) + '</td>'
+                    + '<td style="padding:4px 8px;border:1px solid #e0e0e0;">' + fmt(l.interets) + '</td>'
+                    + '<td style="padding:4px 8px;border:1px solid #e0e0e0;">' + fmt(l.taf) + '</td>'
+                    + '<td style="padding:4px 8px;border:1px solid #e0e0e0;font-weight:600;">' + fmt(l.capRmb) + '</td>'
+                    + '<td style="padding:4px 8px;border:1px solid #e0e0e0;">' + fmt(l.mens) + '</td>'
+                    + '<td style="padding:4px 8px;border:1px solid #e0e0e0;">' + fmt(l.capFin) + '</td>'
+                    + '</tr>';
+            }
+            $('#tbl-body').html(rows);
+            $('#tbl-foot').html(
+                '<tr style="background:#343a40;color:#fff;font-weight:600;text-align:right;font-size:12px;">'
+                + '<td style="padding:6px 10px;border:1px solid #454d55;text-align:center;">TOTAL</td>'
+                + '<td style="padding:6px 10px;border:1px solid #454d55;"></td>'
+                + '<td style="padding:6px 10px;border:1px solid #454d55;">' + fmt(totI) + '</td>'
+                + '<td style="padding:6px 10px;border:1px solid #454d55;">' + fmt(totT) + '</td>'
+                + '<td style="padding:6px 10px;border:1px solid #454d55;">' + fmt(totC) + '</td>'
+                + '<td style="padding:6px 10px;border:1px solid #454d55;">' + fmt(totM) + '</td>'
+                + '<td style="padding:6px 10px;border:1px solid #454d55;"></td>'
+                + '</tr>'
+            );
+            $('#apercu-tableau').show();
+        } else {
+            $('#apercu-tableau').hide();
+        }
+    }
+
+    $('#inp_montant,#inp_echeances,#inp_differes,#inp_taux,#inp_taf,' +
+      '#inp_salaire,#inp_mens2,#inp_mens3a,#inp_mens3b').on('input', recalc);
+
+    appliquerConfigType();
+    recalc();
+});
+</script>
+}

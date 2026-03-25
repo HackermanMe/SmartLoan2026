@@ -1,0 +1,54 @@
+﻿
+@{
+    ViewBag.Title = "Données de la feuille";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string sheetName = ViewBag.SheetName ?? string.Empty;
+
+    /*if (sheetName.EndsWith("1"))
+    {
+        // Supprime le dernier caractère
+        sheetName = sheetName.Substring(0, sheetName.Length - 1);
+    }*/
+
+    //var departmentImage = ViewBag.DepartmentImage;
+}
+
+<style>
+    .image-container {
+        width: auto;
+        border-color: #e5e5e5;
+        border-radius: 8px;
+        padding: 30px;
+        margin-bottom: 20px;
+        /* background-color: #F5F5F7;*/
+        box-shadow: -4px 0 8px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>
+
+@if (ViewBag.SheetImagesList is List<string> sheetImagesList && sheetImagesList.Any())
+{
+    @*<h1>Trombinoscope @sheetName</h1>*@
+    <div class="d-flex flex-column gap-3">
+        <a href="@Url.Action("Index", "Trombinoscope")">Revenir à la sélection</a>
+
+        @foreach (var image in sheetImagesList)
+        {
+            <div class="d-flex justify-content-center align-items-center image-container">
+                <img src="data:image/png;base64,@image" class="img-fluid" alt="Trombinoscope image" />
+            </div>
+        }
+
+    </div>
+}
+else
+{
+    <div class="d-flex flex-column gap-1">
+        <a href="@Url.Action("Index", "Trombinoscope")">Revenir à la sélection</a>
+        <br />
+        <div class="alert alert-danger">
+            <p>Aucune image n'a été trouvée</p>
+        </div>
+    </div>
+}
+

@@ -1,212 +1,498 @@
 ﻿@{
-        int idgroup = Convert.ToInt32(Session["idGroup"]);
+    int idgroup = Convert.ToInt32(Session["idGroup"]);
+    string userFullName = Session["userFullName"]?.ToString() ?? "";
+    string userInitials = "";
+    string userPhoto = Session["userPhoto"]?.ToString();
+
+    if (!string.IsNullOrEmpty(userFullName))
+    {
+        var parts = userFullName.Split(' ');
+        userInitials = parts.Length >= 2
+            ? (parts[0].Substring(0, 1) + parts[1].Substring(0, 1)).ToUpper()
+            : parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+    }
+
+    bool isAdmin = (idgroup == 100 || idgroup == 101);
+    bool isAccountAdmin = (idgroup == 102);
+    bool showSmartLoan = true;
+    bool showEcoCertAdmin = isAdmin;
+    bool showEcoCertCreate = isAdmin || isAccountAdmin;
+    bool showAccountAdmin = isAccountAdmin;
 }
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@ViewData["Title"] - SmartLoan</title>
+    <title>@ViewData["Title"] - RH-Services</title>
     <link rel="shortcut icon" type="image/png" href="~/assets/images/logos/favicon.png" />
     <link rel="stylesheet" href="~/assets/css/styles.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
-        /* Add custom styles for spacing and responsiveness */
-        .navbar-nav {
-            flex-direction: row;
+        /* ========== SIDEBAR ========== */
+        .left-sidebar {
+            width: 260px;
+            min-height: 100vh;
+            background: #fff;
+            border-right: 1px solid #e5e8ec;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.2s;
         }
 
-        .sidebar-item .sidebar-link {
-            transition: background-color 0.3s ease;
+        .sidebar-brand {
+            padding: 18px 20px;
+            border-bottom: 1px solid #e5e8ec;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        /*.sidebar-brand img { height: 36px; }*/
+        .sidebar-brand .sidebar-close {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #6c757d;
+            cursor: pointer;
         }
 
-        .sidebar-item .sidebar-link:hover {
-            background-color: #f8f9fa;
+        .sidebar-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 0;
         }
 
-        .nav-icon-hover .notification {
+        .sidebar-section-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            color: #9ca3af;
+            padding: 16px 20px 6px;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar-nav li a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 20px;
+            margin: 1px 8px;
+            font-size: 0.855rem;
+            color: #4b5563;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+        .sidebar-nav li a i {
+            width: 18px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #9ca3af;
+            transition: color 0.15s;
+        }
+        .sidebar-nav li a:hover {
+            background: #f3f6f9;
+            color: #1f2937;
+        }
+        .sidebar-nav li a:hover i { color: #0082bb; }
+        .sidebar-nav li a.active {
+            background: #0082bb;
+            color: #fff;
+        }
+        .sidebar-nav li a.active i { color: #fff; }
+
+        .sidebar-divider {
+            height: 1px;
+            background: #e5e8ec;
+            margin: 8px 20px;
+        }
+
+        /* ========== HEADER / NAVBAR ========== */
+        .body-wrapper {
+            margin-left: 260px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: margin-left 0.2s;
+        }
+
+        .app-header {
+            background: #fff;
+            border-bottom: 1px solid #e5e8ec;
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header-left .sidebar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            color: #4b5563;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .header-left .sidebar-toggle:hover { background: #f3f6f9; }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header-user-name {
+            font-size: 0.85rem;
+            color: #4b5563;
+            font-weight: 500;
+        }
+        .header-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #0082bb;
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .user-dropdown {
+            position: relative;
+        }
+        .user-dropdown-menu {
+            display: none;
             position: absolute;
-            top: 10px;
-            right: 10px;
+            right: 0;
+            top: 100%;
+            margin-top: 8px;
+            background: #fff;
+            border: 1px solid #e5e8ec;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            min-width: 180px;
+            z-index: 200;
+            padding: 8px;
+        }
+        .user-dropdown-menu.open { display: block; }
+
+        .user-dropdown-menu .dropdown-item {
+            display: block;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            color: #4b5563;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .user-dropdown-menu .dropdown-item:hover { background: #f3f6f9; }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            flex: 1;
+            padding: 24px;
+            background: #f8f9fb;
+        }
+
+        /* ========== FOOTER ========== */
+        .app-footer {
+            text-align: center;
+            padding: 12px 24px;
+            font-size: 0.78rem;
+            color: #9ca3af;
+            border-top: 1px solid #e5e8ec;
+            background: #fff;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @@media (max-width: 1199px) {
+            .left-sidebar {
+                transform: translateX(-100%);
+                box-shadow: none;
+            }
+            .left-sidebar.open {
+                transform: translateX(0);
+                box-shadow: 4px 0 12px rgba(0,0,0,0.1);
+            }
+            .sidebar-brand .sidebar-close { display: block; }
+            .body-wrapper { margin-left: 0; }
+            .header-left .sidebar-toggle { display: block; }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.3);
+                z-index: 99;
+            }
+            .sidebar-overlay.open { display: block; }
         }
     </style>
 </head>
 <body>
-    <!-- Body Wrapper -->
-    <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
-         data-sidebar-position="fixed" data-header-position="fixed">
-        <!-- Sidebar Start -->
-        <aside class="left-sidebar">
-            <!-- Sidebar scroll-->
-            <div>
-                <div class="brand-logo d-flex align-items-center justify-content-between">
-                    <a href="" class="text-nowrap logo-img">
-                        <img src="~/assets/images/logos/télécharger.png" width="180" alt="SmartLoan Logo" />
-                    </a>
 
-                    <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
-                        <i class="ti ti-x fs-8"></i>
-                    </div>
-                </div>
-                <!-- Sidebar navigation-->
-                <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
-                    <ul id="sidebarnav">
-                        <li class="nav-small-cap">
-                            <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
-                            <span class="hide-menu">Accueil</span>
-                        </li>
-                        @if (idgroup == 100 || idgroup == 101)
-                        {
-                            <li class="sidebar-item">
-                                <a class="sidebar-link" href="@Url.Action("Index", "RHAdmin")" aria-expanded="false">
-                                    <span>
-                                        <i class="fas fa-cogs"></i>
-                                    </span>
-                                    <span class="hide-menu">Administration</span>
-                                </a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a class="sidebar-link" href="@Url.Action("StaffSimulation", "RHStaff")" aria-expanded="false">
-                                    <span>
-                                        <i class="fas fa-tachometer-alt"></i>
-                                    </span>
-                                    <span class="hide-menu">Tableau de Bord</span>
-                                </a>
-                            </li>
-                        }
-                        else if (idgroup == 102)
-                        {
-                            <li class="sidebar-item">
-                                <a class="sidebar-link" href="@Url.Action("PendingRoleChanges", "RHAccounts")" aria-expanded="false">
-                                    <span>
-                                        <i class="fas fa-cogs"></i>
-                                    </span>
-                                    <span class="hide-menu">Administration</span>
-                                </a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a class="sidebar-link" href="@Url.Action("StaffSimulation", "RHStaff")" aria-expanded="false">
-                                    <span>
-                                        <i class="fas fa-tachometer-alt"></i>
-                                    </span>
-                                    <span class="hide-menu">Tableau de Bord</span>
-                                </a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="sidebar-item">
-                                <a class="sidebar-link active" href="@Url.Action("StaffSimulation", "RHStaff")" aria-expanded="false">
-                                    <span>
-                                        <i class="fas fa-tachometer-alt"></i>
-                                    </span>
-                                    <span class="hide-menu">Tableau de Bord</span>
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </nav>
-                <!-- End Sidebar navigation -->
-            </div>
-            <!-- End Sidebar scroll-->
-        </aside>
-        <!-- Sidebar End -->
-        <!-- Main wrapper -->
-        <div class="body-wrapper">
-            <!-- Header Start -->
-            <header class="app-header">
-                <nav class="navbar navbar-expand-lg navbar-light">
-                    <ul class="navbar-nav">
-                        <li class="nav-item d-block d-xl-none">
-                            <a class="nav-link sidebartoggler nav-icon-hover" id="headerCollapse" href="javascript:void(0)">
-                                <i class="fas fa-bars"></i>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link nav-icon-hover" href="javascript:void(0)">
-                                <i class="fas fa-bell"></i>
-                                <div class="notification bg-primary rounded-circle"></div>
-                            </a>
-                        </li>
-                    </ul>
-                    <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
-                        <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-                            <p class="nav navbar-text"> @Session["userFullName"] </p>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
-                                   aria-expanded="false">
-                                    <img src="~/assets/images/profile/default-user.png" alt="User Profile" width="35" height="35" class="rounded-circle">
-                                </a>
-                                @if (User.Identity.IsAuthenticated)
-                                {
-                                    using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
-                                    {
-                                        @Html.AntiForgeryToken()
-                                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
-                                            <div class="message-body">
-                                                <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
-                                                    <i class="fas fa-user"></i>
-                                                    <p class="mb-0 fs-3">Profile</p>
-                                                </a>
-                                                <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
-                                                    <i class="fas fa-envelope"></i>
-                                                    <p class="mb-0 fs-3">Mon Compte</p>
-                                                </a>
-                                                <a href="javascript:document.getElementById('logoutForm').submit()" class="btn btn-outline-primary mx-3 mt-2 d-block">Déconnexion</a>
-                                            </div>
-                                        </div>
-                                    }
-                                }
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
-            </header>
+    <!-- Overlay mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-            <!-- Header End -->
-            <div class="container-fluid">
-                <div class="card">
-                    <div class="card-body">
-                        @RenderBody()
-                    </div>
-                </div>
-            </div>
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="left-sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <a href="@Url.Action("Home", "EcoCerHome")">
+                <img src="~/assets/images/logos/logo.png" alt="RH-Services" />
+            </a>
+            <button class="sidebar-close" id="sidebarClose"><i class="fas fa-times"></i></button>
         </div>
+
+        <div class="sidebar-body">
+
+            @* ===== SMARTLOAN ===== *@
+            <div class="sidebar-section-label">SmartLoan</div>
+            <ul class="sidebar-nav">
+                @if (isAdmin || isAccountAdmin)
+                {
+                    <li>
+                        <a href="@Url.Action("Index", "RHAdmin")">
+                            <i class="fas fa-cog"></i> Administration
+                        </a>
+                    </li>
+                }
+                @if (isAccountAdmin)
+                {
+                    <li>
+                        <a href="@Url.Action("PendingRoleChanges", "RHAccounts")">
+                            <i class="fas fa-user-shield"></i> Gestion des comptes
+                        </a>
+                    </li>
+                }
+                <li>
+                    <a href="@Url.Action("StaffSimulation", "RHStaff")">
+                        <i class="fas fa-chart-line"></i> Simulation
+                    </a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Index", "Amortissement")">
+                        <i class="fas fa-table"></i> Tableau d'amortissement
+                    </a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Index", "AmortissementRH")">
+                        <i class="fas fa-user-tie"></i> Amortissement Personnel
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-divider"></div>
+
+            @* ===== ECOCERTIFICATE ===== *@
+            <div class="sidebar-section-label">EcoCertificate</div>
+            <ul class="sidebar-nav">
+                <li>
+                    <a href="@Url.Action("GenerateCertificate", "EcoCerCertificate")">
+                        <i class="fas fa-file-alt"></i> Mon attestation
+                    </a>
+                </li>
+                @if (showEcoCertCreate)
+                {
+                    <li>
+                        <a href="@Url.Action("CreateUserCertificate", "EcoCerAdmin")">
+                            <i class="fas fa-plus-circle"></i> Creer une attestation
+                        </a>
+                    </li>
+                }
+                @if (showEcoCertAdmin)
+                {
+                    <li>
+                        <a href="@Url.Action("ManageCertificates", "EcoCerAdmin")">
+                            <i class="fas fa-cogs"></i> Administration
+                        </a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("EditCertificateTemplate", "EcoCerAdmin")">
+                            <i class="fas fa-edit"></i> Modification
+                        </a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("UploadStaffInfos", "EcoCerAdmin")">
+                            <i class="fas fa-upload"></i> Upload
+                        </a>
+                    </li>
+                }
+            </ul>
+
+            <div class="sidebar-divider"></div>
+
+            @* ===== RESSOURCES ===== *@
+            <div class="sidebar-section-label">Ressources</div>
+            <ul class="sidebar-nav">
+                <li>
+                    <a href="http://10.8.14.65:5234/EcoService/TypeRapport/PlanDeCarriere" target="_blank">
+                        <i class="fas fa-briefcase"></i> Plan de carriere
+                    </a>
+                </li>
+                <li>
+                    <a href="https://teams/Pages/Default.aspx" target="_blank">
+                        <i class="fas fa-globe"></i> Portail Intranet
+                    </a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Index", "Trombinoscope")" target="_blank">
+                        <i class="fas fa-sitemap"></i> Trombinoscope
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- ========== MAIN ========== -->
+    <div class="body-wrapper">
+
+        <!-- ===== HEADER ===== -->
+        <header class="app-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+            </div>
+            <div class="header-right">
+                <span class="header-user-name">@userFullName</span>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { id = "logoutForm" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="user-dropdown">
+    @if (!string.IsNullOrEmpty(userPhoto))
+    {
+        <div class="header-avatar" style="padding:0;overflow:hidden;">
+            <img src="data:image/jpeg;base64,@userPhoto"
+                 style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+        </div>
+    }
+    else
+    {
+        <div class="header-avatar">@userInitials</div>
+    }
+
+                            <div class="user-dropdown-menu">
+                                <a href="javascript:document.getElementById('logoutForm').submit()" class="dropdown-item" style="color:#dc3545;">
+                                    <i class="fas fa-sign-out-alt me-2"></i> Deconnexion
+                                </a>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </header>
+
+        <!-- ===== CONTENT ===== -->
+        <div class="main-content">
+            @RenderBody()
+        </div>
+
+        <!-- ===== FOOTER ===== -->
+        <footer class="app-footer">
+            &copy; @DateTime.Now.Year RH-Services v1.0
+        </footer>
     </div>
 
-    <footer>
-        <p style=" height:30px; color:#ffffff;font:bold; background-image:url(../../Content/images/logo_Ecobank.jpg);background-position:left;background-repeat:repeat-x;"></p>
-        <p style="text-align:center"> &copy;@DateTime.Now.Year Smart-Loan V 1.0</p>
-    </footer>
-
+    <script src="~/assets/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/assets/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
-    <script src="~/assets/libs/jquery/dist/jquery.min.js"></script>
-    <script src="~/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/assets/js/sidebarmenu.js"></script>
-    <script src="~/assets/js/app.min.js"></script>
-    <script src="~/assets/libs/simplebar/dist/simplebar.js"></script>
+    <script src="~/assets/js/site.js" asp-append-version="true"></script>
+
     <script>
-    var timeout;
-    var logoutAfter = 10 * 60 * 1000; // 10 minutes en millisecondes
+        // Sidebar toggle (mobile)
+        (function () {
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebarOverlay');
+            var toggle = document.getElementById('sidebarToggle');
+            var close = document.getElementById('sidebarClose');
 
-    function resetTimer() {
-        clearTimeout(timeout);
-        timeout = setTimeout(logout, logoutAfter);
-    }
+            function openSidebar() {
+                sidebar.classList.add('open');
+                overlay.classList.add('open');
+            }
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+            }
 
-    function logout() {
-        document.getElementById('logoutForm').submit()
-    }
+            if (toggle) toggle.addEventListener('click', openSidebar);
+            if (close) close.addEventListener('click', closeSidebar);
+            if (overlay) overlay.addEventListener('click', closeSidebar);
+        })();
 
-    // Réinitialiser le timer sur les événements de l'utilisateur
-    window.onload = resetTimer;
-    document.onmousemove = resetTimer;
-    document.onkeypress = resetTimer;
-    document.onscroll = resetTimer;
-    document.onclick = resetTimer;
+        // Active link highlight
+        document.addEventListener("DOMContentLoaded", function () {
+            var current = window.location.pathname.toLowerCase().replace(/\/+$/, '');
+            var bestLink = null;
+            var bestLen = 0;
+            document.querySelectorAll(".sidebar-nav a").forEach(function (link) {
+                var href = (link.getAttribute("href") || "").toLowerCase().replace(/\/+$/, '');
+                if (href && href !== "/" && current.indexOf(href) !== -1 && href.length > bestLen) {
+                    bestLink = link;
+                    bestLen = href.length;
+                }
+            });
+            if (bestLink) bestLink.classList.add("active");
+        });
+
+        // User dropdown toggle on click
+        (function () {
+            var avatar = document.querySelector('.header-avatar');
+            var menu = document.querySelector('.user-dropdown-menu');
+            if (avatar && menu) {
+                avatar.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    menu.classList.toggle('open');
+                });
+                document.addEventListener('click', function (e) {
+                    if (!menu.contains(e.target)) {
+                        menu.classList.remove('open');
+                    }
+                });
+            }
+        })();
+
+        // Auto-logout after 10 min inactivity
+        (function () {
+            var timer;
+            function reset() {
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    var f = document.getElementById('logoutForm');
+                    if (f) f.submit();
+                }, 10 * 60 * 1000);
+            }
+            ['load', 'mousemove', 'keypress', 'scroll', 'click'].forEach(function (e) {
+                window.addEventListener(e, reset);
+            });
+            reset();
+        })();
     </script>
+
     @RenderSection("scripts", required: false)
 </body>
 </html>

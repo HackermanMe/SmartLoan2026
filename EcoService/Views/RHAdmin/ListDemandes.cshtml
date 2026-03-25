@@ -1,0 +1,57 @@
+﻿@model List<EcoService.Models.RHDemande>
+
+@{
+    ViewData["Title"] = "ListDemandes";
+}
+
+<div class="row">
+    <div class="col-9">
+        <h2>Demandes</h2>
+    </div>
+
+    <div class="col-3">
+        <form action="ExportToExcel" method="post">
+            <button type="submit" class="btn btn-success"><i class="fas fa-download"></i> Rapport</button>
+        </form>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nom & Prénoms</th>
+            <th>Montant</th>
+            <th>Type de Prêt</th>
+            <th>Matricule</th>
+            <th>Date de demande</th>
+            <th>Salaire Net</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var demande in Model)
+        {
+            <tr>
+                <td>@demande.NomComplet</td>
+                <td>@demande.Montant</td>
+                <td>@demande.TypePret</td>
+                <td>@demande.Matricule</td>
+                <td>@demande.CreatedAt.ToString("dd/MM/yyyy")</td>
+                <td>@demande.SalaireNet</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -87,7 +87,7 @@
             $.ajax({
                 url: '@Url.Action("ValidateChangeRole", "RHAccounts")',
                 type: 'POST',
-                data: { id: pendingRoleChangeId, approve: isApprove },
+                data: { changeId: pendingRoleChangeId, isApproved: isApprove },
                 success: function (result) {
                     // Si l'opération est réussie, actualiser la page ou afficher un message de succès
                     location.reload();

@@ -9,7 +9,7 @@ using System.Web;
 using System.Web.Mvc;
 using NLog;
 using NLog.Fluent;
-using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
+//using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace EcoService.Controllers
 {
@@ -19,6 +19,7 @@ namespace EcoService.Controllers
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         // Instance unique de RHSqlQuery pour l'utilisation dans le contrôleur
         private readonly RHSqlQuery _sqlQuery = new RHSqlQuery();
+        private int quotiteCessible = 50;
 
         // GET: RHStaff              
         public ActionResult Index()
@@ -29,6 +30,7 @@ namespace EcoService.Controllers
        
         public ActionResult StaffSimulation()
         {
+
             string loginStaff = (string)HttpContext.Session["accountName"];
            
             RHSqlQuery st = new RHSqlQuery();
@@ -84,7 +86,7 @@ namespace EcoService.Controllers
                     
             // Calculer la quotité consommée et résiduelle
             var quotiteConsommee = (totalMensualites / salaireNet) * 100;
-            var quotiteResiduelle = 40 - quotiteConsommee;
+            var quotiteResiduelle = quotiteCessible - quotiteConsommee;
 
 
             ViewBag.CreatedAt = createdAt;

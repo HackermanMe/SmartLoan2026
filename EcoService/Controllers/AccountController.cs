@@ -13,7 +13,7 @@ using System.Security;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
-using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
+//using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 using NLog;
 
 namespace Ecoservice.Controllers
@@ -32,7 +32,7 @@ namespace Ecoservice.Controllers
             return View();
         }
 
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public ActionResult Index(LoginViewModel model, string returnUrl)
@@ -70,7 +70,7 @@ namespace Ecoservice.Controllers
             return View(model);
         }
 
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public ActionResult Login(LoginViewModel model, string returnUrl)
@@ -81,8 +81,8 @@ namespace Ecoservice.Controllers
             {
                 try
                 {
-                    //Check user credentials
-                    //  ActiveDirectory adVerifyUser = new ActiveDirectory(serverName, model.UserName, securePwd);
+                    // Check user credentials
+                    // ActiveDirectory adVerifyUser = new ActiveDirectory(serverName, model.UserName, securePwd);
                     var domain = "ECOBANK.GROUP";
 
                     //var domain = System.Security.Principal.WindowsIdentity.GetCurrent().Name.Split('\\').First();
@@ -94,17 +94,55 @@ namespace Ecoservice.Controllers
                     var accountName = model.UserName;
                     searcher.Filter = $"(sAMAccountName={accountName})";
                     searcher.PropertiesToLoad.Add("displayName");
+
+                    searcher.PropertiesToLoad.Add("thumbnailPhoto");
+
+
+                    ////ajout de la civilite et du genre
+                    //searcher.PropertiesToLoad.Add("title");//civilite
+                    //searcher.PropertiesToLoad.Add("extensionAttribute1");//Genre (ou un autre attribut personnalisé)
+
                     var searchResult = searcher.FindOne();
 
                     if (searchResult != null && searchResult.Properties.Contains("displayName"))
                     {
-                        var displayName = searchResult.Properties["displayName"][0];
+                        //var displayName = searchResult.Properties["displayName"][0];
+                        var displayName = searchResult.Properties["displayName"][0].ToString();
+
+                        //// Récupérer la civilité (title)
+                        //string civilite = searchResult.Properties.Contains("title")
+                        //    ? searchResult.Properties["title"][0].ToString()
+                        //    : "Non spécifié";
+
+                        //// Récupérer le genre (extensionAttribute1 ou autre)
+                        //string genre = searchResult.Properties.Contains("extensionAttribute1")
+                        //    ? searchResult.Properties["extensionAttribute1"][0].ToString()
+                        //    : "Non spécifié";
+
+                        // Récupérer la photo de profil depuis l'AD (thumbnailPhoto)
+                        string userPhotoBase64 = null;
+                        if (searchResult.Properties.Contains("thumbnailPhoto") && searchResult.Properties["thumbnailPhoto"].Count > 0)
+                        {
+                            byte[] photoBytes = (byte[])searchResult.Properties["thumbnailPhoto"][0];
+                            userPhotoBase64 = Convert.ToBase64String(photoBytes);
+                        }
+
 
                         Session["domainName"] = domain;
                         Session["accountName"] = accountName;
                         Session["userFullName"] = displayName;
+                        Session["userPhoto"] = userPhotoBase64;
+
+                        //Ajout de la civilite et du genre
+                        //Session["civilite"] = civilite;
+                        //Session["genre"] = genre;
 
                         Logger.Info("Utilisateur {0} connecté avec succès via AD. Nom complet : {1}", accountName, displayName);
+
+                        // Appeler GetCertificateDataModel avec la civilité et le genre
+                        //var certificateDataModel = new EcoCerDbUtility().GetCertificateDataModel(accountName, civilite, genre);
+
+                        // var gene = new EcoCertCertificate().gen(accountName, civilite, genre);
 
                         string accountNamel = Session["accountName"]?.ToString() ?? "DEFAULT";
 
@@ -131,18 +169,22 @@ namespace Ecoservice.Controllers
                                 switch (idgroup)
                                 {
                                     case 2:
-                                        return RedirectToAction("StaffSimulation", "RHStaff");
+                                        return RedirectToAction("Home", "EcoCerHome");
+                                    //return RedirectToAction("StaffSimulation", "RHStaff");
                                     case 100:
-                                        return RedirectToAction("Index", "RHAdmin");
+                                        return RedirectToAction("Home", "EcoCerHome");
+                                    //return RedirectToAction("Index", "RHAdmin");
                                     case 101:
-                                        return RedirectToAction("Index", "RHAdmin");
+                                        return RedirectToAction("Home", "EcoCerHome");
+                                    //return RedirectToAction("Index", "RHAdmin");
                                     case 102:
-                                        return RedirectToAction("PendingRoleChanges", "RHAccounts");
+                                        return RedirectToAction("Home", "EcoCerHome");
+                                    //return RedirectToAction("PendingRoleChanges", "RHAccounts");
                                     default:
                                         ModelState.AddModelError("", "Vous n'avez pas accès à la plateforme.");
                                         break;
                                 }
-                               
+
                             }
                         }
                         else
@@ -160,7 +202,7 @@ namespace Ecoservice.Controllers
                         Session["domainName"] = "";
                         Session["accountName"] = "";
                         Session["userFullName"] = "";
-                    }                   
+                    }
 
                     //return RedirectToAction("StaffSimulation", "RHStaff");
                 }
@@ -171,17 +213,17 @@ namespace Ecoservice.Controllers
                     ModelState.AddModelError("", "Le nom d'utilisateur ou le mot de passe fourni est incorrect.");
                     //return RedirectToAction("Index", "RHAdmin");
                 }
-                
+
             }
             else
             {
                 Logger.Warn("Échec de la validation du modèle pour l'utilisateur {0}", model.UserName);
             }
-            
+
             return View(model);
         }
 
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public ActionResult Loginn(LoginViewModel model, string userName, string userPwd, string returnUrl)
@@ -196,7 +238,7 @@ namespace Ecoservice.Controllers
             }
 
             Utilisateur utilisateur = new Utilisateur { userName = "admin", userPwd = "admin" };
-            
+
             if (model.UserName == utilisateur.userName && model.Password == utilisateur.userPwd)
             {
 
@@ -253,13 +295,13 @@ namespace Ecoservice.Controllers
             }
         }
 
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Logout()
         {
             Logger.Info("Déconnexion de l'utilisateur {0}", User.Identity.Name);
             FormsAuthentication.SignOut();
-            return Redirect("/");
+            return RedirectToAction("Login", "Account");
         }
 
     }

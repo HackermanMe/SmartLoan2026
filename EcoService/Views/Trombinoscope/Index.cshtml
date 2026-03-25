@@ -1,0 +1,57 @@
+﻿
+@{
+    ViewBag.Title = "Choisir un département";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var errorMessage = TempData["ErrorMessage"] as string;
+
+}
+
+<h1> Trombinoscope Indicatif ETG  <font color="blue" size="2">Date de création : 10 Avril 2025 </font></h1>
+
+<p>
+    Ce document a pour but d'afficher le trombinoscope des départements & divisions.
+</p>
+@*<p>
+        Il ne s’agit pas des évolutions figées mais des propositions qui devront servir de base à l’employé pour mieux appréhender et rendre efficace la gestion de sa carrière.
+    </p>
+    <p>
+        Toutes les informations sur ce document peuvent évoluer. Elles ne doivent en aucun cas être considérées comme un droit ou des acquis.
+    </p>
+
+        Les informations relatives aux postes telles que les grades, le niveau académique et l’expérience requise sont à titre indicatif et peuvent être différentes de la réalité à un moment donné.
+    </p>*@
+
+<p>Choisir un département puis cliquer sur Affichier pour consulter le trombinoscope </p>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-success">
+        @errorMessage
+    </div>
+}
+else
+{
+    <table>
+        <tr>
+            <td>
+                <form method="post" action="@Url.Action("DisplaySheet", "Trombinoscope")">
+                    <input type="hidden" name="type" value="PC" />
+
+                    <label for="departmentSelect">Trombinoscope :</label>
+
+                    <select id="departmentSelect" name="selectedDepartment">
+                        @foreach (var sheetName in ViewBag.SheetNames)
+                        {
+                            <option value="@sheetName">@sheetName</option>
+                        }
+                    </select>
+
+                    <button type="submit">Afficher </button>
+                </form>
+            </td>
+            @*<td>&nbsp;&nbsp;&nbsp;  </td>*@
+        </tr>
+    </table>
+}
+
+

@@ -1,0 +1,26 @@
+﻿
+@{
+    ViewBag.Title = "LandingPage";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<head>
+    <link href="@Url.Content("~/css/landingPage.css")" rel="stylesheet" />
+</head>
+
+<div class="d-flex justify-content-center align-items-center align-content-center h-75 flex-row gap-lg-4 mt-5">
+    <div class="card">
+        <div class="card-body custom-card">
+            <h5 class="card-title fs-2">Gérer les attestations</h5>
+            <p class="card-text fs-6">Gérer les attestations des utilisateurs ici!</p>
+            <a href="@Url.Action("ManageCertificates", "EcoCerAdmin")" class="go-button text-white">Aller</a>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body custom-card">
+            <h5 class="card-title fs-2">Créer votre attestation</h5>
+            <p class="card-text fs-5">Créer votre propre attestation!</p>
+            <a href="@Url.Action("Home", "EcoCerHome")" class="go-button text-white">Aller</a>
+        </div>
+    </div>
+</div>

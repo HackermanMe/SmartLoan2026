@@ -1,0 +1,761 @@
+﻿@using GridMvc.Html
+@using System.Data;
+@using Ecoservice.Models;
+@model Dictionary<string, object>
+@{
+    ViewData["Title"] = "Simulation";
+    var staff = Model.ContainsKey("Staff") ? Model["Staff"] as Dictionary<string, object> : null;
+    var prets = Model.ContainsKey("Prets") ? Model["Prets"] as List<Dictionary<string, object>> : new List<Dictionary<string, object>>();
+    var autresPrets = Model.ContainsKey("AutresPrets") ? Model["AutresPrets"] as List<Dictionary<string, object>> : new List<Dictionary<string, object>>();
+    var quotiteResiduelle = Model.ContainsKey("QuotiteResiduelle") ? Model["QuotiteResiduelle"] : null;
+    var quotiteConsommee = Model.ContainsKey("QuotiteConsommee") ? Model["QuotiteConsommee"] : null;
+    var plafondPretUrgence = (Convert.ToDecimal(staff["SalaireNete"]) * 2);
+    var customCulture = (System.Globalization.CultureInfo)System.Globalization.CultureInfo.InvariantCulture.Clone();
+    customCulture.NumberFormat.NumberGroupSeparator = " ";
+}
+
+@if (staff != null)
+{
+    @*<h1>Simulation pour @staff["Email"]</h1>*@
+
+    <h1>@Session["NumeroCompte"]</h1>
+
+    <div class="row">
+        <div class="col-9">
+            <p>
+                <strong>Numéro De Compte :</strong> @staff["NumeroComptee"] <br>
+            </p>
+        </div>
+    </div>
+
+    <!-- Tableau des prêts existants du staff -->
+    <div class="col d-flex align-items-stretch">
+        <div class="card w-100">
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-6">
+                        <h5 class="card-title fw-semibold mb-4">Prêts Existants</h5>
+                    </div>
+                    <div class="col-6">
+                        @if (ViewBag.CreatedAt != null)
+                        {
+                            <p class="text-danger"><strong>Dernière mise à jour :</strong> @((DateTime)ViewBag.CreatedAt)</p>
+                        }
+                    </div>
+                </div>
+                <div class="rachat">
+                </div>
+                <div id="rachat">
+                </div>
+
+                @if (prets != null && prets.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table text-nowrap mb-0 align-middle">
+                            <thead class="text-dark fs-4">
+                                <tr>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">Racheter</h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">Référence</h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">Type de Credit</h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">Montant Décaissé</h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">Encours</h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">Mensualités</h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">Début remboursement</h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">Fin remboursement</h6>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsTable">
+                                @foreach (var pret in prets)
+                                {
+                                    <tr>
+                                        <td><input name="rachatInput" id="rachatInput" type="checkbox" class="border-bottom-0  pretCheckbox" data-loan-mensualite="@pret["Mensualites"]" data-loan-id="@pret["PretId"]"></td>
+                                        <td class="border-bottom-0">@pret["ReferencePret"]</td>
+                                        <td class="border-bottom-0">
+                                            <h6 class="fw-semibold mb-1">@pret["TypeCredit"]</h6>
+                                            <span class="fw-normal">@pret["Taux"]%</span>
+                                        </td>
+                                        <td class="border-bottom-0" id="montant">@string.Format("{0:N0}", pret["Montant"])</td>
+                                        <td class="border-bottom-0" id="Encours">@string.Format("{0:N0}", pret["EnCours"])</td>
+                                        <td class="border-bottom-0">@string.Format("{0:N0}", pret["Mensualites"])</td>
+                                        <td class="border-bottom-0">@(((DateTime?)pret["StartDate"])?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                        <td class="border-bottom-0">@(((DateTime?)pret["EndDate"])?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                 } else
+                    {
+                        <p>Vous n'avez aucun prêt</p>
+                    }
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des engagements autres banques du staff (Ajoutés dynamiquement) -->
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-9">
+                    <h5 class="card-title fw-semibold mb-4">Engagements Autres Banques</h5>
+                </div>
+                <div class="rachat">
+                </div>
+                <div class="col-3">
+                    <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#addRowModal">
+                        Ajouter
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Racheter</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Type de Credit</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Date de mise en place</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Montant initial</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Encours</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Mensualités</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Fin remboursement</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Banque</h6>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Informations des autres engagements ajoutés dynamiquement -->
+                        @foreach (var autresPret in autresPrets)
+                        {
+                            <tr data-id="@autresPret["APretId"]">
+                                <td><input type="checkbox" class="border-bottom-0 autrePretCheckbox" data-otherloan-mensualite="@autresPret["Mensualites"]" data-id="@autresPret["APretId"]"></td>
+                                <td>@autresPret["TypeDeCredit"]</td>
+                                <td>@(((DateTime?)autresPret["StartDate"])?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                <td>@string.Format("{0:N0}", autresPret["Montant"])</td>
+                                <td>@string.Format("{0:N0}", autresPret["EnCours"])</td>
+                                <td>@string.Format("{0:N0}", autresPret["Mensualites"])</td>
+                                <td>@(((DateTime?)autresPret["EndDate"])?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                <td>@autresPret["NomBanque"]</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm delete-btn">Supprimer</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Modal du formulaire d'ajout des informations des autres engagements -->
+            <div class="modal fade" id="addRowModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Ajouter un prêt</h5>
+                            <button type="button" class="close btn btn-light" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addRowForm">
+                                <div class="row">
+                                    <div class="col m-3">
+                                        <div class="form-floating">
+                                            <input class="form-control" type="text" id="objet" name="objet" required>
+                                            <label for="objet">Type de Crédit :</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col m-3">
+                                        <div class="form-floating">
+                                            <input class="form-control" type="text" id="banque" name="banque" required>
+                                            <label for="banque">Nom de l'institution :</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col m-3">
+                                        <div class="form-floating">
+                                            <input class="form-control" type="date" id="dateDebut" name="dateDebut" required>
+                                            <label for="dateDebut">Date de mise en place :</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col m-3">
+                                        <div class="form-floating">
+                                            <input class="form-control" type="date" id="dateFin" name="dateFin" required>
+                                            <label for="dateFin">Dernière Echéance prévue :</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col m-3">
+                                        <div class="form-floating">
+                                            <input class="form-control" type="number" id="montantInitial" name="montantInitial" required>
+                                            <label for="montantInitial">Montant initial :</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col m-3">
+                                        <div class="form-floating">
+                                            <input class="form-control" type="number" id="mensualites" name="mensualites" required>
+                                            <label for="mensualites">Mensualités :</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col m-3">
+                                        <div class="form-floating">
+                                            <input class="form-control" type="number" id="encours" name="encours" required>
+                                            <label for="encours">Montant Encours :</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary m-3">Ajouter</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card overflow-hidden mt-3" role="alert">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <h4>Taux d'endettement: <span id="quot"></span></h4>
+                <h4>Quotité Disponible: <span id="engagement"></span></h4>
+            </div>
+        </div>
+    </div>
+    <!-- Formulaire ou informations de simulation -->
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-9">
+                    <h5 class="card-title fw-semibold">Simulation</h5>
+                </div>
+            </div>
+            <form id="loanCalculator" method="post">
+                <div class="row">
+                    <div class="col m-3">
+                        <div class="form-floating">
+                            <select id="TypeDePret" name="TypeDePret" class="form-select">
+                                <option value="">Choisissez le type de prêt</option>
+                                <option value="Prêt d'urgence" data-rate="0" data-months="12" data-amount="@plafondPretUrgence">Prêt d'urgence</option>
+                                <option value="Prêt personnel" data-rate="3" data-months="60" data-amount="30000000">Prêt personnel</option>
+                                <option value="Prêt scolaire" data-rate="0" data-months="12" data-amount="@staff["SalaireNete"]">Prêt scolaire</option>
+                                <option value="Prêt automobile" data-rate="3" data-months="60" data-amount="20000000">Prêt automobile</option>
+                                <option value="Prêt Aménagement Habitat" data-rate="3" data-months="60" data-amount="20000000">Prêt Aménagement Habitat</option>
+                                <option value="Aménagement gros oeuvres" data-rate="3" data-months="120" data-amount="40000000">Prêt Aménagement gros oeuvres</option>
+                                <option value="Prêt immobilier" data-rate="3" data-months="180" data-amount="150000000">Prêt immobilier</option>
+                            </select>
+                            <label>Type de prêt</label>
+                        </div>
+                    </div>
+
+                    <div class="col m-3">
+                        <div class="form-floating">
+                            <input class="form-control" type="number" id="MontantEmprunte" name="MontantEmprunte" required>
+                            <label for="MontantEmprunte">Montant Emprunté (F CFA) :</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-4 m-3">
+                        <div class="form-floating">
+                            <input class="form-control" type="number" id="annualRate" name="annualRate" step="0.01" readonly required>
+                            <label for="annualRate">Taux d'Intérêt Annuel (%) :</label>
+                        </div>
+                    </div>
+
+                    <div class="col-4 m-3">
+                        <div class="form-floating">
+                            <input class="form-control" type="number" id="months" name="months" required>
+                            <label for="months">Durée du Prêt (Mois) :</label>
+                        </div>
+                    </div>
+                    <div class="col m-3">
+                        <p>
+                            <strong class="text-danger">Durée Maximale:  <span id="maxMonths"></span></strong>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 m-3">
+                        <div class="form-floating">
+                            <input class="form-control" type="number" id="netSalary" value="@staff["SalaireNete"]" name="netSalary" readonly required>
+                            <label for="netSalary">Salaire Net (F CFA) :</label>
+                        </div>
+                    </div>
+                    <div class="col m-3">
+                        <p>
+                            <strong class="text-danger">Montant plafond:  <span id="maxAmount"></span></strong>
+                        </p>
+                    </div>
+                </div>
+            </form>
+            <h4>Mensualité nouveau prêt: <span id="monthlyPayment"></span></h4>
+            <h4>Nouvelle Quotité: <span id="quotity"></span></h4>
+
+            <div id="message">
+            </div>
+            <div id="loan">
+                <button type="button" onclick="sendSimulation()" class="btn btn-primary btn-sm edit-btn">Demander un prêt</button>
+            </div>
+
+            <div class="m-3" id="sendSimulationMessage">
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <p>Informations du personnel introuvables.</p>
+}
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var quotiteCessible = 50;
+            setQuotity();
+
+            // Appel des fonctions lors du changement de type de prêt
+            $('#TypeDePret').on('change', function () {
+                setInterestRate();
+                setMonths();
+                setQuotity();
+                setAmount();
+                calculateMonthlyPayment();
+
+            });
+
+            // Appel des fonctions lors d'un changement dans un champ
+            $('#loanCalculator input').on('input', function () {
+                calculateMonthlyPayment();
+                setQuotity();
+            });
+
+            // Appeler setQuotity() lorsque les cases à cocher des prêts existants sont modifiées
+            $('.pretCheckbox').on('change', function () {
+                var isChecked = $(this).prop('checked');
+                var encours = parseFloat($(this).closest('tr').find('#Encours').text().replace(/\D/g, ''));
+                var montantInitial = parseFloat($(this).closest('tr').find('#montant').text().replace(/\D/g, ''));
+                var resteAPayer = encours - montantInitial * 0.5;
+
+                if (isChecked) {
+                    if (encours >= montantInitial * 0.5) {
+                        // Si l'encours est déjà à 50% ou plus
+                        $('#rachat').html('<div class="alert alert-warning alert-dismissible fade show" role="alert">Vous devez payer ' + new Intl.NumberFormat().format(resteAPayer) + ' F CFA pour racheter ce prêt.</div>');
+                    } else {
+                        // Si l'encours est inférieur à 50%
+                        $('#rachat').html('<div class="alert alert-success alert-dismissible fade show" role="alert">Vous pouvez racheter ce prêt!</div>');
+                    }
+                } else {
+                    // Si la case est décochée, effacer le message
+                    $('#rachat').html('');
+                }
+                setQuotity();
+                calculateMonthlyPayment();
+            });
+
+            // Appeler setQuotity() lorsque les cases à cocher des autres prêts existants sont modifiées
+            $('.autrePretCheckbox').on('change', function () {
+                setQuotity();
+                calculateMonthlyPayment();
+            });
+        });
+
+        // Appeler la fonction setQuotity lors du changement de l'état des cases à cocher
+        $(document).on('change', '.pretCheckbox, .autrePretCheckbox', function () {
+            setQuotity();
+            calculateMonthlyPayment();
+        });
+
+        // Actualisation de la quotité et des mensualités au cochage de la case de rachat des prêts Ecobank
+        $('.pretCheckbox:checked').each(function () {
+            setQuotity();
+            calculateMonthlyPayment();
+        });
+
+        // Actualisation de la quotité et des mensualités au cochage de la case de rachat des prêts autres banques
+        $('.autrePretCheckbox:checked').each(function () {
+            setQuotity();
+            calculateMonthlyPayment();
+        });
+
+        // Fonction d'actualisation de la quotité actuelle
+        function setQuotity() {
+    var mensualites = [];
+    var allmensualites = 0;
+    var quotite = parseFloat(@quotiteConsommee) || 0; // Convertir en nombre ou mettre 0 par défaut
+    var selectedLoanMensualites = [];
+    var otherLoanMensualites = [];
+    var loansQuotity = 0;
+    var sumSelected = 0;
+    var sumOther = 0;
+    var sum = 0;
+    var salaireNete = parseFloat(@staff["SalaireNete"]) || 1; // Assurer un salaire non nul pour éviter la division par 0
+
+    // Parcourir chaque ligne du tableau des autres engagements pour récupérer les mensualités
+    $('.autrePretCheckbox').each(function () {
+        var row = $(this);
+        var mensualite = $(this).data('otherloan-mensualite'); // Récupérer la mensualité à la 6eme colonne
+        if (mensualite && !isNaN(parseFloat(mensualite))) {
+            mensualites.push(parseFloat(mensualite)); // Convertir en nombre avant d'ajouter au tableau
+        }
+    });
+
+    // Additionner toutes les mensualités des engagements
+    if (mensualites.length > 0) {
+        for (let mensualite of mensualites) {
+            allmensualites += mensualite;
+        }
+    }
+
+    // Récupérer les mensualités des prêts sélectionnés
+    $('.pretCheckbox:checked').each(function () {
+        var mensualite = $(this).data('loan-mensualite');
+        if (mensualite && !isNaN(parseFloat(mensualite))) {
+            selectedLoanMensualites.push(parseFloat(mensualite));
+        }
+    });
+
+    // récupérer les mensualités des prêts autres banques sélectionnés
+    $('.autrePretCheckbox:checked').each(function () {
+        var mensualite = $(this).data('otherloan-mensualite');
+        if (mensualite && !isNaN(parseFloat(mensualite))) {
+            otherLoanMensualites.push(parseFloat(mensualite));
+        }
+    });
+
+    // Calcul de la somme des mensualités sélectionnées (Engagements Ecobank)
+    for (let monthly of selectedLoanMensualites) {
+        sumSelected += monthly;
+    }
+
+    // Calcul de la somme des mensualités sélectionnées (Autres engagements)
+    for (let monthly of otherLoanMensualites) {
+        sumOther += monthly;
+    }
+
+    sum = sumOther + sumSelected;
+
+            // quotiteCessible
+            var num = quotiteCessible; // Conversion implicite en nombre
+
+    // Calcul de la quotité
+    quotite = parseFloat(@quotiteConsommee) - (sum / salaireNete) * 100 + ((allmensualites / salaireNete) * 100);
+
+    // Calcul des engagements restants
+    var engagements = num - (parseFloat(@quotiteConsommee) - (sum / salaireNete) * 100 + ((allmensualites / salaireNete) * 100));
+
+    // Vérification des NaN avant l'affichage
+    if (!isNaN(quotite)) {
+        $('#quot').text(quotite.toFixed(2) + '%');
+    } else {
+        $('#quot').text('N/A');
+    }
+
+    if (!isNaN(engagements)) {
+        $('#engagement').text(engagements.toFixed(2) + '%');
+    } else {
+        $('#engagement').text('N/A');
+    }
+
+    return [quotite, allmensualites];
+}
+
+        // Fonction du choix du taux selon le type de prêt sélectionné
+        function setInterestRate() {
+            const selectedOption = $('#TypeDePret option:selected');
+            const rate = selectedOption.data('rate');
+            if (rate !== undefined) {
+                $('#annualRate').val(rate);
+            } else {
+                $('#annualRate').val('');
+            }
+        }
+
+        // Fonction du choix du nombre d'échéances maximum selon le prêt sélectionné
+        function setMonths() {
+            const selectedOption = $('#TypeDePret option:selected');
+            const months = selectedOption.data('months');
+            if (months !== undefined) {
+                $('#months').val(months);
+                $('#months').attr("max", months);
+                $('#maxMonths').text(months + ' mois');
+            } else {
+                $('#months').val('');
+                $('#maxMonths').text('-');
+            }
+        }
+
+        // Fonction du choix du montant maximum selon le prêt sélectionné
+        function setAmount() {
+            const selectedOption = $('#TypeDePret option:selected');
+            const amount = selectedOption.data('amount');
+
+            if (amount !== undefined) {
+                $('#MontantEmprunte').attr("max", amount);
+
+                // Formater le montant avec séparateurs de milliers
+                const formattedAmount = amount.toLocaleString('fr-FR');
+                $('#maxAmount').text(formattedAmount + ' F CFA');
+            } else {
+                $('#MontantEmprunte').val('');
+                $('#maxAmount').text('');
+            }
+        }
+
+
+        // Fonction de calcul par le serveur des mensualités et de la quotité du prêt simulé
+        function calculateMonthlyPayment() {
+            // Envoi des prêts Ecobank rachetés au serveur
+            var selectedLoanIds = [];
+            $('.pretCheckbox:checked').each(function () {
+                selectedLoanIds.push(parseInt($(this).data('loan-id')));
+            });
+
+            // Envoi des autres engagements au serveur
+            var autresPrets = [];
+            $('.autrePretCheckbox:checked').each(function () {
+                autresPrets.push(parseFloat($(this).data('otherloan-mensualite')));
+            });
+
+            // Envoi des informations du prêt simulé au serveur
+            const MontantEmprunte = parseFloat($('#MontantEmprunte').val());
+            const annualRate = parseFloat($('#annualRate').val());
+            const months = parseFloat($('#months').val());
+            const netSalary = parseFloat($('#netSalary').val());
+            const autreMensualites = parseFloat($('#mensualites').val());
+
+            // Vérification des informations entrées
+            if (isNaN(MontantEmprunte) || isNaN(annualRate) || isNaN(months) || isNaN(netSalary) || MontantEmprunte <= 0 || annualRate < 0 || netSalary <= 0 || months <= 0) {
+                $('#monthlyPayment').text('Veuillez saisir des valeurs valides');
+                $('#quotity').text('00%');
+                $('#message').html("<div class=\"alert alert-light\" role=\"alert\">Entrez des valeurs !</div>");
+                return;
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("CalculateMonthlyPayment", "RHDemandeDePret")',
+                data: {
+                    MontantEmprunte: MontantEmprunte,
+                    annualRate: annualRate,
+                    months: months,
+                    netSalary: netSalary,
+                    autreMensualites: autreMensualites,
+                    selectedLoanIds: selectedLoanIds,
+                    autresPrets: autresPrets
+                },
+                success: function (response) {
+                    $('#monthlyPayment').text(response.monthlyPayment + ' F CFA');
+                    const [quotite, mensualitees] = setQuotity();
+                    var newQuotity = parseFloat(@quotiteConsommee) + parseFloat(response.quotity) + parseFloat(mensualitees / @staff["SalaireNete"] * 100);
+                    $('#quotity').text(newQuotity.toFixed(2) + '%');
+                    if (newQuotity <= quotiteCessible) {
+                        $('#message').html("<div class=\"alert alert-success\" role=\"alert\"><h4 class=\"text-success \">Vous pouvez prendre ce prêt ! </h4></div>");
+                        $('#loan').show();
+                    } else {
+                        $('#message').html("<div class=\"alert alert-danger\" role=\"alert\"><h4 class=\"text-danger \">Vous ne pouvez pas prendre ce prêt !</h4></div>");
+                        $('#loan').hide();
+                    }
+                },
+                error: function () {
+                    $('#monthlyPayment').text('Erreur lors du calcul');
+                }
+            });
+        }
+
+        // Fonction d'envoi des informations de simulation
+        function sendSimulation() {
+            // Envoi des informations du prêt simulé au serveur
+            const Montant = parseFloat($('#MontantEmprunte').val());
+            const annualRate = parseFloat($('#annualRate').val());
+            const months = parseFloat($('#months').val());
+            const netSalary = parseFloat($('#netSalary').val());
+            const autreMensualites = parseFloat($('#mensualites').val());
+            const TypeDePret = $('#TypeDePret').val();
+            //const quotity = parseFloat($('#quotity').text().replace('%', ''));
+            const quotity = 49;
+            const matricule = @staff["Matriculee"];
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SendSimulation", "RHDemandeDePret")',
+                data: {
+                    Montant: Montant,
+                    TypeDePret: TypeDePret,
+                    annualRate: annualRate,
+                    months: months,
+                    quotity: quotity,
+                    netSalary: netSalary,
+                    matricule: matricule
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // Traitement en cas de succès
+                        $('#sendSimulationMessage').html("<div class=\"alert alert-success\" role=\"alert\"><h5 class=\"text-success \"> " + response.message + " </h5></div>");
+                         // Redirection vers la page suivante
+                        window.location.href = '@Url.Action("Create", "RHDemandeDePret")';
+                    } else {
+                        // Traitement en cas d'erreur
+                        $('#sendSimulationMessage').html("<div class=\"alert alert-danger\" role=\"alert\"><h4 class=\"text-danger \">" + response.message + "</h4></div>");
+                    }
+                },
+                error: function (response) {
+                    alert('Erreur de communication avec le serveur: ' + error);
+                    $('#sendSimulationMessage').html("<div class=\"alert alert-danger\" role=\"alert\"><h4 class=\"text-danger \"> Erreur de communication avec le serveur: " + error + "</h4></div>");
+                }
+            });
+        }
+
+        // Control du modal et du formulaire d'ajout des autres engagements
+        var editIndex = -1;
+
+        // Ajout de la ligne au tableau lors de la soumission du formulaire
+        $('#addRowForm').on('submit', function (event) {
+            event.preventDefault();
+
+            // Récupération des valeurs des champs
+            var objet = $('#objet').val();
+            var dateDebut = $('#dateDebut').val();
+            var montantInitial = $('#montantInitial').val();
+            var encours = $('#encours').val();
+            var mensualites = $('#mensualites').val();
+            var dateFin = $('#dateFin').val();
+            var banque = $('#banque').val();
+            var numeroCompte = '@staff["NumeroComptee"]';
+
+            // Préparer les données pour l'envoi au serveur
+            var formData = {
+                TypePret: objet,
+                NomBanque: banque,
+                StartDate: dateDebut,
+                EndDate: dateFin,
+                MontantStr: montantInitial,
+                MensualitesStr: mensualites,
+                EncoursStr: encours,
+                NumeroCompte: numeroCompte
+            };
+
+            $.ajax({
+                url: '@Url.Action("AjouterAutresPretsExistants", "RHDemandeDePret")', // Remplacez cette URL par celle de votre contrôleur et action
+                method: 'POST',
+                data: formData,
+                success: function (response) {
+                    // Si tout s'est bien passé côté serveur
+
+                    if (editIndex === -1) {
+                        // Création d'une nouvelle ligne de tableau
+                        var newRow = `
+                            <tr>
+                                <td><input type="checkbox" class="border-bottom-0 autrePretCheckbox" data-otherloan-mensualite="${mensualites}"></td>
+                                <td>${objet}</td>
+                                <td>${dateDebut}</td>
+                                <td>${montantInitial}</td>
+                                <td>${encours}</td>
+                                <td>${mensualites}</td>
+                                <td>${dateFin}</td>
+                                <td>${banque}</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm delete-btn">Supprimer</button>
+                                </td>
+                            </tr>
+                            `;
+
+                        // Ajout de la nouvelle ligne au tableau
+                        $('#tableBody').append(newRow);
+                    } else {
+                        // Modification d'une ligne existante
+                        var row = $('#tableBody tr').eq(editIndex);
+                        row.find('td').eq(1).html(objet);
+                        row.find('td').eq(2).html(dateDebut);
+                        row.find('td').eq(3).html(montantInitial);
+                        row.find('td').eq(4).html(encours);
+                        row.find('td').eq(5).html(mensualites);
+                        row.find('td').eq(6).html(dateFin);
+                        row.find('td').eq(7).html(banque);
+                        editIndex = -1;
+                    }
+
+                    // Réinitialisation du formulaire et fermeture du modal
+                    $('#addRowForm')[0].reset();
+                    $('#addRowModal').modal('hide');
+                    setQuotity();
+                    calculateMonthlyPayment();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Erreur lors de l\'enregistrement des données: ', error);
+                    alert('Une erreur s\'est produite lors de l\'enregistrement. Veuillez réessayer.');
+                }
+            });
+
+        });
+
+        // Suppression de la ligne lors du clic sur le bouton "Supprimer"
+        $('#tableBody').on('click', '.delete-btn', function () {
+            var row = $(this).closest('tr');
+            var engagementId = row.data('id'); // Utiliser un attribut data-id sur la ligne pour stocker l'ID de l'engagement
+
+            // Requête AJAX pour supprimer l'engagement dans la base de données
+            $.ajax({
+                url: '@Url.Action("SupprimerAutresPretsExistants", "RHDemandeDePret")', // URL de votre action côté serveur
+                method: 'POST',
+                data: { id: engagementId }, // Envoie de l'ID au serveur
+                success: function (response) {
+                    if (response.success) {
+                        // Si la suppression est réussie côté serveur, on supprime la ligne de l'interface
+                        row.remove();
+                        setQuotity();
+                        calculateMonthlyPayment();
+                    } else {
+                        alert('Erreur lors de la suppression: ' + response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Erreur lors de la suppression de l\'engagement: ', error);
+                    alert('Une erreur s\'est produite. Veuillez réessayer.');
+                }
+            });
+        });
+    </script>
+}

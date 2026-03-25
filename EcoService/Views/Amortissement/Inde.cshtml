@@ -1,0 +1,718 @@
+﻿@*=============================================================================
+    VUE PRINCIPALE - MODULE PRET BANCAIRE COMPLET
+    =============================================================================
+    Cette vue contient:
+    - Informations client (compte, identite, adresse)
+    - Parametres du pret
+    - Gestion des encours existants (jusqu'a 6)
+    - Capacite d'endettement
+    - Alertes de conformite
+    - Tableau d'amortissement
+    - Export (Excel, PDF, Word) et generation de documents
+
+    Technologies: Razor, jQuery, CSS natif
+    ==========================================================================*@
+
+@model EcoService.Models.AmortissementInput
+
+@{
+    ViewData["Title"] = "Module Pret Bancaire";
+}
+
+@* =============================================================================
+    LIENS CSS SPECIFIQUES A CETTE PAGE
+    ============================================================================= *@
+<link rel="stylesheet" href="~/assets/css/amortissement.css" asp-append-version="true" />
+
+@* =============================================================================
+    EN-TETE DE PAGE
+    ============================================================================= *@
+<div class="page-header">
+    <h1 class="page-title">Module Pret Bancaire</h1>
+    <p class="page-subtitle">Simulation de credit avec tableau d'amortissement</p>
+</div>
+
+@* =============================================================================
+    CONTENEUR PRINCIPAL
+    ============================================================================= *@
+<div class="amortissement-container">
+
+    @* =========================================================================
+        ZONE D'ALERTES (affichee dynamiquement)
+        ========================================================================= *@
+    <div class="alertes-container" id="alertesContainer" style="display:none;">
+        <div class="alertes-header">
+            <h3>Alertes et Conformite</h3>
+            <span class="alertes-count" id="alertesCount">0</span>
+        </div>
+        <div class="alertes-list" id="alertesList">
+            <!-- Les alertes seront generees par jQuery -->
+        </div>
+    </div>
+
+    @* =========================================================================
+        SECTION : FORMULAIRE DE SAISIE
+        ========================================================================= *@
+    <section class="form-section">
+        <form id="amortissementForm">
+            @Html.AntiForgeryToken()
+
+            @* -----------------------------------------------------------------
+                ONGLETS DE NAVIGATION
+                ----------------------------------------------------------------- *@
+            <div class="form-tabs">
+                <button type="button" class="tab-btn active" data-tab="tabPret">Pret</button>
+                <button type="button" class="tab-btn" data-tab="tabClient">Client</button>
+                <button type="button" class="tab-btn" data-tab="tabEncours">Encours <span class="badge" id="encoursCount">0</span></button>
+                <button type="button" class="tab-btn" data-tab="tabAvance">Options</button>
+            </div>
+
+            @* -----------------------------------------------------------------
+                ONGLET 1: PARAMETRES DU PRET
+                ----------------------------------------------------------------- *@
+            <div class="tab-content active" id="tabPret">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="montantPret">Montant du Pret *</label>
+                        <input type="number" id="montantPret" name="montantPret"
+                               class="form-control" required min="1" step="1"
+                               placeholder="10000000" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tauxAnnuel">Taux Annuel HT (%) *</label>
+                        <input type="number" id="tauxAnnuel" name="tauxAnnuel"
+                               class="form-control" required min="0" max="100"
+                               step="0.01" placeholder="7.75" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Taux TTC (%)</label>
+                        <input type="text" id="tauxTTC" class="form-control"
+                               readonly title="Calcule: Taux HT x (1 + TAF)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nombreEcheances">Nombre d'Echeances *</label>
+                        <input type="number" id="nombreEcheances" name="nombreEcheances"
+                               class="form-control" required min="1" max="600"
+                               placeholder="36" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="periodicite">Periodicite</label>
+                        <select id="periodicite" name="periodicite" class="form-control">
+                            <option value="1" selected>Mensuel</option>
+                            <option value="3">Trimestriel</option>
+                            <option value="6">Semestriel</option>
+                            <option value="12">Annuel</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dateDebut">Date 1ere Echeance *</label>
+                        <input type="date" id="dateDebut" name="dateDebut"
+                               class="form-control" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dateDeblocage">Date Deblocage</label>
+                        <input type="date" id="dateDeblocage" name="dateDeblocage"
+                               class="form-control" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fraisDossier">Frais Dossier (1.5%)</label>
+                        <input type="number" id="fraisDossier" name="fraisDossier"
+                               class="form-control" min="0" step="1" value="0"
+                               placeholder="Auto-calcul" />
+                        <button type="button" class="btn-calc-frais" id="btnCalcFrais" title="Calculer 1.5%">%</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="objetCredit">Objet du Credit</label>
+                        <select id="objetCredit" name="objetCredit" class="form-control">
+                            <option value="">-- Selectionnez --</option>
+                            <option value="Achat vehicule">Achat vehicule</option>
+                            <option value="Travaux">Travaux</option>
+                            <option value="Scolaire">Scolaire</option>
+                            <option value="Tresorerie">Tresorerie</option>
+                            <option value="Rachat credits">Rachat de credits</option>
+                            <option value="Equipement">Equipement</option>
+                            <option value="Autre">Autre</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tauxTAF">TAF (%)</label>
+                        <input type="number" id="tauxTAF" name="tauxTAF"
+                               class="form-control" min="0" max="100"
+                               step="0.01" value="10" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modeRemboursement">Mode Remboursement</label>
+                        <select id="modeRemboursement" name="modeRemboursement" class="form-control">
+                            <option value="1" selected>Echeances constantes</option>
+                            <option value="2">Amortissement constant</option>
+                            <option value="3">In Fine</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="conventionJours">Convention Jours</label>
+                        <select id="conventionJours" name="conventionJours" class="form-control">
+                            <option value="1" selected>30/360</option>
+                            <option value="2">Exact/365</option>
+                        </select>
+                    </div>
+                </div>
+
+                @* Capacite d'endettement *@
+                <div class="capacite-section">
+                    <h4>Capacite d'Endettement</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="salaireMensuel">Salaire Mensuel</label>
+                            <input type="number" id="salaireMensuel" name="salaireMensuel"
+                                   class="form-control" min="0" step="1" value="0"
+                                   placeholder="150000" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="profilClient">Profil Client</label>
+                            <select id="profilClient" name="profilClient" class="form-control">
+                                <option value="1">Salarie</option>
+                                <option value="4">Retraite</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="autresCharges">Autres Charges</label>
+                            <input type="number" id="autresCharges" name="autresCharges"
+                                   class="form-control" min="0" step="1" value="0"
+                                   placeholder="0" />
+                        </div>
+
+                        <div class="form-group capacite-info">
+                            <label>Capacite Max</label>
+                            <div class="capacite-display">
+                                <span id="capaciteMaxDisplay">-</span>
+                                <small id="tauxEndettementMaxDisplay">(-)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* -----------------------------------------------------------------
+                ONGLET 2: INFORMATIONS CLIENT
+                ----------------------------------------------------------------- *@
+            <div class="tab-content" id="tabClient">
+                <div class="form-grid">
+                    <div class="form-group span-2">
+                        <label for="numeroCompte">Numero de Compte *</label>
+                        <div class="input-with-btn">
+                            <input type="text" id="numeroCompte" name="numeroCompte"
+                                   class="form-control" placeholder="Ex: 001-12345-001" />
+                            <button type="button" class="btn-search" id="btnRechercheCompte" title="Rechercher">
+                                &#128269;
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group span-2">
+                        <label for="intituleCompte">Intitule du Compte</label>
+                        <input type="text" id="intituleCompte" name="intituleCompte"
+                               class="form-control" readonly placeholder="Auto-rempli" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="clientNom">Nom *</label>
+                        <input type="text" id="clientNom" name="clientNom"
+                               class="form-control" placeholder="DUPONT" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="clientPrenom">Prenom *</label>
+                        <input type="text" id="clientPrenom" name="clientPrenom"
+                               class="form-control" placeholder="Jean" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="clientDateNaissance">Date de Naissance</label>
+                        <input type="date" id="clientDateNaissance" name="clientDateNaissance"
+                               class="form-control" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="clientLieuNaissance">Lieu de Naissance</label>
+                        <input type="text" id="clientLieuNaissance" name="clientLieuNaissance"
+                               class="form-control" placeholder="Douala" />
+                    </div>
+
+                    <div class="form-group span-2">
+                        <label for="clientAdresse">Adresse</label>
+                        <input type="text" id="clientAdresse" name="clientAdresse"
+                               class="form-control" placeholder="123 Rue Example" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="clientVille">Ville</label>
+                        <input type="text" id="clientVille" name="clientVille"
+                               class="form-control" placeholder="Douala" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="clientTelephone">Telephone</label>
+                        <input type="tel" id="clientTelephone" name="clientTelephone"
+                               class="form-control" placeholder="+237 6XX XXX XXX" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="situationMatrimoniale">Situation Matrimoniale</label>
+                        <select id="situationMatrimoniale" name="situationMatrimoniale" class="form-control">
+                            <option value="1">Celibataire</option>
+                            <option value="2">Marie(e)</option>
+                            <option value="3">Divorce(e)</option>
+                            <option value="4">Veuf(ve)</option>
+                            <option value="5">Union libre</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="clientProfession">Profession</label>
+                        <input type="text" id="clientProfession" name="clientProfession"
+                               class="form-control" placeholder="Ingenieur" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="clientEmployeur">Employeur</label>
+                        <input type="text" id="clientEmployeur" name="clientEmployeur"
+                               class="form-control" placeholder="Societe ABC" />
+                    </div>
+                </div>
+
+                @* Piece d'identite *@
+                <div class="piece-identite-section">
+                    <h4>Piece d'Identite</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="typePieceIdentite">Type</label>
+                            <select id="typePieceIdentite" name="typePieceIdentite" class="form-control">
+                                <option value="1">CNI</option>
+                                <option value="2">Passeport</option>
+                                <option value="3">Carte de sejour</option>
+                                <option value="4">Permis de conduire</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="numeroPieceIdentite">Numero</label>
+                            <input type="text" id="numeroPieceIdentite" name="numeroPieceIdentite"
+                                   class="form-control" placeholder="123456789" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dateDelivrancePiece">Date Delivrance</label>
+                            <input type="date" id="dateDelivrancePiece" name="dateDelivrancePiece"
+                                   class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lieuDelivrancePiece">Lieu Delivrance</label>
+                            <input type="text" id="lieuDelivrancePiece" name="lieuDelivrancePiece"
+                                   class="form-control" placeholder="Douala" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dateExpirationPiece">Date Expiration</label>
+                            <input type="date" id="dateExpirationPiece" name="dateExpirationPiece"
+                                   class="form-control" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* -----------------------------------------------------------------
+                ONGLET 3: ENCOURS EXISTANTS
+                ----------------------------------------------------------------- *@
+            <div class="tab-content" id="tabEncours">
+                <div class="encours-header">
+                    <h4>Credits Existants du Client (max 6)</h4>
+                    <button type="button" class="btn btn-sm btn-primary" id="btnAjouterEncours">
+                        + Ajouter un encours
+                    </button>
+                </div>
+
+                <div class="encours-list" id="encoursList">
+                    <!-- Les encours seront ajoutes dynamiquement -->
+                </div>
+
+                <div class="encours-resume" id="encoursResume" style="display:none;">
+                    <div class="resume-row">
+                        <span>Total des encours actifs:</span>
+                        <span id="totalEncoursActifs">0</span>
+                    </div>
+                    <div class="resume-row">
+                        <span>Total mensualites encours:</span>
+                        <span id="totalMensualitesEncours">0</span>
+                    </div>
+                    <div class="resume-row highlight">
+                        <span>Encours a racheter:</span>
+                        <span id="totalEncoursARacheter">0</span>
+                    </div>
+                    <div class="resume-row">
+                        <span>Commission rachat (2%):</span>
+                        <span id="totalCommissionRachat">0</span>
+                    </div>
+                    <div class="resume-row highlight">
+                        <span>Montant net disponible:</span>
+                        <span id="montantNetDisponible">0</span>
+                    </div>
+                </div>
+
+                <div class="encours-template" id="encoursTemplate" style="display:none;">
+                    <div class="encours-card" data-index="0">
+                        <div class="encours-header-card">
+                            <span class="encours-numero">Encours #1</span>
+                            <div class="encours-actions">
+                                <label class="checkbox-rachat">
+                                    <input type="checkbox" class="encours-racheter" /> A racheter
+                                </label>
+                                <button type="button" class="btn-supprimer-encours" title="Supprimer">&#10005;</button>
+                            </div>
+                        </div>
+                        <div class="encours-grid">
+                            <div class="form-group">
+                                <label>Banque/Reference</label>
+                                <input type="text" class="form-control encours-banque" placeholder="Interne" />
+                            </div>
+                            <div class="form-group">
+                                <label>Solde Restant *</label>
+                                <input type="number" class="form-control encours-solde" min="0" step="1" placeholder="0" />
+                            </div>
+                            <div class="form-group">
+                                <label>Mensualite</label>
+                                <input type="number" class="form-control encours-mensualite" min="0" step="1" placeholder="0" />
+                            </div>
+                            <div class="form-group">
+                                <label>Echeances Rest.</label>
+                                <input type="number" class="form-control encours-echeances" min="0" max="600" placeholder="0" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* -----------------------------------------------------------------
+                ONGLET 4: OPTIONS AVANCEES
+                ----------------------------------------------------------------- *@
+            <div class="tab-content" id="tabAvance">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="typeTaux">Type de Taux</label>
+                        <select id="typeTaux" name="typeTaux" class="form-control">
+                            <option value="1" selected>Proportionnel</option>
+                            <option value="2">Actuariel</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="baseAssurance">Base Assurance</label>
+                        <select id="baseAssurance" name="baseAssurance" class="form-control">
+                            <option value="1" selected>Capital Initial</option>
+                            <option value="2">Capital Restant Du</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="primeAssuranceClient">Prime Assurance Client</label>
+                        <input type="number" id="primeAssuranceClient" name="primeAssuranceClient"
+                               class="form-control" min="0" step="1" value="0"
+                               placeholder="Ex: 575326" title="Prime d'assurance totale payee par le client" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="commissionETG">Commission ETG</label>
+                        <input type="number" id="commissionETG" name="commissionETG"
+                               class="form-control" min="0" step="1" value="0"
+                               placeholder="0" title="Commission ETG sur l'assurance" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prime Assurance GTA C2A</label>
+                        <input type="text" id="primeAssuranceGTAC2A" class="form-control"
+                               readonly title="Calcule automatiquement: Prime Client - Commission ETG" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="assuranceFixe">Assurance/Echeance</label>
+                        <input type="number" id="assuranceFixe" name="assuranceFixe"
+                               class="form-control" min="0" step="1" value="0"
+                               placeholder="0" title="Assurance mensuelle affichee dans le tableau" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="teg">TEG Manuel (%)</label>
+                        <input type="number" id="teg" name="teg"
+                               class="form-control" min="0" max="100"
+                               step="0.01" value="0" placeholder="Auto-calcul" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tauxCommissionRachat">Commission Rachat (%)</label>
+                        <input type="number" id="tauxCommissionRachat" name="tauxCommissionRachat"
+                               class="form-control" min="0" max="10" step="0.1" value="2" />
+                    </div>
+                </div>
+
+                @* Section Differe *@
+                <div class="differe-section">
+                    <h4>Differe de Paiement</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="differeEcheances">Nombre d'Echeances</label>
+                            <input type="number" id="differeEcheances" name="differeEcheances"
+                                   class="form-control" min="0" max="120" value="0" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="typeDiffere">Type de Differe</label>
+                            <select id="typeDiffere" name="typeDiffere" class="form-control">
+                                <option value="1" selected>Partiel (interets payes)</option>
+                                <option value="2">Total (interets capitalises)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                @* Section Remboursement Anticipe *@
+                <div class="ra-section">
+                    <h4>Remboursement Anticipe</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="echeanceRA">A l'Echeance N°</label>
+                            <input type="number" id="echeanceRA" name="echeanceRA"
+                                   class="form-control" min="0" max="600" value="0"
+                                   placeholder="0 = aucun" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="montantRA">Montant RA</label>
+                            <input type="number" id="montantRA" name="montantRA"
+                                   class="form-control" min="0" step="1" value="0"
+                                   placeholder="0 = total" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tauxPenaliteRA">Penalite (%)</label>
+                            <input type="number" id="tauxPenaliteRA" name="tauxPenaliteRA"
+                                   class="form-control" min="0" max="100" step="0.01" value="3" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* -----------------------------------------------------------------
+                BOUTONS D'ACTION
+                ----------------------------------------------------------------- *@
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="btnCalculer">
+                    <span class="btn-text">Calculer le Tableau</span>
+                    <span class="btn-loader" style="display:none;">Calcul en cours...</span>
+                </button>
+                <button type="button" class="btn btn-secondary" id="btnReset">
+                    Reinitialiser
+                </button>
+            </div>
+        </form>
+    </section>
+
+    @* =========================================================================
+        SECTION : RESULTATS (initialement cachee)
+        ========================================================================= *@
+    <section class="results-section" id="resultsSection" style="display:none;">
+
+        @* -----------------------------------------------------------------
+            RESUME DU PRET
+            ----------------------------------------------------------------- *@
+        <div class="resume-card">
+            <div class="section-header">
+                <h2>Resume du Pret</h2>
+                <div class="mensualite-display">
+                    MENSUALITE: <span id="mensualiteDisplay">0</span>
+                </div>
+            </div>
+
+            <div class="resume-grid">
+                <div class="resume-item">
+                    <span class="resume-label">Montant du pret</span>
+                    <span class="resume-value" id="resumeMontant">-</span>
+                </div>
+                <div class="resume-item">
+                    <span class="resume-label">Taux nominal</span>
+                    <span class="resume-value" id="resumeTaux">-</span>
+                </div>
+                <div class="resume-item">
+                    <span class="resume-label">Nb Echeances</span>
+                    <span class="resume-value" id="resumeEcheances">-</span>
+                </div>
+                <div class="resume-item">
+                    <span class="resume-label">Periodicite</span>
+                    <span class="resume-value" id="resumePeriodicite">-</span>
+                </div>
+                <div class="resume-item">
+                    <span class="resume-label">Mensualite HT</span>
+                    <span class="resume-value" id="resumeMensualite">-</span>
+                </div>
+                <div class="resume-item">
+                    <span class="resume-label">Assurance/Ech.</span>
+                    <span class="resume-value" id="resumeAssuranceEch">-</span>
+                </div>
+                <div class="resume-item">
+                    <span class="resume-label">Mensualite TTC</span>
+                    <span class="resume-value" id="resumeMensualiteAssurance">-</span>
+                </div>
+                <div class="resume-item">
+                    <span class="resume-label">Total Interets</span>
+                    <span class="resume-value" id="resumeTotalInterets">-</span>
+                </div>
+                <div class="resume-item">
+                    <span class="resume-label">Total TAF</span>
+                    <span class="resume-value" id="resumeTotalTAF">-</span>
+                </div>
+                <div class="resume-item">
+                    <span class="resume-label">Total Assurance</span>
+                    <span class="resume-value" id="resumeTotalAssurance">-</span>
+                </div>
+                <div class="resume-item">
+                    <span class="resume-label">Frais Dossier</span>
+                    <span class="resume-value" id="resumeFraisDossier">-</span>
+                </div>
+                <div class="resume-item" id="resumeRachatContainer" style="display:none;">
+                    <span class="resume-label">Encours Rachetes</span>
+                    <span class="resume-value" id="resumeEncoursRachetes">-</span>
+                </div>
+                <div class="resume-item" id="resumeCommissionContainer" style="display:none;">
+                    <span class="resume-label">Commission Rachat</span>
+                    <span class="resume-value" id="resumeCommissionRachat">-</span>
+                </div>
+                <div class="resume-item" id="resumeNetContainer" style="display:none;">
+                    <span class="resume-label">Montant Net Dispo.</span>
+                    <span class="resume-value highlight" id="resumeMontantNet">-</span>
+                </div>
+                <div class="resume-item highlight">
+                    <span class="resume-label">Cout Total Credit</span>
+                    <span class="resume-value" id="resumeCoutTotal">-</span>
+                </div>
+                <div class="resume-item">
+                    <span class="resume-label">TEG Calcule</span>
+                    <span class="resume-value" id="resumeTEGCalcule">-</span>
+                </div>
+                <div class="resume-item" id="resumePenaliteRAContainer" style="display:none;">
+                    <span class="resume-label">Penalite RA</span>
+                    <span class="resume-value" id="resumePenaliteRA">-</span>
+                </div>
+            </div>
+
+            @* Capacite d'endettement dans le resume *@
+            <div class="endettement-resume" id="endettementResume" style="display:none;">
+                <h4>Analyse d'Endettement</h4>
+                <div class="endettement-grid">
+                    <div class="endettement-item">
+                        <span class="label">Salaire</span>
+                        <span class="value" id="resumeSalaire">-</span>
+                    </div>
+                    <div class="endettement-item">
+                        <span class="label">Taux Max Autorise</span>
+                        <span class="value" id="resumeTauxMax">-</span>
+                    </div>
+                    <div class="endettement-item">
+                        <span class="label">Capacite Max</span>
+                        <span class="value" id="resumeCapaciteMax">-</span>
+                    </div>
+                    <div class="endettement-item">
+                        <span class="label">Total Charges</span>
+                        <span class="value" id="resumeTotalCharges">-</span>
+                    </div>
+                    <div class="endettement-item highlight">
+                        <span class="label">Taux Endettement</span>
+                        <span class="value" id="resumeTauxEndettement">-</span>
+                    </div>
+                    <div class="endettement-item">
+                        <span class="label">Reste a Vivre</span>
+                        <span class="value" id="resumeResteAVivre">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* -----------------------------------------------------------------
+            BOUTONS D'EXPORT
+            ----------------------------------------------------------------- *@
+        <div class="export-actions">
+            <button type="button" class="btn btn-export btn-dossier" id="btnGenererContrat" style="background-color: rgba(234, 188, 23, 0.47);">
+                Dossier Complet (PDF)
+            </button>
+            <button type="button" class="btn btn-export btn-excel" id="btnExportExcel">
+                Export Excel
+            </button>
+            <button type="button" class="btn btn-export btn-pdf" id="btnExportPdf">
+                Export PDF
+            </button>
+            <button type="button" class="btn btn-export btn-word" id="btnExportWord">
+                Export Word
+            </button>
+        </div>
+
+        @* -----------------------------------------------------------------
+            TABLEAU D'AMORTISSEMENT
+            ----------------------------------------------------------------- *@
+        <div class="tableau-card">
+            <div class="section-header">
+                <h2>TABLEAU D'AMORTISSEMENT</h2>
+                <span class="client-info" id="tableauClientInfo"></span>
+            </div>
+
+            <div class="table-container">
+                <table class="amortissement-table" id="amortissementTable">
+                    <thead>
+                        <tr>
+                            <th>Pmt</th>
+                            <th>Date</th>
+                            <th>Balance<br />Debut Periode</th>
+                            <th>Balance<br />Fin Periode</th>
+                            <th>Principal<br />Paye</th>
+                            <th>Interet<br />Paye TTC</th>
+                            <th>Interet<br />Paye HT</th>
+                            <th>TPS sur<br />Interet</th>
+                            <th>Montant de<br />l'Echeance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableauBody">
+                        <!-- Les lignes seront generees par jQuery -->
+                    </tbody>
+                    <tfoot id="tableauFooter">
+                        <!-- Les totaux seront generes par jQuery -->
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    @* =========================================================================
+        ZONE D'ERREURS
+        ========================================================================= *@
+    <div class="error-container" id="errorContainer" style="display:none;">
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+</div>
+
+@* =============================================================================
+    SCRIPTS JAVASCRIPT/JQUERY
+    ============================================================================= *@
+@section Scripts {
+    <script src="~/assets/js/amortissement.js" asp-append-version="true"></script>
+}

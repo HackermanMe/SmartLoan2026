@@ -65,7 +65,7 @@ namespace EcoService.Controllers
         }
 
         // Action pour traiter la création d'un utilisateur
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(UserCreateViewModel model)
         {
@@ -74,10 +74,11 @@ namespace EcoService.Controllers
                 try
                 {
                     // Créer l'utilisateur dans la table RHAccounts
-                    int newUserId = _sqlQuery.CreateUser(model.Matricule, model.Nom, model.Email, model.RoleId);
+                    int newUserId = _sqlQuery.CreateUser(model.Matricule, model.Nom, model.Prenom, model.Email, model.NumeroCompte, model.RoleId);
+                    int proposedBy = GetCurrentUserId();
 
                     // Ajouter un enregistrement dans PendingRoleChanges pour la validation du rôle
-                    _sqlQuery.AddPendingRoleChange(newUserId, model.RoleId);
+                    _sqlQuery.AddPendingRoleChange(model.Matricule, proposedBy, model.RoleId);
 
                     TempData["SuccessMessage"] = "L'utilisateur a été créé avec succès. Le rôle est en attente de validation.";
                     return RedirectToAction("PendingRoleChanges");
@@ -138,7 +139,7 @@ namespace EcoService.Controllers
         }
 
         // Action pour valider ou rejeter un changement de rôle
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         public ActionResult ValidateChangeRole(int changeId, bool isApproved)
         {
             try
@@ -175,6 +176,7 @@ namespace EcoService.Controllers
         // Méthode auxiliaire pour obtenir l'ID de l'utilisateur actuel
         private int GetCurrentUserId()
         {
+            string loginStaff = (string)HttpContext.Session["accountName"];
             return Convert.ToInt32(Session["IDUser"]); // Assurez-vous que "UserId" est stocké dans la session
         }
     }

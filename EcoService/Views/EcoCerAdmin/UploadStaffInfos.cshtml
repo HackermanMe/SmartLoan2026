@@ -1,0 +1,120 @@
+﻿
+@{
+    ViewBag.Title = "Chargement";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .view-content-box {
+        width: auto;
+        border-color: #e5e5e5;
+        border-radius: 8px;
+        padding: 30px;
+        /* background-color: #F5F5F7;*/
+        box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1), -4px 0 8px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    /*  .uploadFile-input {
+                    outline:none;
+                } */
+
+    .uploadFile-input:focus {
+        /* border-color: #c5cedb;
+        border-width: 3px; */
+        outline: 2px solid #0082bb;
+        box-shadow: none;
+    }
+
+    .uploadBtn {
+        background-color: #0082bb;
+        width: 100px;
+        border-style: none;
+        border-radius: 9px;
+        text-align: center;
+        font-size: 1rem;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+        .uploadBtn:active {
+            background-color: #005f8c;
+            transform: scale(0.97);
+        }
+
+        .uploadBtn:hover {
+            background-color: #007bb1;
+        }
+    /*6DE1D2*/
+    .downloadbtn {
+        width: 210px;
+        height: 35px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #2DAA9E;
+        border-radius: 20px;
+        /*display: inline-block;*/
+        /*text-align: center;*/
+        color: #2DAA9E;
+        background-color: inherit;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+        .downloadbtn:hover {
+            background-color: #2DAA9E;
+            color: white;
+        }
+
+        .downloadbtn:active {
+            transform: scale(0.90);
+        }
+
+    /*.btn-text {
+    display:inline-block;
+    text-decoration: none;
+    cursor: pointer;
+}*/
+</style>
+
+<div class="view-content-box">
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        <h4>Upload de fichier</h4>
+        <a class="downloadbtn d-flex justify-content-center align-items-center gap-2" href="@Url.Action("DownloadStaffTemplate","EcoCerAdmin")">
+            <span class="btn-text">Télécharger le template</span>
+            <span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-arrow-down" viewBox="0 0 16 16">
+                    <path d="M8.5 6.5a.5.5 0 0 0-1 0v3.793L6.354 9.146a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 10.293z" />
+                    <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z" />
+                </svg>
+            </span>
+        </a>
+    </div>
+    <hr />
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <form id="uploadFileForm" action="UploadStaffInfos" method="post" enctype="multipart/form-data">
+        <div class="d-flex flex-column justify-content-center gap-3">
+            <label class="fs-5" for="addFile">Ajouter un fichier : </label>
+            @* <div class="d-flex flex-row">
+                    <input class="uploadFile-input" type="file" name="addFile" />
+                    <button id="submitFile">Uploader</button>
+                </div> *@
+            <div class="input-group">
+                <input type="file" class="uploadFile-input form-control" id="addFile" name="excelFile" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
+                <button class="uploadBtn text-white text-center" type="submit" id="uploadButton">Uploader</button>
+            </div>
+        </div>
+    </form>
+</div>
+

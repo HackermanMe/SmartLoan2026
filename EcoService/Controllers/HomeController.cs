@@ -8,6 +8,8 @@ namespace EcoService.Controllers
 {
     public class HomeController : Controller
     {
+        public HomeController() { }
+
         // GET: Home
         public ActionResult Index()
         {
@@ -27,7 +29,7 @@ namespace EcoService.Controllers
         }
 
         // POST: Home/Create
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         public ActionResult Create(FormCollection collection)
         {
             try
@@ -49,7 +51,7 @@ namespace EcoService.Controllers
         }
 
         // POST: Home/Edit/5
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         public ActionResult Edit(int id, FormCollection collection)
         {
             try
@@ -71,7 +73,7 @@ namespace EcoService.Controllers
         }
 
         // POST: Home/Delete/5
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         public ActionResult Delete(int id, FormCollection collection)
         {
             try

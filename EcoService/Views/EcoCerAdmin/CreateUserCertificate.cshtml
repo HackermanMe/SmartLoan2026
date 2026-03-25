@@ -1,0 +1,618 @@
+﻿
+
+@{
+    ViewBag.Title = "Creer Certificate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .content-box {
+        width: auto;
+        border-color: #e5e5e5;
+        border-radius: 8px;
+        padding: 30px;
+        /* background-color: #F5F5F7;*/
+        box-shadow: 0 -4px 4px rgba(0, 0, 0, 0.1), -4px 0 4px rgba(0, 0, 0, 0.1), 0 4px 4px rgba(0,0,0,0.1);
+    }
+
+    /*.uploadFile-input {
+                    outline:none;
+                }*/
+
+    .user-search-input {
+        width: 640px;
+        height: 40px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #d0d5dd;
+        border-radius: 9px;
+        padding: 14px;
+        margin-bottom: 20px;
+    }
+
+        .user-search-input:focus {
+            border-color: #c5cedb;
+            border-width: 2px;
+            outline: none;
+        }
+
+    /*#0082bb*/
+    .search-button {
+        background-color: inherit;
+        width: 260px;
+        height: 40px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #0082bb;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 1rem;
+        color: #0082bb;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+        .search-button:active {
+            background-color: #005f8c;
+            transform: scale(0.95);
+        }
+
+        .search-button:hover {
+            background-color: #0082bb;
+            color: white;
+        }
+
+    .confirm-button {
+        background-color: inherit;
+        width: 230px;
+        height: 40px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #0082bb;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 1rem;
+        color: #0082bb;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+        .confirm-button:active {
+            background-color: #005f8c;
+            transform: scale(0.95);
+        }
+
+        .confirm-button:hover {
+            background-color: #0082bb;
+            color: white;
+        }
+
+    .cancel-button {
+        background-color: inherit;
+        width: 160px;
+        height: 40px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #808080;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 1rem;
+        color: #808080;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+        .cancel-button:active {
+            background-color: #B7B7B7;
+            transform: scale(0.95);
+        }
+
+        .cancel-button:hover {
+            background-color: #808080;
+            color: white;
+        }
+
+    .form-input {
+        height: 40px;
+        width: auto;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #d0d5dd;
+        border-radius: 9px;
+        padding: 14px;
+    }
+
+        .form-input:focus {
+            border-color: #c5cedb;
+            border-width: 2px;
+            outline: none;
+        }
+
+    .form-select {
+        width: 430px;
+        height: 40px;
+        border-style: solid;
+        border-width: 1px;
+        border-radius: 9px;
+        border-color: #d0d5dd;
+        padding: 7px;
+    }
+
+        .form-select:focus {
+            border-width: 2px;
+            border-color: #c5cedb;
+        }
+
+    body.modal-open {
+        filter: blur(px);
+        pointer-events: none;
+        overflow: hidden;
+        padding-right: 0 !important;
+    }
+
+    .success-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background: #F5F5F7;
+        padding: 10px;
+        border-radius: 10px;
+        width: 600px;
+        box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
+    }
+
+        .modal-content p {
+            text-align: center;
+            margin-bottom: 0;
+        }
+</style>
+
+<div class="d-flex flex-column justify-content-center align-content-center gap-4">
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        <h4>Création d'attestation pour un utilisateur</h4>
+    </div>
+    <hr />
+
+
+    @* Zone de recherche *@
+    <div class="d-flex flex-column justify-content-center gap-3 content-box">
+        @*<form id="searchUserForm" action="" method="post">
+            </form>*@
+        <label class="fs-5" for="addFile">Rechercher un utilisateur : </label>
+        <div class="alert alert-danger d-none" id="alertBox">
+            <span id="alertMessage"></span>
+        </div>
+        <div class="d-flex flex-row gap-2">
+            <input type="text" class="user-search-input" id="userSearchInput" name="userSearchInput" placeholder="Rechercher..." />
+            <button type="button" class="search-button text-center" id="searchButton">Rechercher & Charger</button>
+        </div>
+    </div>
+
+    @* Formulaire dans lequel sont chargées les données *@
+    <div class="d-flex flex-column justify-content-center align-content-center content-box" id="certificateFormSection">
+        <input type="hidden" class="form-input p-2" id="userIdInput" name="UserId" readonly />
+        <input type="hidden" class="form-input p-2" id="userLoginInput" name="UserLogin" readonly />
+        <div class="d-flex flex-column justify-content-center gap-md-4">
+            <div class="d-flex flex-column gap-2">
+                <label class="">Nom</label>
+                <input class="form-input p-2 " placeholder="Entrer votre nom ici" id="lastnameInput" name="Nom" readonly />
+            </div>
+
+            <div class="d-flex flex-column gap-2">
+                <label class="">Prénom(s) (Ex : Messi Ayi Kékéli)</label>
+                <input class="form-input p-2 " placeholder="Entrer votre prénom ici" id="firstnameInput" name="Prenom" readonly />
+            </div>
+
+            <div class="d-flex flex-row gap-3">
+                <div class="d-flex flex-column gap-2">
+                    <label for="genderSelect" class="">Genre</label>
+                    <select id="genderSelect" name="Sexe" class="form-select" disabled>
+                        <option value="" disabled selected>Définir le genre</option>
+                        @foreach (var sexe in Enum.GetValues(typeof(EcoService.Models.Enums.Sexe)).Cast<EcoService.Models.Enums.Sexe>())
+                        {
+                            <option value="@sexe">@sexe</option>
+                        }
+                    </select>
+                </div>
+                <div class="d-flex flex-column gap-2">
+                    <label for="civilitySelect" class="">Civilité</label>
+                    <select id="civilitySelect" name="Civilite" class="form-select" disabled>
+                        <option value="" disabled selected>Définir la civilité</option>
+                        @foreach (var civilite in Enum.GetValues(typeof(EcoService.Models.Enums.Civilite)).Cast<EcoService.Models.Enums.Civilite>())
+                        {
+                            <option value="@civilite">@civilite</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <label class="">Catégorie professionnelle</label>
+                <input class="form-input p-2 w-auto" placeholder="Cadre de banque/Agent de banque" id="professionalCategoryInput" name="CategorieProfessionnelle" readonly />
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <label class="">Date de recrutement</label>
+                <input type="date" class="form-input p-2 w-auto" id="recruitmentDateInput" name="DateRecrutement" readonly />
+            </div>
+            <div class="d-flex flex-row justify-content-end">
+                @*<button class="cancel-button">Annuler</button>*@
+                <button class="confirm-button" id="continueButton">Enrégistrer et continuer</button>
+            </div>
+        </div>
+    </div>
+
+    @* Vue d'ensemble des informations *@
+    <div class="d-flex flex-column justify-content-center align-content-center content-box d-none" id="certificateOverviewSection">
+        <h4 class="mb-4">Vue d'ensemble des informations:</h4>
+        <div class="form-input p-2 d-none">
+            <span id="userIdPreview"></span>
+        </div>
+        @*<input type="hidden" class="form-input p-2" id="userIdPreview" readonly />*@
+        <div class="d-flex flex-column justify-content-center gap-md-4">
+            <div class="d-flex flex-column gap-2">
+                <label class="">Nom</label>
+                <div class="form-input p-2">
+                    <span id="lastnamePreview"></span>
+                </div>
+                @*<input type="text" class="form-input p-2" id="lastnamePreview" readonly />*@
+            </div>
+
+            <div class="d-flex flex-column gap-2">
+                <label class="">Prénom(s)</label>
+                <div class="form-input p-2">
+                    <span id="firstnamePreview"></span>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column gap-2">
+                <label for="genderPreview" class="">Genre</label>
+                <div class="form-input p-2">
+                    <span id="genderPreview"></span>
+                </div>
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <label for="civilityPreview" class="">Civilité</label>
+                <div class="form-input p-2">
+                    <span id="civilityPreview"></span>
+                </div>
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <label class="">Catégorie professionnelle</label>
+                <div class="form-input p-2">
+                    <span id="professionalCategoryPreview"></span>
+                </div>
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <label class="">Date de recrutement</label>
+                <div class="form-input p-2">
+                    <span id="recruitmentDatePreview"></span>
+                </div>
+            </div>
+            <div class="d-flex flex-row justify-content-between">
+                <button type="reset" class="cancel-button" id="goBackButton">Retourner</button>
+                <button type="button" class="confirm-button" id="confirmButton">Confirmer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*Modal de succès*@
+<div id="successModal" class="success-modal" tabindex="-1">
+    <div class="d-flex flex-column justify-content-center gap-3 modal-content">
+        <div class="d-flex justify-content-end ">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+        </div>
+        <div>
+            <div class="d-flex flex-row justify-content-center align-items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16" style="color:green">
+                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                </svg>
+                <p></p>
+            </div>
+            <div class="d-flex justify-content-end">
+                <button id="okButton" class="btn btn-success">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function formatDateToInputFormat(dateString) {
+        let date = new Date(dateString);
+        let day = String(date.getDate()).padStart(2, '0');
+        let month = String(date.getMonth() + 1).padStart(2, '0');
+        let year = date.getFullYear();
+
+        return `${year}-${month}-${day}`;
+    }
+
+    function formatDateToDisplay(dateString) {
+        let date = new Date(dateString);
+        //console.log(date);
+        let day = String(date.getDate()).padStart(2, '0');
+        let month = String(date.getMonth() + 1).padStart(2, '0');
+        let year = date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const certificateFormSection = document.getElementById("certificateFormSection");
+        const certificateOverviewSection = document.getElementById("certificateOverviewSection");
+        const certificateForminputs = document.querySelectorAll("#certificateFormSection input:not([type='button']):not([type='submit']),#certificateFormSection select");
+
+        function validateCertificateFormInputs() {
+            certificateForminputs.forEach(input => {
+                //console.log(input.tagName);
+                const parentElement = input.closest("div");
+                const errorElement = parentElement.querySelector("small");
+
+                if (errorElement && input.value.trim() !== "") {
+                    errorElement.remove();
+                }
+            });
+        }
+
+        function validateCertificateFormSelects() {
+            certificateForminputs.forEach(input => {
+                if (input.tagName === "SELECT") {
+                    const parentElement = input.closest("div");
+                    const errorElement = parentElement.querySelector("small");
+                    if (errorElement && input.value.trim() !== "") {
+                        errorElement.remove();
+                    }
+                }
+            });
+        }
+
+        //Retirer les messages d'erreur dès qu'il y'a des données dans les inputs
+        //Cas des inputs
+        /*certificateForminputs.forEach(input => {
+            console.log(input.tagName);
+
+            input.addEventListener("input", function () {
+                const parentElement = input.closest("div");
+                const errorElement = parentElement.querySelector("small");
+
+                if (errorElement && input.value.trim() !== "") {
+                    errorElement.remove();
+                }
+            });
+
+            //Cas des selects
+            if (input.tagName === "SELECT") {
+                input.addEventListener("change", function () {
+                    const parentElement = input.closest("div");
+                    const errorElement = parentElement.querySelector("small");
+
+                    if (errorElement && input.value.trim() !== "") {
+                        errorElement.remove();
+                    }
+                });
+            }
+        });*/
+
+        //Recherche d'un utilisateur
+        document.getElementById("searchButton").addEventListener("click", function () {
+            const searchInput = document.getElementById("userSearchInput");
+            const alertBox = document.getElementById("alertBox");
+            const alertMessage = document.getElementById("alertMessage");
+
+            fetch(`/EcoCerAdmin/SearchUser?param=${encodeURIComponent(searchInput.value)}`)
+                .then(response => response.json())
+                .then(result => {
+                    console.log(result);
+
+                    if (result.statusCode === 200) {
+                        const user = result.data;
+
+                        document.getElementById("userIdInput").value = user.UserId;
+                        document.getElementById("userLoginInput").value = user.Login;
+                        document.getElementById("lastnameInput").value = user.Nom;
+                        document.getElementById("firstnameInput").value = user.Prenom;
+                        document.getElementById("professionalCategoryInput").value = user.CategorieProfessionnelle;
+                        document.getElementById("recruitmentDateInput").value = formatDateToInputFormat(user.DateRecrutement);
+
+                        //Activation des inputs quand les données sont chargées à l'interieur
+                        certificateForminputs.forEach(input => {
+                            const excludedIds = ["professionalCategoryInput", "recruitmentDateInput"];
+                            if (input.tagName === "INPUT") {
+                                if (!excludedIds.includes(input.id)) {
+                                    input.removeAttribute("readonly");
+                                }
+                            } else if (input.tagName === "SELECT") {
+                                input.removeAttribute("disabled");
+                            }
+                        });
+
+                        alertBox.classList.add("d-none");
+                        validateCertificateFormInputs();
+                    } else {
+                        //alert(`Result status code: ${result.statusCode}, Result message:${result.message}`);
+
+                        alertMessage.textContent = result.message;
+                        alertBox.classList.remove("d-none")
+                    }
+                }).catch(error => console.error("Error: ", error));
+        });
+
+        document.getElementById("continueButton").addEventListener("click", function () {
+            //const inputs = document.querySelectorAll("#certificateFormSection input:not([type='hidden']):not([type='button']):not([type='submit']),#certificateFormSection select")
+            let isValid = true;
+            let errorMessage = "";
+
+            certificateForminputs.forEach(input => {
+                const existingError = input.parentNode.querySelector("small");
+                let inputValue = input.value.trim();
+
+                if (existingError) {
+                    existingError.remove();
+                }
+
+                if (!inputValue && input.type !== "hidden") {
+                    isValid = false;
+                    switch (input.id) {
+                        case "lastnameInput":
+                            errorMessage = "Le nom doit être spécifié";
+                            break;
+                        case "firstnameInput":
+                            errorMessage = "Le prénom doit être spécifié";
+                            break;
+                        case "genderSelect":
+                            errorMessage = "Veuillez définir le genre";
+                            break;
+                        case "civilitySelect":
+                            errorMessage = "Veuillez définir la civilité";
+                            break;
+                        case "professionalCategoryInput":
+                            errorMessage = "La catégorie professionnelle doit être spécifiée";
+                            break;
+                        case "recruitmentDateInput":
+                            errorMessage = "La date de recrutement doit être spécifiée";
+                            break;
+                        default:
+                            errorMessage = "Ce champ est requis";
+                            break;
+                    }
+
+                    let errorElement = document.createElement("small");
+                    errorElement.className = "text-danger";
+                    errorElement.textContent = errorMessage;
+
+                    input.parentElement.appendChild(errorElement);
+                }
+
+            });
+
+            if (!isValid) {
+                return;
+            }
+
+
+            //Récupération des données du formulaire de création d'une attestation
+            const certificateFormData = {
+                userId: document.getElementById("userIdInput").value,
+                nom: document.getElementById("lastnameInput").value,
+                prenom: document.getElementById("firstnameInput").value,
+                genre: document.getElementById("genderSelect").value,
+                civilite: document.getElementById("civilitySelect").value,
+                categorieProfessionnelle: document.getElementById("professionalCategoryInput").value,
+                dateRecrutement: formatDateToDisplay(document.getElementById("recruitmentDateInput").value)
+            };
+
+            console.log(certificateFormData);
+
+            //Chargement du formulaire de vue d'ensemble
+            document.getElementById("userIdPreview").value = certificateFormData.userId
+            document.getElementById("lastnamePreview").textContent = certificateFormData.nom
+            document.getElementById("firstnamePreview").textContent = certificateFormData.prenom
+            document.getElementById("genderPreview").textContent = certificateFormData.genre
+            document.getElementById("civilityPreview").textContent = certificateFormData.civilite
+            document.getElementById("professionalCategoryPreview").textContent = certificateFormData.categorieProfessionnelle
+            document.getElementById("recruitmentDatePreview").textContent = certificateFormData.dateRecrutement
+
+            //Changement de vue
+            certificateFormSection.classList.add("d-none");
+            certificateOverviewSection.classList.remove("d-none");
+        });
+
+        document.getElementById("goBackButton").addEventListener("click", function () {
+            certificateFormSection.classList.remove("d-none");
+            certificateOverviewSection.classList.add("d-none");
+        });
+
+        //Envoie des données au backend
+        document.getElementById("confirmButton").addEventListener("click", function () {
+            const formData = {};
+
+            //Récupération des valeurs contenues dans les inputs
+            certificateForminputs.forEach(input => {
+                if (input.name) {
+                    formData[input.name] = input.value;
+                }
+            });
+
+            console.log(formData);
+
+            fetch("/EcoCerAdmin/CreateUserCertificate", {
+                method: "POST",
+                headers: {
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.statusCode === 200) {
+                        const successModal = document.getElementById("successModal")
+                        /*$('#successModal').modal("show");*/
+                        successModal.querySelector("p").textContent = result.message;
+                        successModal.style.display = "flex";
+                        document.body.classList.add("modal-open");
+                        //alert(result.message);
+                    } else {
+                        alert(result.message);
+                    }
+                })
+                .catch(err => console.error(err));
+        });
+
+        //Bouton ok du modal qui le ferme et réinitialise le formulaire de demande
+        document.getElementById("okButton").addEventListener("click", function () {
+            document.getElementById("successModal").style.display = "none";
+            document.body.classList.remove("modal-open");
+
+            certificateForminputs.forEach(input => {
+                if (input.value) {
+                    input.value = ""
+                }
+            });
+
+            certificateFormSection.classList.remove("d-none");
+            certificateOverviewSection.classList.add("d-none");
+            window.scrollTo(0, 0);
+        });
+
+        //Changement des options des select en fonction de l'option selectionnée dans le select adjacent
+        const sexeSelect = document.getElementById("genderSelect");
+        const civiliteSelect = document.getElementById("civilitySelect");
+
+        function updateCivilityBasedOnSex() {
+            if (sexeSelect.value === "Homme") {
+                civiliteSelect.value = "Monsieur";
+                civiliteSelect.dispatchEvent(new Event("change"));
+            } else if (sexeSelect.value === "Femme") {
+                civiliteSelect.value = "Madame";
+                civiliteSelect.dispatchEvent(new Event("change"));
+
+            }/* else {
+                civiliteSelect.disabled = false;
+            }*/
+        }
+
+        function updateSexBasedOnCivility() {
+            if (civiliteSelect.value === "Monsieur") {
+                sexeSelect.value = "Homme";
+                validateCertificateFormSelects();
+            } else if (civiliteSelect.value === "Madame") {
+                sexeSelect.value = "Femme";
+                validateCertificateFormSelects();
+            }/* else {
+                sexeSelect.disabled = false;
+            }*/
+        }
+
+        sexeSelect.addEventListener("change", updateCivilityBasedOnSex);
+        civiliteSelect.addEventListener("change", updateSexBasedOnCivility);
+
+        updateCivilityBasedOnSex();
+        updateSexBasedOnCivility();
+    });
+</script>

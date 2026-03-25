@@ -1,0 +1,977 @@
+﻿
+@{
+    ViewBag.Title = "Modification Certificat";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /*modal styles*/
+    .searchBar-input {
+        height: 40px;
+        width: 450px !important;
+        border-style: solid;
+        border-width: 2px;
+        border-color: #d0d5dd;
+        border-radius: 9px;
+        padding: 14px;
+        margin-bottom: 20px;
+    }
+
+    body.modal-open {
+        filter: blur(px);
+        pointer-events: none;
+    }
+
+    .edit-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background: #F5F5F7;
+        padding: 12px;
+        border-radius: 10px;
+        width: 700px;
+        box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
+    }
+
+    .close-btn {
+        float: right;
+        font-size: 27px;
+        cursor: pointer;
+        color: #B7B7B7;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+        .close-btn:hover {
+            color: #000000;
+        }
+
+    /*.close-btn:active{
+                    color:#000000;
+                    transform:scale(0.5)
+                }*/
+
+    .custom-box {
+        width: 1200px;
+    }
+
+    .modal-input {
+        height: 40px;
+        width: 320px;
+        border-style: solid;
+        border-width: 2px;
+        border-color: #d0d5dd;
+        border-radius: 9px;
+        padding: 14px;
+    }
+
+    .modal-select {
+        width: 320px;
+        height: 40px;
+        border-style: solid;
+        border-width: 2px;
+        border-radius: 9px;
+        border-color: #d0d5dd;
+        padding: 7px;
+    }
+
+    .modal-submit-button {
+        background-color: #0082bb;
+        width: 220px;
+        height: 50px;
+        border-style: none;
+        border-radius: 9px;
+        text-align: center;
+        font-size: 1rem;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+        .modal-submit-button:active {
+            background-color: #005f8c;
+            transform: scale(0.95);
+        }
+
+        .modal-submit-button:hover {
+            background-color: #007bb1;
+        }
+
+    .modal-cancel-button {
+        background-color: #B7B7B7;
+        width: 170px;
+        height: 50px;
+        border-style: none;
+        border-radius: 9px;
+        font-size: 1rem;
+        text-decoration: none;
+        text-align: center;
+        display: inline-block;
+        line-height: 50px;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+        .modal-cancel-button:active {
+            background-color: #999999 !important;
+            transform: scale(0.95);
+        }
+
+        .modal-cancel-button:hover {
+            background-color: #B4B4B8;
+        }
+
+    a:hover {
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    select:focus {
+        border-color: #c5cedb !important;
+        border-width: 3px !important;
+        outline: none !important;
+    }
+
+
+    /*ManageCertificates view styles*/
+    .view-content-box {
+        width: auto;
+        border-color: #e5e5e5;
+        border-radius: 8px;
+        padding: 30px;
+        /* background-color: #F5F5F7;*/
+        box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1), -4px 0 8px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .table-container {
+        width: auto;
+        border-color: #e5e5e5;
+        border-radius: 8px;
+        padding: 30px;
+        margin-bottom: 20px;
+        /* background-color: #F5F5F7;*/
+        box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1), -4px 0 8px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    input:focus {
+        border-color: #c5cedb;
+        border-width: 3px;
+        outline: none;
+    }
+
+    h2 {
+        margin-bottom: 1rem;
+        color: #333;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .custom-container {
+        width: 300px;
+        background-color: #F5F5F7;
+        border-color: #e5e5e5;
+        box-shadow: 5px 5px 5px rgb(0 0 0 / 0.1);
+        border-radius: 8px;
+    }
+    /*Styled table for ManageCertificate page*/
+    .styled-table {
+        /*    border-collapse: collapse;*/
+        margin-bottom: 2rem;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        width: 100%;
+    }
+
+        .styled-table thead tr {
+            background-color: #0082bb;
+            color: #ffffff;
+            text-align: left;
+        }
+
+        .styled-table th, .styled-table td {
+            padding: 12px 15px;
+        }
+
+        .styled-table tbody tr {
+            border-bottom: 1px solid #dddddd;
+        }
+
+            .styled-table tbody tr:nth-of-type(even) {
+                background-color: #f3f3f3;
+            }
+
+            .styled-table tbody tr:last-of-type {
+                border-bottom: 2px solid #0082bb;
+            }
+
+            .styled-table tbody tr.active-row {
+                font-weight: bold;
+                color: #009879;
+            }
+
+    .table-hover tbody tr {
+        cursor: pointer;
+        transition: transform 0.2s ease-in-out, background 0.3s ease;
+    }
+
+        .table-hover tbody tr:hover {
+            transform: scale(1.03);
+            background: rgba(0, 123, 255, 0.1);
+        }
+
+        .table-hover tbody tr.clickable-row:active {
+            transform: scale(0.97);
+        }
+
+    .download-btn {
+        width: 100px;
+        height: 35px;
+        background-color: inherit;
+        /*background-color: #0082bb;*/
+        /*border-style: none;*/
+        border-style: solid;
+        border-width: 1px;
+        border-color: #0082bb;
+        text-align: center;
+        color: #0082bb;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+        .download-btn:hover {
+            background-color: #0082bb;
+            color: white;
+        }
+
+        .download-btn:active {
+            transform: scale(0.95);
+        }
+</style>
+
+<!----------------------------------------------------- Section html -------------------------------------------------->
+<!--html des tableaux composants la page-->
+<div class="d-flex justify-content-center flex-column align-content-center">
+    <div>
+        <p class="fs-5">Liste des attestations</p>
+    </div>
+    @*   <div class="">
+            <input type="text" class="searchBar-input p-2 w-auto" placeholder="Rechercher..." id="certificateSearchInput" oninput="searchQuery();" />
+        </div> *@
+    <hr>
+    @* Tableau des attestations en attente *@
+    <div class="table-container" id="PendingSection">
+        <h2>Attestations en attente de traitement...</h2>
+        <div class="">
+            <input type="text" class="searchBar-input p-2 w-auto" placeholder="Rechercher..." id="pendingCertificatesSearch" />
+        </div>
+        <table class="styled-table table-hover" id="pendingCertificatesTable">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Numéro de référence</th>
+                    <th scope="col">Nom complet</th>
+                    <th scope="col">Date de création</th>
+                    <th scope="col">Statut</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody id="pendingCertificatesList">
+                @{
+                    var pendingCertificates = ViewBag.PendingCertificates;
+                    if (pendingCertificates.Count == 0)
+                    {
+                        <tr class="">
+                            <td colspan="6">
+                                <div class="alert alert-info text-center mx-auto" role="alert">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16" style="margin-right: 6px;">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
+                                    </svg>
+                                    Aucune nouvelle demande d'attestation n'a été soumise pour le moment...
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+
+                        for (int i = 0; i < pendingCertificates.Count; i++)
+                        {
+
+                            var certificate = pendingCertificates[i];
+            <tr class="clickable-row" data-id="@certificate.CdmId" onclick="openModal();editCertificate(@certificate.CdmId);">
+                <td>@(i + 1)</td>
+                <td>@certificate.RefNumber</td>
+                <td>@certificate.Nom @certificate.Prenom</td>
+                <!--<td>@*@certificate.CreationDate.ToString("dd/MM/yyyy")*@</td>-->
+                <td>@certificate.CreationDate.ToString("dd/MM/yyyy", new System.Globalization.CultureInfo("fr-FR"))</td>
+                <td><span class="badge bg-danger">En attente</span></td>
+                <td>
+                    <button class="validate-btn rounded btn btn-outline-success" id="validateButton" onclick="event.stopPropagation();validateCertificate();">
+                        Valider
+                    </button>
+                </td>
+            </tr>
+                        }
+                    }
+                }
+
+            </tbody>
+        </table>
+
+        <nav aria-label="Page navigation" id="pageNavigation">
+            <ul class="pagination justify-content-center" id="pendingPagination">
+                <li class="page-item">
+                    <a class="page-link" id="prevPending">Précédent</a>
+                </li>
+                <li class="page-item"><a class="page-link" id="pendingPageInfo"></a></li>
+                <li class="page-item">
+                    <a class="page-link" id="nextPending">Suivant</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    @* Tableau des attestations validées *@
+    <div class="table-container" id="ValidateSection">
+        <h2>Attestations validées</h2>
+        <div class="">
+            <input type="text" class="searchBar-input p-2 w-auto" placeholder="Rechercher..." id="validateCertificatesSearch" />
+        </div>
+        <table class="styled-table table-hover" id="validateCertificatesTable">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Numéro de référence</th>
+                    <th scope="col">Nom complet</th>
+                    <th scope="col">Date de création</th>
+                    <th scope="col">Statut</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody id="validateCertificatesList">
+
+                @{
+                    //var validateCertificates = ViewBag.ValidateCertificates as List<YourCertificateModel>;
+                    var validateCertificates = ViewBag.ValidateCertificates;
+                }
+                @if (validateCertificates.Count == 0)
+                {
+                    <tr class="">
+                        <td colspan="6">
+                            <div class="alert alert-info text-center mx-auto" role="alert">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16" style="margin-right: 6px;">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                    <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
+                                </svg>
+                                Aucune attestation n'a encore été validée
+                            </div>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    for (int i = 0; i < validateCertificates.Count; i++)
+                    {
+                        var certificate = validateCertificates[i];
+            <tr class="" data-id="@certificate.CdmId">
+                <td>@(i + 1)</td>
+                <td>@certificate.RefNumber</td>
+                <td>@certificate.Nom @certificate.Prenom</td>
+                <td>@certificate.CreationDate.ToString("dd/MM/yyyy", new System.Globalization.CultureInfo("fr-FR"))</td>
+                <!--<td>@*@certificate.CreationDate.ToString("dd/MM/yyyy")*@</td>-->
+                <td><span class="badge bg-success">Validé</span></td>
+                <td>
+                    <button class="download-btn rounded-pill" onclick="event.stopPropagation(); getCertificatePdf(@certificate.CdmId);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark" viewBox="0 0 16 16">
+                            <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5z" />
+                        </svg>
+                        Générer
+                    </button>
+                </td>
+            </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center" id="validatePagination">
+                <li class="page-item">
+                    <a class="page-link" id="prevValidate">Précédent</a>
+                </li>
+                <li class="page-item"><a class="page-link" id="validatePageInfo"></a></li>
+                <li class="page-item">
+                    <a class="page-link" id="nextValidate">Suivant</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+@* } *@
+
+
+<!--Formulaire de modification d'une attestation-->
+<div id="editModal" class="edit-modal">
+    <div class="modal-content">
+        <div class="d-flex justify-content-end ">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+        </div>
+        <h2 style="font-size:1.5rem;text-align:center;">Modifier une attestation</h2>
+
+        <form method="post" action="@Url.Action("UpdateCertificate", "EcoCerAdmin")" id="editCertificateForm">
+            @Html.AntiForgeryToken()
+            <div class="d-flex justify-content-center align-items-center p-4 flex-column gap-1">
+                <input type="hidden" name="CdmId" value="" id="cmdId" />
+                <div class="d-flex flex-row gap-3">
+                    <div class="d-flex flex-column gap-2">
+                        <label>Nom:</label>
+                        <input class="modal-input" id="nom" name="Nom" />
+                        <span id="lastNameError" class="text-danger"></span>
+                        @* <span asp-validation-for="CertificateToEdit.Nom" class="text-danger"></span> *@
+                    </div>
+                    <div class="d-flex flex-column gap-2">
+                        <label>Prénom:</label>
+                        <input class="modal-input" id="prenom" name="Prenom" />
+                        <span id="firstNameError" class="text-danger"></span>
+                        @* <span asp-validation-for="CertificateToEdit.Prenom" class="text-danger"></span> *@
+                    </div>
+                </div>
+                <div class="d-flex gap-3 flex-row">
+                    <div class="d-flex flex-column gap-2">
+                        <label class="">Genre</label>
+                        <select class="modal-select" id="sexe" name="sexe">
+                            @foreach (var sexe in Enum.GetValues(typeof(EcoService.Models.Enums.Sexe)).Cast<EcoService.Models.Enums.Sexe>())
+                            {
+                                <option value="@sexe">@sexe</option>
+                            }
+                        </select>
+                        <span id="genderError" class="text-danger"></span>
+                        @* <span asp-validation-for="CertificateToEdit.Sexe" class="text-danger"></span> *@
+                    </div>
+                    <div class="d-flex flex-column gap-2">
+                        <label class="">Civilité</label>
+                        <select class="modal-select" id="civilite" name="civilite">
+                            @foreach (var civilite in Enum.GetValues(typeof(EcoService.Models.Enums.Civilite)).Cast<EcoService.Models.Enums.Civilite>())
+                            {
+                                <option value="@civilite" selected="@civilite">@civilite</option>
+                            }
+                        </select>
+                        <span id="civiliteError" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="d-flex flex-column gap-2">
+                    <label class="">Catégorie professionnelle:</label>
+                    <input class="modal-input" id="categoriePro" name="CategorieProfessionnelle" style="width:650px;" />
+                    <span id="catProError" class="text-danger"></span>
+                    @* <span asp-validation-for="CertificateToEdit.Prenom" class="text-danger"></span> *@
+                </div>
+                <div class="d-flex flex-column gap-2">
+                    <label class="">Date de recrutement:</label>
+                    <input class="modal-input" type="date" id="dateRecrutement" name="DateRecrutement" style="width:650px;" />
+                    <span id="dateReError" class="text-danger"></span>
+                    @* <span asp-validation-for="CertificateToEdit.DateRecrutement" class="text-danger"></span> *@
+                </div>
+                <div class="d-flex flex-row gap-lg-5 mt-3">
+                    @* asp-controller="EcoCerAdmin" asp-action="ManageCertificates" *@
+                    <a onclick="closeModal();" class="modal-cancel-button text-white">Annuler</a>
+                    <button id="confirmButton" type="submit" class="modal-submit-button text-white text-center">Confirmer</button>
+                </div>
+            </div>
+        </form>
+        @*<button id="validateButton" class="modal-submit-button text-white text-center">Valider</button> *@
+    </div>
+</div>
+
+
+<!----------------------------------------------------- Section javascript -------------------------------------------------->
+
+<script>
+
+    function openModal() {
+        document.getElementById("editModal").style.display = "flex";
+        document.body.classList.add("modal-open");
+    }
+
+    function closeModal() {
+        document.getElementById("editModal").style.display = "none";
+        document.body.classList.remove("modal-open");
+    }
+
+    //Chargement de l'attestation à modifier
+    function editCertificate(certificateId) {
+        //console.log("Got clicked again!");
+        //console.log("Trying to load certificate with ID:"+certificateId);
+        $.ajax({
+            type: 'GET',
+            url: 'GetCertificate',
+            data: { id: certificateId },
+            success: function (response) {
+                //console.log("Certificate loaded successfully!");
+                //console.log(response);
+                const formattedDateRecrutement = formatDateToInputFormat(response.DateRecrutement);
+
+                //Chargement des données dans le modal
+                $('#cmdId').val(response.CdmId);
+                $('#nom').val(response.Nom);
+                $('#prenom').val(response.Prenom);
+                $('#sexe').val(response.Sexe);
+                $('#civilite').val(response.Civilite)
+                $('#categoriePro').val(response.CategorieProfessionnelle)
+                $('#dateRecrutement').val(formattedDateRecrutement)
+
+            },
+            error: function (xhr, status, error) {
+                console.error("Error details: ", xhr.responseText, status, error);
+                alert("Failed to load certificate details, please try again");
+            }
+        });
+    }
+
+    function getCertificatePdf(certificateId) {
+        window.location.href = 'GetCertificatePdf/' + certificateId;
+    }
+
+    function searchQuery() {
+        console.log("Change event triggered");
+
+        var searchParameter = $("#certificateSearchInput").val();
+        //console.log(searchParameter);
+        $.ajax({
+            url: '/EcoCerAdmin/SearchCertificate',
+            type: 'GET',
+            data: { parameter: searchParameter },
+            success: function (response) {
+                //console.log(response);
+                $("#certificateList").html(response);
+            },
+            error: function (xhr, status, error) {
+                console.error("Error details :", xhr.responseText, status, error)
+                alert("Error during search!");
+            }
+        })
+    }
+
+    function validateCertificate() {
+        let token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        let row = event.target.closest("tr");
+        let certificateId = row.getAttribute("data-id");
+
+        console.log("CertificateId: ", certificateId);
+
+        fetch("/EcoCerAdmin/ValidateCertificate", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "RequestVerificationToken": token
+            },
+            body: `certificateId=${certificateId}`
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log("Certificate validate successfully");
+                    location.reload();
+                } else {
+                    console.error("Validation failed")
+                }
+            })
+            .catch(error => console.error("Error: ", error));
+    }
+
+
+
+
+    /*document.querySelector("#editCertificatetForm").addEventListener("submit", function(event){
+        event.preventDefault();
+
+    });*/
+
+    /*document.addEventListener("DOMContentLoaded", function(){
+        let token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        document.querySelectorAll(".validate-btn").forEach(function(btn){
+            btn.addEventListener("click", function(event){
+                event.stopPropagation();
+
+                let row = btn.closest("tr");
+                let certificateId = row.getAttribute("data-id")
+
+                console.log("CertificateId: ", certificateId);
+
+                  fetch("/EcoCerAdmin/ValidateCertificate", {
+                    method:"POST",
+                    headers:{
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "RequestVerificationToken": token
+                    },
+                    body: `certificateId=${certificateId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success){
+                        console.log("Certificate validate successfully");
+                            location.reload();
+                            document.querySelector("#ValidateSection").scrollIntoView({behavior:"smooth"});
+                    }else{
+                        console.error("Validation failed")
+                    }
+                })
+                .catch(error => console.error("Error: ", error) );
+            });
+        });
+    });*/
+
+    /*script pour que la vue scroll directement sur le tableau d'attestations validées
+    aucune attestation en attente n'existe*/
+    window.onload = function () {
+        if (document.querySelectorAll("tbody tr").length === 0) {
+            document.querySelector("#ValidateSection").scrollIntoView({ behavior: "smooth" });
+        }
+    }
+
+    function formatDateToInputFormat(dateString) {
+        let date = new Date(dateString);
+        let day = String(date.getDate()).padStart(2, '0');
+        let month = String(date.getMonth() + 1).padStart(2, '0');
+        let year = date.getFullYear();
+
+        return `${year}-${month}-${day}`;
+    }
+
+    function formatDate(dateString) {
+        let date = new Date(dateString);
+        let day = String(date.getDate()).padStart(2, '0');
+        let month = String(date.getMonth() + 1).padStart(2, '0');
+        let year = date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    }
+
+    /*Fonction qui ajoute un delai après la saisie de l'utilisateur avant l'appel des fonctions de recherche*/
+    function debounce(func, delay) {
+        let timer;
+        return function (...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                func.apply(this, args);
+            }, delay);
+        };
+    }
+
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let pendingPage = 1;
+        let validatePage = 1;
+        const rowsPerPage = 5;
+        let pendingCertificates = [];
+        let validateCertificates = [];
+
+        document.querySelectorAll("#pendingCertificatesList tr").forEach(row => {
+            //console.log(row.cells.length);
+            if (row.cells.length > 1) {
+                pendingCertificates.push({
+                    CdmId: row.getAttribute("data-id"),
+                    PositionNumber: row.cells[0].textContent,
+                    RefNumber: row.cells[1].textContent,
+                    NomEtPrenom: row.cells[2].textContent,
+                    DateCreation: row.cells[3].textContent
+                });
+            }
+        });
+
+        document.querySelectorAll("#validateCertificatesList tr").forEach(row => {
+            //console.log(row.cells.length);
+            if (row.cells.length > 1) {
+                validateCertificates.push({
+                    CdmId: row.getAttribute("data-id"),
+                    PositionNumber: row.cells[0].textContent,
+                    RefNumber: row.cells[1].textContent,
+                    NomEtPrenom: row.cells[2].textContent,
+                    DateCreation: row.cells[3].textContent
+                });
+            }
+        });
+
+        function updateTable(type, html) {
+            let tableBody;
+            let currentPage;
+            let data;
+            let pageInfo;
+            /*console.log("UpdateTable function got called!");
+            console.log("pendingCertificates: ", pendingCertificates);
+            console.log("validateCertificates: ", validateCertificates);*/
+            if (type === "pending") {
+                tableBody = document.getElementById("pendingCertificatesList");
+                currentPage = pendingPage;
+                data = pendingCertificates
+                pageInfo = document.getElementById("pendingPageInfo")
+            } else {
+                tableBody = document.getElementById("validateCertificatesList");
+                currentPage = validatePage;
+                data = validateCertificates;
+                pageInfo = document.getElementById("validatePageInfo");
+            }
+
+            tableBody.innerHTML = "";
+            let start = (currentPage - 1) * rowsPerPage;
+            let end = currentPage * rowsPerPage;
+            let paginatedData = data.slice(start, end);
+            if (html.length === 0) {
+                if (paginatedData.length > 0) {
+
+                    paginatedData.forEach((certificate, index) => {
+                        tableBody.innerHTML += type === "pending" ? `<tr class="clickable-row" data-id="${certificate.CdmId}" onclick="openModal();editCertificate(${certificate.CdmId});">
+                                <td>${index + 1}</td>
+                                <td>${certificate.RefNumber}</td>
+                                <td>${certificate.NomEtPrenom}</td>
+                                <td>${certificate.DateCreation}</td>
+                                <td><span class="badge bg-danger">En attente</span></td>
+                                <td>
+                                    <button class="validate-btn rounded  btn btn-outline-success" id="validateButton" onclick="event.stopPropagation();">
+                                        Valider
+                                    </button>
+                                </td>
+                            </tr>`: `<tr class="" data-id="${certificate.CdmId}">
+                                <td>${index + 1}</td>
+                                <td>${certificate.RefNumber}</td>
+                                <td>${certificate.NomEtPrenom}</td>
+                                <td>${certificate.DateCreation}</td>
+                                <td><span class="badge bg-success">Validé</span></td>
+                                <td>
+                                   <button class="download-btn rounded-pill" onclick="event.stopPropagation(); getCertificatePdf(${certificate.CdmId});">
+       <svg xmlns="http://www.w3.org/2000/svg"  width="16" height="16" fill="currentColor" class="bi bi-file-earmark" viewBox="0 0 16 16">
+           <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5z" />
+       </svg>
+       Générer
+                                    </button>
+                                </td>
+                            </tr>`
+                    });
+                } else {
+                    tableBody.innerHTML += type === "pending" ? `  <tr class="">
+                  <td colspan="6">
+                      <div class="alert alert-info text-center mx-auto" role="alert">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16" style="margin-right: 6px;">
+                              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                              <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
+                          </svg>
+                          Aucune nouvelle demande d'attestation n'a été soumise pour le moment...
+                      </div>
+                  </td>
+              </tr>`: `<tr class="">
+                  <td colspan="6">
+                      <div class="alert alert-info text-center mx-auto" role="alert">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16" style="margin-right: 6px;">
+                              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                              <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
+                          </svg>
+                          Aucune attestation n'a encore été validée
+                      </div>
+                  </td>
+              </tr>`;
+                }
+
+                pageInfo.textContent = paginatedData.length > 0 ? `Page ${currentPage} sur ${Math.ceil(data.length / rowsPerPage)}` : "Page 1 sur 1"
+            } else {
+                tableBody.innerHTML = html;
+            }
+        }
+        function setUpPagination(type) {
+            document.getElementById(type === "pending" ? "prevPending" : "prevValidate")
+                .addEventListener("click", function () {
+                    if (type === "pending" && pendingPage > 1) {
+                        pendingPage--;
+                    } else if (type === "validate" && validatePage > 1) {
+                        validatePage--
+                    }
+
+                    updateTable(type, "");
+                });
+
+            document.getElementById(type === "pending" ? "nextPending" : "nextValidate")
+                .addEventListener("click", function () {
+                    //console.log("length: " + pendingCertificates.length);
+                    let lastPendingPage = Math.ceil(pendingCertificates.length / rowsPerPage);
+                    let lastValidatePage = Math.ceil(validateCertificates.length / rowsPerPage);
+                    if (type === "pending" && pendingPage < lastPendingPage) {
+                        pendingPage++;
+                    } else if (type === "validate" && validatePage < lastValidatePage) {
+                        validatePage++
+                    }
+
+                    updateTable(type, "");
+                });
+        }
+
+        updateTable("pending", "");
+        updateTable("validate", "");
+        setUpPagination("pending");
+        setUpPagination("validate");
+
+        document.getElementById("pendingCertificatesSearch").addEventListener("input", debounce(function () {
+            let param = this.value.trim();
+            //console.log(param);
+            let html = ""
+            fetch(`/EcoCerAdmin/SearchPendingCertificates?param=${param}`)
+                .then(response => response.json())
+                .then(data => {
+                    /*console.log("Full response: ",data);
+                    console.log("Fetch result: "+JSON.stringify(data.Result,null,2));
+                    console.log("Result length: "+data.Result.length);*/
+                    if (data.Result.length === 0) {
+                        html = `<tr class="">
+                                    <td colspan="6">
+                                        <div class="alert alert-info text-center mx-auto" role="alert">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16" style="margin-right: 6px;">
+                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
+                                            </svg>
+                                            Aucune attestation n'a été trouvée
+                                        </div>
+                                    </td>
+                                </tr>`
+
+                        updateTable("pending", html);
+                    }
+                    else {
+                        pendingCertificates = [];
+                        data.Result.forEach((certificate, index) => {
+                            //console.log("The certificate: "+JSON.stringify(certificate,null,2));
+                            pendingCertificates.push({
+                                CdmId: certificate.CdmId,
+                                PositionNumber: index + 1,
+                                RefNumber: certificate.RefNumber,
+                                NomEtPrenom: `${certificate.Nom} ${certificate.Prenom}`,
+                                //DateCreation: `${certificate.CreationDate}`
+                                DateCreation: `${formatDate(Date(certificate.CreationDate).toString("o"))}`
+                            });
+                        });
+                        updateTable("pending", "");
+                        //console.log("Pending certificates table now: "+JSON.stringify(pendingCertificates,null,2));
+                    };
+                });
+
+        }, 300))
+
+        document.getElementById("validateCertificatesSearch").addEventListener("input", debounce(function () {
+            let param = this.value.trim();
+            let html = "";
+            fetch(`/EcoCerAdmin/SearchValidateCertificates?param=${param}`)
+                .then(response => response.json())
+                .then(data => {
+                    /*console.log("Validate Fetch result: "+JSON.stringify(data.result,null,2));
+                    console.log("Result length: "+data.result.length);*/
+                    if (data.Result.length === 0) {
+                        html = `<tr class="">
+                                    <td colspan="6">
+                                        <div class="alert alert-info text-center mx-auto" role="alert">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16" style="margin-right: 6px;">
+                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
+                                            </svg>
+                                            Aucune attestation n'a été trouvée
+                                        </div>
+                                    </td>
+                                </tr>`
+
+                        updateTable("validate", html);
+                    }
+                    else {
+                        validateCertificates = [];
+                        data.Result.forEach((certificate, index) => {
+                            //console.log("The certificate: "+JSON.stringify(certificate,null,2));
+                            validateCertificates.push({
+                                CdmId: certificate.CdmId,
+                                PositionNumber: index + 1,
+                                RefNumber: certificate.RefNumber,
+                                NomEtPrenom: `${certificate.Nom} ${certificate.Prenom}`,
+                                //DateCreation: `${certificate.CreationDate}`
+                                DateCreation: `${formatDate(Date(certificate.CreationDate).toString("o"))}`
+                            });
+                        });
+                        updateTable("validate", "");
+                        //console.log("Validate certificates table now: "+JSON.stringify(pendingCertificates,null,2));
+                    };
+                });
+
+        }, 300));
+
+        document.querySelectorAll(".validate-btn").forEach(function (btn) {
+            let token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            btn.addEventListener("click", function (event) {
+                event.stopPropagation();
+
+                let row = btn.closest("tr");
+                let certificateId = row.getAttribute("data-id")
+                let certificateOwner = row.cells[2].textContent;
+
+                console.log("CertificateId: ", certificateId);
+                console.log("Certificate owner: ", certificateOwner);
+
+                fetch("/EcoCerAdmin/ValidateCertificate", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "RequestVerificationToken": token
+                    },
+                    body: `certificateId=${certificateId}`
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Validate data content:", data);
+                        if (data.success) {
+                            console.log("Certificate validate successfully");
+                            location.reload();
+                        } else {
+                            console.error("Validation failed")
+                        }
+                    })
+                    .catch(error => console.error("Error: ", error));
+            });
+        });
+    });
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const sexeSelect = document.getElementById("sexe");
+        const civiliteSelect = document.getElementById("civilite");
+
+        function updateCivilityBasedOnSex() {
+            if (sexeSelect.value === "Homme") {
+                civiliteSelect.value = "Monsieur";
+            } else if (sexeSelect.value === "Femme") {
+                civiliteSelect.value = "Madame";
+            } else {
+                civiliteSelect.disabled = false;
+            }
+        }
+
+        function updateSexBasedOnCivility() {
+            if (civiliteSelect.value === "Monsieur") {
+                sexeSelect.value = "Homme";
+            } else if (civiliteSelect.value === "Madame") {
+                sexeSelect.value = "Femme";
+            } else {
+                sexeSelect.disabled = false;
+            }
+        }
+
+        sexeSelect.addEventListener("change", updateCivilityBasedOnSex);
+        civiliteSelect.addEventListener("change", updateSexBasedOnCivility);
+
+        updateCivilityBasedOnSex();
+        updateSexBasedOnCivility();
+    });
+
+</script>
+

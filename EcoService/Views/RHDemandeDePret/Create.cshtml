@@ -1,120 +1,197 @@
 ﻿@model Dictionary<string, object>
 @using Newtonsoft.Json
+
 @{
     ViewData["Title"] = "Demande de prêt";
     var staff = Model.ContainsKey("Staff") ? Model["Staff"] as Dictionary<string, object> : null;
     var simulationData = Model.ContainsKey("SimulationData") ? Model["SimulationData"] as dynamic : null;
     var prets = Model.ContainsKey("Prets") ? Model["Prets"] as List<Dictionary<string, object>> : null;
+    // Définissez les options pour les listes déroulantes
+    var classes = new List<string> { "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X" }; // Liste des classes 
+    var grades = new List<string> { "6A", "6B", "5A", "5B", "4A", "4B", "4C", "3A", "3B", "3C", "2A", "2B", "1" }; // Liste des grades 
 }
 
-<h2>Demande de prêt</h2>
-<p>Vérifiez les informations complémentaires</p>
-<h4>Informations sur la simulation</h4>
-<div class="row">
-    <div class="col">
-        <p>Nom et Prénoms: <strong> @staff["Nomm"] @staff["Prenomm"] </strong> </p>
-    </div>
-    <div class="col">
-        <p>Numéro de compte: <strong> @staff["NumeroComptee"] </strong> </p>
+<div class="container mt-5">
+    <h2 class="mb-4">Demande de Prêt</h2>
+    <p class="text-muted">Veuillez vérifier les informations ci-dessous.</p>
+
+    <!-- Informations sur la simulation -->
+    <div class="card mb-4">
+        <div class="card-header text-white" style="background-color: #f8f9fa;">
+            <h4 class="mb-0">Informations sur la Simulation</h4>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>Nom et Prénoms :</strong> @staff["Nomm"] @staff["Prenomm"]</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Numéro de Compte :</strong> @staff["NumeroComptee"]</p>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <p><strong>Type de Prêt :</strong> @simulationData.TypeDePret</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Taux Annuel :</strong> @simulationData.AnnualRate %</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Montant :</strong> @string.Format("{0:N0}", @simulationData.Montant) F CFA</p>
+                </div>
+                @*<div class="col-md-3">
+                    
+                </div>*@
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <p><strong>Durée (mois) :</strong> @simulationData.Months</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Salaire Net :</strong> @string.Format("{0:N0}", @simulationData.NetSalary) F CFA</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Mensualités Maximum :</strong> @string.Format("{0:N0}", @simulationData.Remboursement) F CFA</p>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- Formulaire des informations complémentaires -->
+    <div class="card">
+        <div class="card-header text-white" style="background-color: #f8f9fa;">
+            <h4 class="mb-0">Informations Complémentaires</h4>
+        </div>
+        <div class="card-body">
+            <form id="complementaryForm" method="post">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input class="form-control"
+                                   value="@staff["Nomm"]"
+                                   type="text"
+                                   id="nom"
+                                   name="nom"
+                                   required>
+                            <label for="nom">Nom<span class="text-danger">*</span></label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input class="form-control"
+                                   value="@staff["Prenomm"]"
+                                   type="text"
+                                   id="prenoms"
+                                   name="prenoms"
+                                   required>
+                            <label for="prenoms">Prénoms <span class="text-danger">*</span></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input class="form-control"
+                                   type="date"
+                                   id="dateNaissance"
+                                   name="dateNaissance"
+                                   required>
+                            <label for="dateNaissance">Date de Naissance <span class="text-danger">*</span></label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input class="form-control"
+                                   type="date"
+                                   id="dateDebut"
+                                   name="dateDebut"
+                                   required>
+                            <label for="dateDebut">Date d'Entrée à ECOBANK-TOGO <span class="text-danger">*</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <!-- Liste déroulante pour Classe -->
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <select class="form-select" id="ranking" name="ranking" required>
+                                <option value="" disabled selected>Sélectionnez une classe</option>
+                                @foreach (var classe in classes)
+                                {
+                                    <option value="@classe">@classe</option>
+                                }
+                            </select>
+                            <label for="ranking">Classe <span class="text-danger">*</span></label>
+                        </div>
+                    </div>
+
+                    <!-- Liste déroulante pour Grade -->
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <select class="form-select" id="grade" name="grade" required>
+                                <option value="" disabled selected>Sélectionnez un grade</option>
+                                @foreach (var grade in grades)
+                                {
+                                    <option value="@grade">@grade</option>
+                                }
+                            </select>
+                            <label for="grade">Grade <span class="text-danger">*</span></label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input class="form-control"
+                                   value="@staff["Matriculee"]"
+                                   type="number"
+                                   id="matricule"
+                                   name="matricule"
+                                   readonly
+                                   required>
+                            <label for="matricule">N° Matricule</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="notes" class="form-label"><strong>Notes Explicatives :</strong></label>
+                    <div class="form-floating">
+                        <textarea class="form-control"
+                                  id="notes"
+                                  name="notes"
+                                  style="height: 150px;"
+                                  placeholder="Entrez vos notes ici..."></textarea>
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-send-fill"></i> Envoyer la Demande
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
-<div class="row">
-    <div class="col m-1">
-        <p>Type de prêt: <strong> @simulationData.TypeDePret </strong> </p>
-    </div>
-    <div class="col m-1">
-        <p>Taux annuel: <strong> @simulationData.AnnualRate % </strong> </p>
-    </div>
-    <div class="col m-1">
-        <p>Montant: <strong> @string.Format("{0:N0}", @simulationData.Montant) F CFA </strong> </p>
-    </div>
-    <div class="col m-1">
-        <p>Mensualités maximum: <strong>@string.Format("{0:N0}", @simulationData.Remboursement) F CFA </strong> </p>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col m-1">
-        <p>Durée (mois): <strong> @simulationData.Months </strong> </p>
-    </div>
-    <div class="col m-1">
-        <p>Quotité: <strong> @simulationData.Quotity % </strong> </p>
-    </div>
-    <div class="col m-1">
-        <p>Salaire net: <strong>@string.Format("{0:N0}", @simulationData.NetSalary) F CFA </strong> </p>
-    </div>
-    <div class="col m-1">
-        <p>Matricule: <strong> @simulationData.Matricule </strong> </p>
-    </div>
-</div>
-
-<h4>Entrez les informations complémentaires </h4>
-<form id="complementaryForm" method="post">
-    <div class="row">
-        <div class="col m-3">
-            <div class="form-floating">
-                <input class="form-control" type="date" id="dateNaissance" name="dateNaissance" required>
-                <label for="dateNaissance">Date de naissance :</label>
-            </div>
-        </div>
-
-        <div class="col m-3">
-            <div class="form-floating">
-                <input class="form-control" type="date" id="dateDebut" name="dateDebut" required>
-                <label for="dateDebut">Date d'entrée à ECOBANK-TOGO :</label>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-4 m-3">
-            <div class="form-floating">
-                <input class="form-control" type="text" id="ranking" name="ranking" required>
-                <label for="ranking">Classe :</label>
-            </div>
-        </div>
-
-        <div class="col-4 m-3">
-            <div class="form-floating">
-                <input class="form-control" type="text" id="grade" name="grade" required>
-                <label for="grade">Grade :</label>
-            </div>
-        </div>
-        <div class="col m-3">
-            <div class="form-floating">
-                <input class="form-control" value="@staff["Matriculee"]" type="number" id="matricule" name="matricule" readonly required>
-                <label for="matricule">N° Matricule :</label>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <label for="notes">Notes Explicatives :</label>
-        <div class="form-floating">
-            <textarea class="form-control" id="notes" name="notes" style="height: 175px;">
-    
-            </textarea>
-        </div>
-    </div>
-
-    <button type="submit" class="btn btn-primary mt-3">
-        Envoyer
-    </button>
-</form>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Optionnel : Ajoutez Bootstrap Icons pour les icônes -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <script>
-
         $(document).ready(function () {
             $('#complementaryForm').on('submit', function (event) {
-                //event.preventDefault();
+                event.preventDefault(); // Empêche le rechargement de la page
+
+                var nomComplet = $('#nom').val() + ' ' + $('#prenoms').val();
 
                 var data = {
                     Montant: encodeURIComponent(@simulationData.Montant),
-                    nom: encodeURIComponent('@staff["Nomm"] @staff["Prenomm"]'),
+                    nom: encodeURIComponent(nomComplet),
                     TypeDePret: encodeURIComponent('@simulationData.TypeDePret'),
                     numeroCompte: encodeURIComponent('@staff["NumeroComptee"]'),
                     annualRate: encodeURIComponent(@simulationData.AnnualRate),
@@ -128,7 +205,6 @@
                     matricule: encodeURIComponent(@simulationData.Matricule),
                     notes: encodeURIComponent($('#notes').val()),
                     prets: @Html.Raw(JsonConvert.SerializeObject(@prets)),
-
                 };
 
                 console.log('Données soumises:', data);
@@ -145,7 +221,12 @@
                         // Crée un lien pour télécharger le fichier
                         var link = document.createElement('a');
                         var url = window.URL.createObjectURL(blob);
-                        var fileName = xhr.getResponseHeader('Content-Disposition').split('filename=')[1].replace(/"/g, '');
+                        var contentDisposition = xhr.getResponseHeader('Content-Disposition');
+                        var fileName = "document.pdf"; // Nom par défaut
+
+                        if (contentDisposition && contentDisposition.indexOf('filename=') !== -1) {
+                            fileName = contentDisposition.split('filename=')[1].replace(/"/g, '');
+                        }
 
                         // Télécharge automatiquement le fichier
                         link.href = url;
@@ -153,6 +234,7 @@
                         document.body.appendChild(link);
                         link.click();
                         window.URL.revokeObjectURL(url);
+                        document.body.removeChild(link);
                     },
                     error: function (error) {
                         console.error('Erreur de communication avec le serveur:', error); // Affiche l'objet complet dans la console
@@ -161,6 +243,5 @@
                 });
             });
         });
-
     </script>
 }

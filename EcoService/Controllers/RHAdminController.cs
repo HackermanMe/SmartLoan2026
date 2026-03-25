@@ -33,54 +33,112 @@ namespace EcoService.Controllers
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         // Instance unique de RHSqlQuery pour l'utilisation dans le contrôleur
         private readonly RHSqlQuery _sqlQuery = new RHSqlQuery();
-
+        public int quotiteCessible = 50;
         // GET: RHAdmin
         public ActionResult Index()
         {
             string accountName = Session["accountName"]?.ToString() ?? "DEFAULT";
-            SqlDataReader DbReader = _sqlQuery.Accounts(accountName);
-            
-            // Rechercher le rôle dans la base de données 
-            RHSqlQuery a = new RHSqlQuery();
-            SqlDataReader DbReader1 = a.AccountRole(accountName);
+            DataTable dataTable = new DataTable();
 
-            // Initialisation de la variable du groupe de l'utilisateur
-            if (DbReader1.Read())
+            try
             {
-                // Vérification de la présence de la colonne IDGroup
-                if (DbReader1.IsDBNull(DbReader1.GetOrdinal("IDGroup")))
+                // --- Lecture des informations du compte ---
+                using (SqlDataReader DbReader = _sqlQuery.Accounts(accountName))
                 {
-                    Logger.Warn("Groupe non attribué pour l'utilisateur {0}", accountName);
-                    ModelState.AddModelError("", "Groupe non attribué.");
+                    if (DbReader.HasRows)
+                        dataTable.Load(DbReader);
+                    else
+                    {
+                        using (SqlDataReader DbReader2 = _sqlQuery.Accounts("DEFAULT"))
+                        {
+                            dataTable.Load(DbReader2);
+                        }
+                    }
                 }
-                else
+
+                // --- Recherche du rôle dans la base de données ---
+                using (SqlDataReader DbReader1 = _sqlQuery.AccountRole(accountName))
                 {
-                    int idgroup = DbReader1.GetInt32(DbReader1.GetOrdinal("IDGroup"));
-                    Session["idGroup"] = idgroup;                   
+                    if (DbReader1.Read())
+                    {
+                        int ordinal = DbReader1.GetOrdinal("IDGroup");
+
+                        if (DbReader1.IsDBNull(ordinal))
+                        {
+                            Logger.Warn("Groupe non attribué pour l'utilisateur {0}", accountName);
+                            ModelState.AddModelError("", "Groupe non attribué.");
+                        }
+                        else
+                        {
+                            // Lecture adaptée au type SQL BIGINT
+                            long idgroup = DbReader1.GetInt64(ordinal);
+                            Session["idGroup"] = Convert.ToInt32(idgroup); // garde la compatibilité avec int
+                            Logger.Info("Utilisateur {0} associé au groupe {1}", accountName, idgroup);
+                        }
+                    }
+                    else
+                    {
+                        Logger.Error("Aucune donnée de rôle trouvée pour l'utilisateur {0}", accountName);
+                        ModelState.AddModelError("", "Erreur de rôle utilisateur.");
+                    }
                 }
             }
-            else
+            catch (Exception ex)
             {
-                Logger.Error("Erreur de rôle utilisateur pour l'utilisateur {0}", accountName);
-                // Gérer le cas où aucune donnée n'est lue
-                ModelState.AddModelError("", "Erreur de rôle utilisateur.");
+                Logger.Error(ex, "Erreur inattendue dans RHAdminController.Index pour l'utilisateur {0}", accountName);
+                ModelState.AddModelError("", "Une erreur inattendue est survenue. Veuillez réessayer.");
             }
 
-            // Affichage des comptes du personnel à la vue par le dataTable
-            var dataTable = new DataTable();
-
-            if (DbReader.HasRows)
-            {
-                dataTable.Load(DbReader);
-            }
-            else
-            {
-                SqlDataReader DbReader2 = _sqlQuery.Accounts("DEFAULT");
-                dataTable.Load(DbReader2);
-            }
-
+            // --- Retour de la vue ---
             return View(dataTable);
         }
+
+        //public ActionResult Index()
+        //{
+        //    string accountName = Session["accountName"]?.ToString() ?? "DEFAULT";
+        //    SqlDataReader DbReader = _sqlQuery.Accounts(accountName);
+
+        //    // Rechercher le rôle dans la base de données 
+        //    RHSqlQuery a = new RHSqlQuery();
+        //    SqlDataReader DbReader1 = a.AccountRole(accountName);
+
+        //    // Initialisation de la variable du groupe de l'utilisateur
+        //    if (DbReader1.Read())
+        //    {
+        //        // Vérification de la présence de la colonne IDGroup
+        //        if (DbReader1.IsDBNull(DbReader1.GetOrdinal("IDGroup")))
+        //        {
+        //            Logger.Warn("Groupe non attribué pour l'utilisateur {0}", accountName);
+        //            ModelState.AddModelError("", "Groupe non attribué.");
+        //        }
+        //        else
+        //        {
+        //            int idgroup = DbReader1.GetInt32(DbReader1.GetOrdinal("IDGroup"));
+        //            Session["idGroup"] = idgroup;                   
+        //        }
+        //    }
+        //    else
+        //    {
+        //        Logger.Error("Erreur de rôle utilisateur pour l'utilisateur {0}", accountName);
+        //        // Gérer le cas où aucune donnée n'est lue
+        //        ModelState.AddModelError("", "Erreur de rôle utilisateur.");
+        //    }
+
+        //    // Affichage des comptes du personnel à la vue par le dataTable
+        //    var dataTable = new DataTable();
+
+        //    if (DbReader.HasRows)
+        //    {
+        //        dataTable.Load(DbReader);
+        //    }
+        //    else
+        //    {
+        //        SqlDataReader DbReader2 = _sqlQuery.Accounts("DEFAULT");
+        //        dataTable.Load(DbReader2);
+        //    }
+
+        //    return View(dataTable);
+        //}
 
         public ActionResult AccountsAdmin()
         {
@@ -102,8 +160,62 @@ namespace EcoService.Controllers
             return View(dataTable);
         }
 
+        public ActionResult ListDemandes()
+        {
+            List<RHDemande> listDemandes = _sqlQuery.GetDemandesPret();
+            return View(listDemandes);
+        }
+
+        // Action pour télécharger le rapport des demandes en fichier Excel
+        public ActionResult ExportToExcel()
+        {
+            List<RHDemande> loanRequests = _sqlQuery.GetDemandesPret();
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Rapport des Prêts");
+
+                // En-têtes des colonnes
+                worksheet.Cells[1, 1].Value = "Nom & Prénoms";
+                worksheet.Cells[1, 2].Value = "Date de naissance";
+                worksheet.Cells[1, 3].Value = "Numéro de compte";
+                worksheet.Cells[1, 4].Value = "Montant Crédit (Chiffre)";
+                worksheet.Cells[1, 5].Value = "Montant Mensualité (Chiffre)";
+                worksheet.Cells[1, 6].Value = "Nombre d'échéance (Chiffre)";
+                worksheet.Cells[1, 7].Value = "Date début de remboursement";
+                worksheet.Cells[1, 8].Value = "Taux";
+                worksheet.Cells[1, 9].Value = "Type de crédit";
+
+                // Remplir les lignes avec les données des demandes
+                int row = 2;
+                foreach (var request in loanRequests)
+                {
+                    worksheet.Cells[row, 1].Value = request.NomComplet; // Tu devrais récupérer le nom et prénom depuis une autre table liée
+                    worksheet.Cells[row, 2].Value = request.DateNaissance; // Valeur brute de la date
+                    worksheet.Cells[row, 2].Style.Numberformat.Format = "dd/MM/yyyy"; // Formater la cellule comme une date lisible
+                    worksheet.Cells[row, 3].Value = request.NumeroCompte;
+                    worksheet.Cells[row, 4].Value = request.Montant;
+                    worksheet.Cells[row, 5].Value = request.Montant / request.NbreEcheances; // Calcul de la mensualité
+                    worksheet.Cells[row, 6].Value = request.NbreEcheances;
+                    worksheet.Cells[row, 7].Value = request.CreatedAt; // Date de création
+                    worksheet.Cells[row, 8].Value = request.Taux;
+                    worksheet.Cells[row, 9].Value = request.TypePret;
+
+                    row++;
+                }
+
+                // Générer le fichier Excel
+                var stream = new MemoryStream();
+                package.SaveAs(stream);
+                stream.Position = 0;
+                string fileName = $"RapportPrets{DateTime.Now:yyyyMMddHHmmssfff}.xlsx";
+
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+        }
+
         //Action pour changer le rôle de l'utilisateur
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         public ActionResult ChangeRole(int role, int matricule)
         {
             try
@@ -128,7 +240,7 @@ namespace EcoService.Controllers
         }
 
         // Action pour rechercher les comptes
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         public ActionResult SearchAccounts(string searchTerm)
         {
             List<Dictionary<string, object>> accountsList = _sqlQuery.SearchAccounts(searchTerm);
@@ -136,7 +248,7 @@ namespace EcoService.Controllers
         }
 
         // Action pour rechercher le personnel
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         public ActionResult Search(string searchTerm)
         {
             List<Dictionary<string, object>> staffList = _sqlQuery.SearchStaff(searchTerm);
@@ -187,7 +299,7 @@ namespace EcoService.Controllers
 
             // Calculer la quotité consommée et résiduelle
             var quotiteConsommee = (totalMensualites / salaireNet) * 100;
-            var quotiteResiduelle = 40 - quotiteConsommee;
+            var quotiteResiduelle = quotiteCessible - quotiteConsommee;
 
             ViewBag.CreatedAt = createdAt;
             // Récupérer les prêts autres banques
@@ -217,7 +329,7 @@ namespace EcoService.Controllers
             return View();
         }
 
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         public ActionResult ImportStaffs(HttpPostedFileBase file)
         {
             // Implémentation de l'importation du personnel depuis un fichier Excel
@@ -227,9 +339,10 @@ namespace EcoService.Controllers
                 return RedirectToAction("UploadStaff");
             }
 
-            var uploadsFolder = Server.MapPath("~/Uploads/Staffs");
+            //var uploadsFolder = Server.MapPath("~/Uploads/Staffs");
 
-            //var uploadsFolder = "//10.8.14.100/SmartLoanList/";
+            var uploadsFolder = "//10.8.14.65/SmartLoanList/";
+
 
             //string uploadsFolder = WebConfigurationManager.AppSettings["RHExportPath"].ToString();
 
@@ -318,7 +431,7 @@ namespace EcoService.Controllers
             return RedirectToAction("UploadStaff");
         }
 
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         public ActionResult ImportLoans(HttpPostedFileBase file)
         {
             // Vérification de la validité du fichier
@@ -328,8 +441,8 @@ namespace EcoService.Controllers
                 return RedirectToAction("UploadLoans");
             }
 
-            var uploadsFolder = Server.MapPath("~/App_Data/uploads/");
-            //var uploadsFolder = "//10.8.14.100/SmartLoanList/";
+            //var uploadsFolder = Server.MapPath("~/App_Data/uploads/");
+            var uploadsFolder = "//10.8.14.65/SmartLoanList/";
 
             // Vérification de l'existence du répertoire de téléchargement
             if (!Directory.Exists(uploadsFolder))
@@ -455,11 +568,9 @@ namespace EcoService.Controllers
         public ActionResult DownloadLoansTemplate(string fileName)
         {
             // Chemin du fichier sur le serveur
-            //string filePath = "//10.8.14.65/SmartLoanList/Content/Files/"+fileName;
+            string filePath = "//10.8.14.65/SmartLoanList/Content/Files/"+fileName;
 
-            string filePath = Server.MapPath("~/Content/Files/" + fileName);
-            // C:\Users\ftchangai\source\repos\EcoService\EcoService\Content\Files\Prets.xlsx
-
+         
             // Définir le type de contenu en fonction de l'extension du fichier
             string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 

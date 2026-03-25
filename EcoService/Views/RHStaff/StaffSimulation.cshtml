@@ -9,6 +9,9 @@
     var autresPrets = Model.ContainsKey("AutresPrets") ? Model["AutresPrets"] as List<Dictionary<string, object>> : new List<Dictionary<string, object>>();
     var quotiteResiduelle = Model.ContainsKey("QuotiteResiduelle") ? Model["QuotiteResiduelle"] : null;
     var quotiteConsommee = Model.ContainsKey("QuotiteConsommee") ? Model["QuotiteConsommee"] : null;
+    var plafondPretUrgence = (Convert.ToDecimal(staff["SalaireNete"]) * 2);
+    var customCulture = (System.Globalization.CultureInfo)System.Globalization.CultureInfo.InvariantCulture.Clone();
+    customCulture.NumberFormat.NumberGroupSeparator = " ";
 }
 
 @if (staff != null)
@@ -24,7 +27,7 @@
             </p>
         </div>
     </div>
-    
+
     <!-- Tableau des prêts existants du staff -->
     <div class="col d-flex align-items-stretch">
         <div class="card w-100">
@@ -44,58 +47,63 @@
                 </div>
                 <div id="rachat">
                 </div>
-                <div class="table-responsive">
-                    <table class="table text-nowrap mb-0 align-middle">
-                        <thead class="text-dark fs-4">
-                            <tr>
-                                <th class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0">Racheter</h6>
-                                </th>
-                                <th class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0">Référence</h6>
-                                </th>
-                                <th class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0">Type de Credit</h6>
-                                </th>
-                                <th class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0">Montant Décaissé</h6>
-                                </th>
-                                <th class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0">Encours</h6>
-                                </th>
-                                <th class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0">Mensualités</h6>
-                                </th>
-                                <th class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0">Début remboursement</h6>
-                                </th>
-                                <th class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0">Fin remboursement</h6>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody id="resultsTable">
-                            @foreach (var pret in prets)
-                            {
+
+                @if (prets != null && prets.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table text-nowrap mb-0 align-middle">
+                            <thead class="text-dark fs-4">
                                 <tr>
-                                    <td><input name="rachatInput" id="rachatInput" type="checkbox" class="border-bottom-0  pretCheckbox" data-loan-mensualite="@pret["Mensualites"]" data-loan-id="@pret["PretId"]"></td>
-                                    <td class="border-bottom-0">@pret["ReferencePret"]</td>
-                                    <td class="border-bottom-0">
-                                        <h6 class="fw-semibold mb-1">@pret["TypeCredit"]</h6>
-                                        <span class="fw-normal">@pret["Taux"]%</span>
-                                    </td>
-                                    <td class="border-bottom-0" id="montant">@string.Format("{0:N0}", pret["Montant"])</td>
-                                    <td class="border-bottom-0" id="Encours">@string.Format("{0:N0}", pret["EnCours"])</td>
-                                    <td class="border-bottom-0">@string.Format("{0:N0}", pret["Mensualites"])</td>
-                                    @*<td class="border-bottom-0">@pret["StartDate"]</td>
-                                    <td class="border-bottom-0">@pret["EndDate"]</td>*@
-                                    <td class="border-bottom-0">@(((DateTime?)pret["StartDate"])?.ToString("dd/MM/yyyy") ?? "N/A")</td>
-                                    <td class="border-bottom-0">@(((DateTime?)pret["EndDate"])?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">Racheter</h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">Référence</h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">Type de Credit</h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">Montant Décaissé</h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">Encours</h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">Mensualités</h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">Début remboursement</h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">Fin remboursement</h6>
+                                    </th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody id="resultsTable">
+                                @foreach (var pret in prets)
+                                {
+                                    <tr>
+                                        <td><input name="rachatInput" id="rachatInput" type="checkbox" class="border-bottom-0  pretCheckbox" data-loan-mensualite="@pret["Mensualites"]" data-loan-id="@pret["PretId"]"></td>
+                                        <td class="border-bottom-0">@pret["ReferencePret"]</td>
+                                        <td class="border-bottom-0">
+                                            <h6 class="fw-semibold mb-1">@pret["TypeCredit"]</h6>
+                                            <span class="fw-normal">@pret["Taux"]%</span>
+                                        </td>
+                                        <td class="border-bottom-0" id="montant">@string.Format("{0:N0}", pret["Montant"])</td>
+                                        <td class="border-bottom-0" id="Encours">@string.Format("{0:N0}", pret["EnCours"])</td>
+                                        <td class="border-bottom-0">@string.Format("{0:N0}", pret["Mensualites"])</td>
+                                        <td class="border-bottom-0">@(((DateTime?)pret["StartDate"])?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                        <td class="border-bottom-0">@(((DateTime?)pret["EndDate"])?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                 } else
+                    {
+                        <p>Vous n'avez aucun prêt</p>
+                    }
             </div>
         </div>
     </div>
@@ -238,81 +246,99 @@
                     </div>
                 </div>
             </div>
-            
+
         </div>
     </div>
 
-    <div class="alert alert-light mt-3" role="alert">
-        <h4>Taux d'endettement: <span id="quot"></span></h4>
-        <h4>Quotité Disponible: <span id="engagement"></span></h4>
+    <div class="card overflow-hidden mt-3" role="alert">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <h4>Taux d'endettement: <span id="quot"></span></h4>
+                <h4>Quotité Disponible: <span id="engagement"></span></h4>
+            </div>
+        </div>
     </div>
     <!-- Formulaire ou informations de simulation -->
-    <form id="loanCalculator" method="post">
-        <div class="row">
-            <div class="col m-3">
-                <div class="form-floating">
-                    <select id="TypeDePret" name="TypeDePret" class="form-select">
-                        <option value="">Choisissez le type de prêt</option>
-                        <option value="Prêt d'urgence" data-rate="0" data-months="12" data-amount="@staff["SalaireNete"]*1.5">Prêt d'urgence</option>
-                        <option value="Prêt personnel" data-rate="3" data-months="60" data-amount="20000000">Prêt personnel</option>
-                        <option value="Prêt scolaire" data-rate="0" data-months="12" data-amount="@staff["SalaireNete"]">Prêt scolaire</option>
-                        <option value="Prêt automobile" data-rate="3" data-months="60" data-amount="20000000">Prêt automobile</option>
-                        <option value="Prêt Aménagement Habitat" data-rate="3" data-months="60" data-amount="15000000">Prêt Aménagement Habitat</option>
-                        <option value="Aménagement gros oeuvres" data-rate="3" data-months="120" data-amount="40000000">Prêt Aménagement gros oeuvres</option>
-                        <option value="Prêt immobilier" data-rate="3.5" data-months="180" data-amount="100000000">Prêt immobilier</option>
-                    </select>
-                    <label>Type de prêt</label>
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-9">
+                    <h5 class="card-title fw-semibold">Simulation</h5>
                 </div>
             </div>
+            <form id="loanCalculator" method="post">
+                <div class="row">
+                    <div class="col m-3">
+                        <div class="form-floating">
+                            <select id="TypeDePret" name="TypeDePret" class="form-select">
+                                <option value="">Choisissez le type de prêt</option>
+                                <option value="Prêt d'urgence" data-rate="0" data-months="12" data-amount="@(plafondPretUrgence.ToString(System.Globalization.CultureInfo.InvariantCulture))">Prêt d'urgence</option>
+                                <option value="Prêt personnel" data-rate="3" data-months="60" data-amount="30000000">Prêt personnel</option>
+                                <option value="Prêt scolaire" data-rate="0" data-months="12" data-amount="@(Convert.ToDecimal(staff["SalaireNete"]).ToString(System.Globalization.CultureInfo.InvariantCulture))">Prêt scolaire</option>
+                                <option value="Prêt automobile" data-rate="3" data-months="60" data-amount="20000000">Prêt automobile</option>
+                                <option value="Prêt Aménagement Habitat" data-rate="3" data-months="60" data-amount="20000000">Prêt Aménagement Habitat</option>
+                                <option value="Aménagement gros oeuvres" data-rate="3" data-months="120" data-amount="40000000">Prêt Aménagement gros oeuvres</option>
+                                <option value="Prêt immobilier" data-rate="3" data-months="180" data-amount="150000000">Prêt immobilier</option>
+                            </select>
+                            <label>Type de prêt</label>
+                        </div>
+                    </div>
 
-            <div class="col m-3">
-                <div class="form-floating">
-                    <input class="form-control" type="number" id="MontantEmprunte" name="MontantEmprunte" required>
-                    <label for="MontantEmprunte">Montant Emprunté (F CFA) :</label>
+                    <div class="col m-3">
+                        <div class="form-floating">
+                            <input class="form-control" type="number" id="MontantEmprunte" name="MontantEmprunte" required>
+                            <label for="MontantEmprunte">Montant Emprunté (F CFA) :</label>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="row">
+                    <div class="col-4 m-3">
+                        <div class="form-floating">
+                            <input class="form-control" type="number" id="annualRate" name="annualRate" step="0.01" readonly required>
+                            <label for="annualRate">Taux d'Intérêt Annuel (%) :</label>
+                        </div>
+                    </div>
+
+                    <div class="col-4 m-3">
+                        <div class="form-floating">
+                            <input class="form-control" type="number" id="months" name="months" required>
+                            <label for="months">Durée du Prêt (Mois) :</label>
+                        </div>
+                    </div>
+                    <div class="col m-3">
+                        <p>
+                            <strong class="text-danger">Durée Maximale:  <span id="maxMonths"></span></strong>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 m-3">
+                        <div class="form-floating">
+                            <input class="form-control" type="number" id="netSalary" value="@(Convert.ToDecimal(staff["SalaireNete"]).ToString(System.Globalization.CultureInfo.InvariantCulture))" name="netSalary" readonly required>
+                            <label for="netSalary">Salaire Net (F CFA) :</label>
+                        </div>
+                    </div>
+                    <div class="col m-3">
+                        <p>
+                            <strong class="text-danger">Montant plafond:  <span id="maxAmount"></span></strong>
+                        </p>
+                    </div>
+                </div>
+            </form>
+            <h4>Mensualité nouveau prêt: <span id="monthlyPayment"></span></h4>
+            <h4>Nouvelle Quotité: <span id="quotity"></span></h4>
+
+            <div id="message">
+            </div>
+            <div id="loan">
+                <button type="button" onclick="sendSimulation()" class="btn btn-primary btn-sm edit-btn">Demander un prêt</button>
+            </div>
+
+            <div class="m-3" id="sendSimulationMessage">
             </div>
         </div>
-
-        <div class="row">
-            <div class="col-4 m-3">
-                <div class="form-floating">
-                    <input class="form-control" type="number" id="annualRate" name="annualRate" step="0.01" readonly required>
-                    <label for="annualRate">Taux d'Intérêt Annuel (%) :</label>
-                </div>
-            </div>
-
-            <div class="col-4 m-3">
-                <div class="form-floating">
-                    <input class="form-control" type="number" id="months" name="months" required>
-                    <label for="months">Durée du Prêt (Mois) :</label>
-                </div>
-            </div>
-            <div class="col m-3">
-                <p>
-                    <strong class="text-danger">Durée Maximale:  <span id="maxMonths"></span></strong>
-                </p>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-6 m-3">
-                <div class="form-floating">
-                    <input class="form-control" type="number" id="netSalary" value="@staff["SalaireNete"]" name="netSalary" readonly required>
-                    <label for="netSalary">Salaire Net (F CFA) :</label>
-                </div>
-            </div>
-        </div>
-    </form>
-    <h4>Mensualité nouveau prêt: <span id="monthlyPayment"></span></h4>
-    <h4>Nouvelle Quotité: <span id="quotity"></span></h4>
-
-    <div id="message">
-    </div>
-    <div id="loan">
-        <button type="button" onclick="sendSimulation()" class="btn btn-primary btn-sm edit-btn">Demander un prêt</button>
-    </div>
-
-    <div class="m-3" id="sendSimulationMessage">
     </div>
 }
 else
@@ -326,6 +352,8 @@ else
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+        var quotiteCessible = 50;
+
         $(document).ready(function () {
             setQuotity();
 
@@ -430,6 +458,7 @@ else
         }
     });
 
+    // récupérer les mensualités des prêts autres banques sélectionnés
     $('.autrePretCheckbox:checked').each(function () {
         var mensualite = $(this).data('otherloan-mensualite');
         if (mensualite && !isNaN(parseFloat(mensualite))) {
@@ -449,7 +478,8 @@ else
 
     sum = sumOther + sumSelected;
 
-    var num = 40; // Conversion implicite en nombre
+            // quotiteCessible
+            var num = quotiteCessible; // Conversion implicite en nombre
 
     // Calcul de la quotité
     quotite = parseFloat(@quotiteConsommee) - (sum / salaireNete) * 100 + ((allmensualites / salaireNete) * 100);
@@ -502,14 +532,19 @@ else
         function setAmount() {
             const selectedOption = $('#TypeDePret option:selected');
             const amount = selectedOption.data('amount');
+
             if (amount !== undefined) {
                 $('#MontantEmprunte').attr("max", amount);
-                $('#maxAmount').text(amount + ' F CFA');
+
+                // Formater le montant avec séparateurs de milliers
+                const formattedAmount = amount.toLocaleString('fr-FR');
+                $('#maxAmount').text(formattedAmount + ' F CFA');
             } else {
                 $('#MontantEmprunte').val('');
                 $('#maxAmount').text('');
             }
         }
+
 
         // Fonction de calcul par le serveur des mensualités et de la quotité du prêt simulé
         function calculateMonthlyPayment() {
@@ -557,7 +592,7 @@ else
                     const [quotite, mensualitees] = setQuotity();
                     var newQuotity = parseFloat(@quotiteConsommee) + parseFloat(response.quotity) + parseFloat(mensualitees / @staff["SalaireNete"] * 100);
                     $('#quotity').text(newQuotity.toFixed(2) + '%');
-                    if (newQuotity <= 40) {
+                    if (newQuotity <= quotiteCessible) {
                         $('#message').html("<div class=\"alert alert-success\" role=\"alert\"><h4 class=\"text-success \">Vous pouvez prendre ce prêt ! </h4></div>");
                         $('#loan').show();
                     } else {
@@ -581,7 +616,7 @@ else
             const autreMensualites = parseFloat($('#mensualites').val());
             const TypeDePret = $('#TypeDePret').val();
             //const quotity = parseFloat($('#quotity').text().replace('%', ''));
-            const quotity = 39;
+            const quotity = 49;
             const matricule = @staff["Matriculee"];
 
             $.ajax({
@@ -607,7 +642,7 @@ else
                         $('#sendSimulationMessage').html("<div class=\"alert alert-danger\" role=\"alert\"><h4 class=\"text-danger \">" + response.message + "</h4></div>");
                     }
                 },
-                error: function (response) {
+                error: function (xhr, status, error) {
                     alert('Erreur de communication avec le serveur: ' + error);
                     $('#sendSimulationMessage').html("<div class=\"alert alert-danger\" role=\"alert\"><h4 class=\"text-danger \"> Erreur de communication avec le serveur: " + error + "</h4></div>");
                 }

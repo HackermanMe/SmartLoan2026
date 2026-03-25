@@ -17,8 +17,8 @@ CREATE TABLE [dbo].[Accounts] (
 
 EXEC sp_rename 'RHAccounts.UserId', 'idUser', 'COLUMN';
 
-INSERT INTO RHAccounts(Nom,Prenom,Email,NumeroCompte,IDGroup,ProfilUser) VALUES ('TCHANGAI', 'Florentin', 'FTCHANGAI@ecobank.com', '140167775001', 1, 'Valid');
-INSERT INTO RHStaffs(Matricule,SalaireNet,Email,NumeroCompte) VALUES (890, 300000, 'FTCHANGAI@ecobank.com', '140167775001');
+INSERT INTO RHAccounts(Nom,Prenom,Email,NumeroCompte,IDGroup,ProfilUser) VALUES ('TCHANGAI', 'Florentin', 'ftchangai@ecobank.com', '140167775001', 1, 'Valid');
+INSERT INTO RHStaffs(Matricule,SalaireNet,Email,NumeroCompte) VALUES (890, 300000, 'ftchangai@ecobank.com', '140167775001');
 
 SET IDENTITY_INSERT [dbo].[RHPretsExistants] ON
 INSERT INTO [dbo].[RHPretsExistants] ([PretId], [ReferencePret], [Montant], [StartDate], [EndDate], [Taux], [EnCours], [NumeroCompte], [StaffId], [Mensualites], [TypeCredit]) VALUES (2013, N'M61ACAS203660001', CAST(14000000.00 AS Decimal(18, 2)), N'2020-12-31 00:00:00', N'2025-12-25 00:00:00', 3, 4662843, N'140032679014', NULL, 123450, N'CREDIT MOYEN TERME AUTO-MOTO STAFF AMORTI ')
@@ -39,12 +39,9 @@ SET IDENTITY_INSERT [dbo].[RHPretsExistants] OFF
 ALTER TABLE ECOSERVICEDB.dbo.RHAccounts
 ADD NumeroCompte VARCHAR(255);
 
-ALTER TABLE ECOSERVICEDB.dbo.RHAccounts
-ALTER COLUMN Email VARCHAR(255);
 
 SELECT b.IDGroup, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee
 FROM [EcoServiceDB].[dbo].RhAccounts a JOIN [EcoServiceDB].[dbo].[RHRoles] b ON a.IDGroup = b.IDGroup WHERE a.Login = 'FTCHANGAI'
-
 
 -- Script de création de la table de demandes de prêts 
 CREATE TABLE [dbo].[RHDemandes] (
@@ -71,4 +68,8 @@ CREATE TABLE RHRoleChangesPending (
 );
 GO
 
-SELECT * FROM dbo.RHAccounts;
+SELECT * FROM dbo.RHAccounts WHERE Nom LIKE '%KOKOU%';
+
+INSERT INTO RHRoleChangesPending (Matricule, NewRole, ProposedBy) VALUES (1003, 1, 1001);
+
+DELETE FROM RHDemandes;

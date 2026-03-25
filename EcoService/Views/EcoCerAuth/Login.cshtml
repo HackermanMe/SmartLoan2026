@@ -1,0 +1,109 @@
+﻿
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_LoginPartial.cshtml";
+}
+
+@model EcoService.Models.EcoCerUserLoginModel
+
+<style>
+    .custom-margin {
+        margin-top: 105px;
+    }
+
+    .custom-container {
+        /* background-color:#fafdfe; */
+        /* background-color: #0082bb; */
+        width: 500px;
+        height: fit-content;
+        border-color: #e5e5e5;
+        box-shadow: 4px 4px rgb(0 0 0 / 0.1);
+        border-radius: 8px;
+    }
+
+    .login-inputs {
+        width: auto;
+        height: 42px;
+        /* border:2px; */
+        border-style: solid;
+        border-width: 2px;
+        border-color: #d0d5dd;
+        border-radius: 9px;
+        padding: 14px;
+    }
+
+    .login-button {
+        width: 500px;
+        height: 42px;
+        text-align: center;
+        border-style: none;
+        border-radius: 9px;
+        font-size: 1.2rem;
+        background-color: #0082bb;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+        .login-button:active {
+            background-color: #005f8c;
+            transform: scale(0.95);
+        }
+
+    input:focus {
+        border-color: #c5cedb;
+        border-width: 3px;
+        outline: none;
+    }
+
+    button:hover {
+        background-color: #007bb1;
+    }
+
+    .transbox {
+        background-color: #ffffff;
+        /* opacity:0.6; */
+    }
+
+    label, input, button {
+        font-family: 'Poppins';
+        font-weight: 400;
+    }
+
+    .login-label {
+        color: #686D76;
+    }
+</style>
+
+<div class="p-10 custom-margin container bg-opacity-25">
+    <div class="form-container">
+        <div class="row justify-content-center align-content-center">
+            <div class="col-md-5">
+                <div class="card p-5 custom-container border-1 border">
+                    <div class="text-center">
+                        <img src="~/images/logo.png" alt="Logo" class="img-fluid" style="max-width: 180px; margin-bottom: 15px;" />
+                    </div>
+                    <h2 class="mb-3" style="color:#0082bb; text-align:center; font-family:'Poppins';font-weight:600; font-size:1.6rem">EcoCertificate</h2>
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <h2 class="mb-3" style="color:#0082bb; font-family:'Poppins';font-weight:600; font-size:1.4rem">Connectez-vous</h2>
+                    <form asp-action="Login" method="post">
+                        <div class="d-flex flex-column gap-2">
+                            <label asp-for="Login" class="login-label">Nom d'utilisateur</label>
+                            <input asp-for="Login" type="text" class="login-inputs" name="Login" placeholder="Entrer le nom d'utilisateur">
+                            <span asp-validation-for="Login" class="text-danger"></span>
+                        </div>
+                        <br>
+                        <div class="d-flex flex-column gap-2">
+                            <label asp-for="Password" class="login-label">Mot de passe</label>
+                            <input asp-for="Password" type="password" class="login-inputs" name="password" placeholder="Entrer le mot de passe">
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        <br />
+                        <div class="d-flex">
+                            <button type="submit" class="login-button text-white">Se Connecter</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,944 @@
+.amortissement-container {
+    max-width: 1400px;
+    margin: auto;
+}
+
+
+/* ============================
+   FORMULAIRE PLUS ATTRACTIF
+   ============================ */
+
+.form-section-compact {
+    padding: 14px 18px;
+    margin-top: 10px;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* Tabs mieux styl�s */
+.form-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.tab-btn {
+    background: #f3f6fb;
+    border: 1px solid #dce6f3;
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    transition: all 0.2s ease;
+}
+
+    .tab-btn:hover {
+        background: var(--color-primary-light);
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+    }
+
+    .tab-btn.active {
+        background: var(--color-primary);
+        color: white;
+        border-color: var(--color-primary);
+    }
+
+/* Onglets : masquer les inactifs */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Encours : grille horizontale */
+.encours-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px 14px;
+}
+
+.encours-card {
+    background: #f8fbff;
+    border: 1px solid #e4eefb;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+}
+
+.encours-header-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.encours-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-supprimer-encours {
+    background: none;
+    border: none;
+    color: var(--color-error, #DC3545);
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* Grid plus compact */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px 14px;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+    .form-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1100px) {
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 700px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Champs plus jolis */
+.form-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.form-control {
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid #d7dce3;
+    padding: 6px 10px;
+    font-size: 13px;
+    background: #fbfcfe;
+    transition: 0.2s;
+}
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0px 0px 0px 3px rgba(0, 120, 212, 0.2);
+        background: white;
+    }
+
+/* Sections internes plus compactes */
+.capacite-section,
+.piece-identite-section,
+.differe-section,
+.ra-section {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #f8fbff;
+    border: 1px solid #e4eefb;
+}
+
+    .capacite-section h4,
+    .piece-identite-section h4,
+    .differe-section h4,
+    .ra-section h4 {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: var(--color-primary-dark);
+    }
+
+/* Boutons action plus jolis */
+.form-actions {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border-light);
+}
+
+    .form-actions .btn {
+        border-radius: 10px;
+        padding: 10px 18px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+/* Bouton % frais dossier */
+.btn-calc-frais {
+    height: 36px;
+    width: 36px;
+    border-radius: 10px;
+    border: none;
+    background: var(--color-primary);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: 0.2s;
+}
+
+    .btn-calc-frais:hover {
+        background: var(--color-primary-hover);
+    }
+
+
+/*
+ * =============================================================================
+ * STYLES CSS - TABLEAU D'AMORTISSEMENT
+ * =============================================================================
+ * Feuille de style pure CSS (sans framework) pour le module d'amortissement.
+ *
+ * Palette de couleurs:
+ * - Bleu primaire    : #0078D4 (boutons, titres, accents)
+ * - Bleu secondaire  : #106EBE (hover, liens)
+ * - Bleu fonce       : #004578 (headers tableau)
+ * - Bleu tres clair  : #E6F2FF (fonds alternes)
+ * - Blanc            : #FFFFFF (fond principal)
+ * - Gris clair       : #F5F5F5 (fond sections)
+ * - Texte            : #333333 (texte principal)
+ *
+ * Organisation:
+ * 1. Variables CSS
+ * 2. Reset et base
+ * 3. Layout principal
+ * 4. En-tete de page
+ * 5. Formulaire
+ * 6. Boutons
+ * 7. Section resultats
+ * 8. Resume du pret
+ * 9. Tableau d'amortissement
+ * 10. Export
+ * 11. Messages d'erreur
+ * 12. Responsive
+ * =============================================================================
+ */
+
+/* =============================================================================
+   1. VARIABLES CSS
+   Centralisees pour faciliter la personnalisation et la maintenance
+   ============================================================================= */
+:root {
+    /* Couleurs principales */
+    --color-primary: #0078D4;
+    --color-primary-hover: #106EBE;
+    --color-primary-dark: #004578;
+    --color-primary-light: #E6F2FF;
+
+    /* Couleurs neutres */
+    --color-white: #FFFFFF;
+    --color-bg: #F8FAFC;
+    --color-bg-section: #F5F5F5;
+    --color-border: #E0E0E0;
+    --color-border-light: #F0F0F0;
+
+    /* Couleurs texte */
+    --color-text: #333333;
+    --color-text-light: #666666;
+    --color-text-muted: #999999;
+
+    /* Couleurs d'etat */
+    --color-success: #28A745;
+    --color-warning: #FFA500;
+    --color-error: #DC3545;
+
+    /* Espacements */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+
+    /* Rayons de bordure */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    /* Ombres */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+}
+
+/* =============================================================================
+   2. RESET ET BASE
+   ============================================================================= */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* =============================================================================
+   3. LAYOUT PRINCIPAL
+   ============================================================================= */
+
+/* Contenu principal pleine page */
+.main-content {
+    min-height: 100vh;
+    background-color: var(--color-bg);
+}
+
+.amortissement-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: var(--spacing-md);
+}
+
+/* =============================================================================
+   4. EN-TETE DE PAGE (COMPACT)
+   Style epure avec bandeau bleu subtil
+   ============================================================================= */
+.page-header {
+    text-align: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    border-radius: var(--radius-md);
+    color: var(--color-white);
+}
+
+.page-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+    font-size: 0.85rem;
+    margin: 4px 0 0 0;
+    opacity: 0.9;
+}
+
+/* =============================================================================
+   5. FORMULAIRE COMPACT
+   Design epure et compact - tous les champs sur une grille
+   ============================================================================= */
+.form-section {
+    background: var(--color-white);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+/* Version compacte du formulaire */
+.form-section.form-compact {
+    padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--color-primary-light);
+}
+
+.section-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-primary-dark);
+    margin: 0;
+}
+
+/* -----------------------------------------------------------------------------
+   GRILLE COMPACTE - Tous les champs alignes
+   ----------------------------------------------------------------------------- */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--spacing-sm);
+    align-items: end;
+}
+
+/* Groupe de champ individuel */
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-light);
+    margin-bottom: 2px;
+    white-space: nowrap;
+}
+
+/* Champs de formulaire compacts */
+.form-control {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 0.875rem;
+    color: var(--color-text);
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.15);
+}
+
+.form-control::placeholder {
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+}
+
+/* Boutons inline dans la grille */
+.form-actions-inline {
+    display: flex;
+    gap: var(--spacing-xs);
+    align-items: flex-end;
+    padding-bottom: 2px;
+}
+
+/* Zone d'actions du formulaire (version classique) */
+.form-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border-light);
+}
+
+/* =============================================================================
+   6. BOUTONS
+   Style epure avec hover anime
+   ============================================================================= */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+/* Boutons compacts */
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Bouton primaire (bleu) */
+.btn-primary {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+/* Bouton secondaire (outline) */
+.btn-secondary {
+    background-color: var(--color-white);
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background-color: var(--color-primary-light);
+}
+
+/* =============================================================================
+   7. SECTION RESULTATS
+   ============================================================================= */
+.results-section {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =============================================================================
+   8. RESUME DU PRET
+   Carte avec grille d'informations
+   ============================================================================= */
+.resume-card {
+    background: var(--color-white);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Affichage mis en avant de la mensualite */
+.mensualite-display {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-sm);
+}
+
+.mensualite-display span {
+    font-size: 1.25rem;
+    color: var(--color-primary-dark);
+}
+
+/* Grille du resume */
+.resume-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.resume-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-bg);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--color-primary-light);
+}
+
+.resume-item.highlight {
+    background: var(--color-primary-light);
+    border-left-color: var(--color-primary);
+}
+
+.resume-label {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+}
+
+.resume-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.resume-item.highlight .resume-value {
+    color: var(--color-primary-dark);
+}
+
+/* =============================================================================
+   9. TABLEAU D'AMORTISSEMENT
+   Style epure avec headers bleus
+   ============================================================================= */
+.tableau-card {
+    background: var(--color-white);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.table-container {
+    overflow-x: auto;
+    margin-top: var(--spacing-md);
+}
+
+.amortissement-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+/* En-tetes du tableau */
+.amortissement-table thead th {
+    background: var(--color-primary-dark);
+    color: var(--color-white);
+    padding: var(--spacing-md);
+    text-align: right;
+    font-weight: 600;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+}
+
+.amortissement-table thead th:first-child {
+    text-align: center;
+    border-top-left-radius: var(--radius-sm);
+}
+
+.amortissement-table thead th:nth-child(2) {
+    text-align: center;
+}
+
+.amortissement-table thead th:last-child {
+    border-top-right-radius: var(--radius-sm);
+}
+
+/* Corps du tableau */
+.amortissement-table tbody td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-align: right;
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.amortissement-table tbody td:first-child {
+    text-align: center;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.amortissement-table tbody td:nth-child(2) {
+    text-align: center;
+}
+
+/* Lignes alternees */
+.amortissement-table tbody tr:nth-child(even) {
+    background-color: var(--color-primary-light);
+}
+
+/* Hover sur les lignes */
+.amortissement-table tbody tr:hover {
+    background-color: #D4E8FC;
+}
+
+/* Ligne en differe (style different) */
+.amortissement-table tbody tr.differe {
+    background-color: #FFF8E7;
+    font-style: italic;
+}
+
+.amortissement-table tbody tr.differe:hover {
+    background-color: #FFEFC7;
+}
+
+/* Ligne TOTAL (style special) */
+.amortissement-table tbody tr.total-row {
+    background-color: var(--color-primary-dark) !important;
+    color: var(--color-white);
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.amortissement-table tbody tr.total-row:hover {
+    background-color: var(--color-primary-dark) !important;
+}
+
+.amortissement-table tbody tr.total-row td {
+    border-bottom: none;
+    padding: var(--spacing-md);
+}
+
+.amortissement-table tbody tr.total-row td.total-label {
+    text-align: center;
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+
+/* =============================================================================
+   10. BOUTONS D'EXPORT
+   ============================================================================= */
+.export-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.btn-export {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.export-icon {
+    font-size: 1.2rem;
+}
+
+/* Bouton Excel (vert) */
+.btn-excel {
+    background-color: var(--color-success);
+    color: var(--color-white);
+}
+
+.btn-excel:hover {
+    background-color: #218838;
+}
+
+/* Bouton PDF (rouge) */
+.btn-pdf {
+    background-color: #DC3545;
+    color: var(--color-white);
+}
+
+.btn-pdf:hover {
+    background-color: #C82333;
+}
+
+/* Bouton Word (bleu) */
+.btn-word {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+.btn-word:hover {
+    background-color: var(--color-primary-hover);
+}
+
+/* =============================================================================
+   11. MESSAGES D'ERREUR
+   ============================================================================= */
+.error-container {
+    margin-top: var(--spacing-lg);
+}
+
+.error-message {
+    background-color: #FFF0F0;
+    border: 1px solid var(--color-error);
+    border-left: 4px solid var(--color-error);
+    color: var(--color-error);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+}
+
+/* =============================================================================
+   12. RESPONSIVE
+   Adaptations pour tablettes et mobiles
+   ============================================================================= */
+
+/* Ecrans larges - grille complete */
+@media (min-width: 1200px) {
+    .form-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+/* Tablettes */
+@media (max-width: 1199px) {
+    .form-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .form-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .resume-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Petites tablettes */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Mobiles */
+@media (max-width: 576px) {
+    .amortissement-container {
+        padding: var(--spacing-sm);
+    }
+
+    .page-header {
+        padding: var(--spacing-sm) var(--spacing-md);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .page-title {
+        font-size: 1.2rem;
+    }
+
+    .page-subtitle {
+        display: none;
+    }
+
+    .form-section,
+    .resume-card,
+    .tableau-card {
+        padding: var(--spacing-sm);
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-xs);
+    }
+
+    .form-actions-inline {
+        grid-column: span 2;
+        justify-content: center;
+    }
+
+    .section-header {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        align-items: flex-start;
+    }
+
+    .mensualite-display {
+        width: 100%;
+        text-align: center;
+        font-size: 0.85rem;
+    }
+
+    .resume-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-xs);
+    }
+
+    .resume-item {
+        padding: var(--spacing-xs);
+        font-size: 0.8rem;
+    }
+
+    .form-actions {
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .export-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .btn-export {
+        flex: 1;
+        min-width: 100px;
+        justify-content: center;
+        font-size: 0.75rem;
+        padding: 6px 8px;
+    }
+
+    /* Tableau en scroll horizontal */
+    .amortissement-table {
+        font-size: 0.75rem;
+    }
+
+    .amortissement-table thead th,
+    .amortissement-table tbody td {
+        padding: 4px 6px;
+    }
+}
+
+/* =============================================================================
+   13. ANIMATIONS DE CHARGEMENT
+   ============================================================================= */
+.btn-loader {
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-loader::after {
+    content: "";
+    width: 16px;
+    height: 16px;
+    margin-left: var(--spacing-sm);
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* -----------------------------------------------------------------------------
+   SPINNERS POUR BOUTONS D'EXPORT
+   ----------------------------------------------------------------------------- */
+
+/* Bouton en etat de chargement */
+.btn-loading {
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.btn-loading:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Spinner anime */
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: var(--spacing-xs);
+}
+
+/* =============================================================================
+   14. IMPRESSION
+   ============================================================================= */
+@media print {
+    .page-header,
+    .form-section,
+    .export-actions,
+    .form-actions {
+        display: none;
+    }
+
+    .results-section {
+        display: block !important;
+    }
+
+    .amortissement-table {
+        font-size: 0.8rem;
+    }
+}

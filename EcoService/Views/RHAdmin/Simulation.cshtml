@@ -231,24 +231,29 @@
         </div>
     </div>
 
-    <div class="alert alert-light mt-3" role="alert">
-        <h4>Taux d'endettement: <span id="quot"></span></h4>
-        <h4>Quotité Disponible: <span id="engagement"></span></h4>
+    <div class="card overflow-hidden mt-3" role="alert">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <h4>Taux d'endettement: <span id="quot"></span></h4>
+                <h4>Quotité Disponible: <span id="engagement"></span></h4>
+            </div>
+        </div>
     </div>
     <!-- Formulaire ou informations de simulation -->
+    <h5 class="card-title fw-semibold">Simulation</h5>
     <form id="loanCalculator" method="post">
         <div class="row">
             <div class="col m-3">
                 <div class="form-floating">
                     <select id="TypeDePret" name="TypeDePret" class="form-select">
                         <option value="">Choisissez le type de prêt</option>
-                        <option value="Prêt d'urgence" data-rate="0" data-months="12" data-amount="@staff["SalaireNete"]*1.5">Prêt d'urgence</option>
-                        <option value="Prêt personnel" data-rate="3" data-months="60" data-amount="20000000">Prêt personnel</option>
+                        <option value="Prêt d'urgence" data-rate="0" data-months="12" data-amount="@staff["SalaireNete"]*2">Prêt d'urgence</option>
+                        <option value="Prêt personnel" data-rate="3" data-months="60" data-amount="30000000">Prêt personnel</option>
                         <option value="Prêt scolaire" data-rate="0" data-months="12" data-amount="@staff["SalaireNete"]">Prêt scolaire</option>
                         <option value="Prêt automobile" data-rate="3" data-months="60" data-amount="20000000">Prêt automobile</option>
-                        <option value="Prêt Aménagement Habitat" data-rate="3" data-months="60" data-amount="15000000">Prêt Aménagement Habitat</option>
+                        <option value="Prêt Aménagement Habitat" data-rate="3" data-months="60" data-amount="20000000">Prêt Aménagement Habitat</option>
                         <option value="Aménagement gros oeuvres" data-rate="3" data-months="120" data-amount="40000000">Prêt Aménagement gros oeuvres</option>
-                        <option value="Prêt immobilier" data-rate="3.5" data-months="180" data-amount="100000000">Prêt immobilier</option>
+                        <option value="Prêt immobilier" data-rate="3" data-months="180" data-amount="150000000">Prêt immobilier</option>
                     </select>
                     <label>Type de prêt</label>
                 </div>
@@ -382,6 +387,7 @@ else
 
         // Fonction d'actualisation de la quotité actuelle
         function setQuotity() {
+            var quotiteCessible = 50;
     var mensualites = [];
     var allmensualites = 0;
     var quotite = parseFloat(@quotiteConsommee) || 0; // Convertir en nombre ou mettre 0 par défaut
@@ -396,7 +402,7 @@ else
     // Parcourir chaque ligne du tableau des autres engagements pour récupérer les mensualités
     $('.autrePretCheckbox').each(function () {
         var row = $(this);
-        var mensualite = $(this).data('otherloan-mensualite'); 
+        var mensualite = $(this).data('otherloan-mensualite');
         if (mensualite && !isNaN(parseFloat(mensualite))) {
             mensualites.push(parseFloat(mensualite)); // Convertir en nombre avant d'ajouter au tableau
         }
@@ -436,7 +442,7 @@ else
 
     sum = sumOther + sumSelected;
 
-    var num = 40; // Conversion implicite en nombre
+            var num = quotiteCessible; // Conversion implicite en nombre
 
     // Calcul de la quotité
     quotite = parseFloat(@quotiteConsommee) - (sum / salaireNete) * 100 + ((allmensualites / salaireNete) * 100);
@@ -501,6 +507,7 @@ else
 
         // Fonction de calcul par le serveur des mensualités et de la quotité du prêt simulé
         function calculateMonthlyPayment() {
+            var quotiteCessible = 50;
             // Envoi des prêts Ecobank rachetés au serveur
             var selectedLoanIds = [];
             $('.pretCheckbox:checked').each(function () {
@@ -546,7 +553,7 @@ else
                     const [quotite, mensualitees] = setQuotity();
                     var newQuotity = parseFloat(@quotiteConsommee) + parseFloat(response.quotity) + parseFloat(mensualitees / @staff["SalaireNete"] * 100);
                     $('#quotity').text(newQuotity.toFixed(2) + '%');
-                    if (newQuotity <= 40) {
+                    if (newQuotity <= quotiteCessible) {
                         $('#message').html("<div class=\"alert alert-success\" role=\"alert\"><h3 class=\"text-success \">Vous pouvez prendre ce prêt ! </h3></div>");
                     } else {
                         $('#message').html("<div class=\"alert alert-danger\" role=\"alert\"><h3 class=\"text-danger \">Vous ne pouvez pas prendre ce prêt !</h3></div>");

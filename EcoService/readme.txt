@@ -24,7 +24,7 @@ This Revision (V.1.2.0)
 
    * The Old Implementation (Basic Usage)
 
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult UploadFiles(Enumerable<HttpPostedFileBase> files)
 	    {
@@ -35,7 +35,7 @@ This Revision (V.1.2.0)
 
   * The New Implementation (Wraps in a using statement)
 
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult UploadFiles(IEnumerable<HttpPostedFileBase> files)
 		{
@@ -67,7 +67,7 @@ This Revision (V.1.2.0)
        
 2........Sending the files
              
-	    [HttpPost]
+	    [System.Web.Mvc.HttpPost]
         [ValidateAntiForgeryToken]
         public  ActionResult UploadFiles(IEnumerable<HttpPostedFileBase> files)
 		{
@@ -85,7 +85,7 @@ This Revision (V.1.2.0)
 
 3........Sending the files Asyncronuously
 
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         [ValidateAntiForgeryToken]
         public  async Task<int> ActionResult UploadFiles(IEnumerable<HttpPostedFileBase> files)
 		{

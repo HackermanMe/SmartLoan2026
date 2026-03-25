@@ -17,6 +17,16 @@ namespace EcoService.Models
         [Display(Name = "Nom")]
         public string Nom { get; set; }
 
+        [Required(ErrorMessage = "Le prénom est requis.")]
+        [StringLength(100, ErrorMessage = "Le prénom ne doit pas dépasser 100 caractères.")]
+        [Display(Name = "Prenom")]
+        public string Prenom { get; set; }
+
+        [Required(ErrorMessage = "Le numéro de compte est requis.")]
+        [StringLength(14, ErrorMessage = "Le numéro de compte ne doit pas dépasser 14 caractères.")]
+        [Display(Name = "Nom")]
+        public string NumeroCompte { get; set; }
+
         [Required(ErrorMessage = "L'adresse email est requise.")]
         [EmailAddress(ErrorMessage = "Veuillez entrer une adresse email valide.")]
         [Display(Name = "Email")]

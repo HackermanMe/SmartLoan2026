@@ -1,0 +1,229 @@
+﻿
+@{
+    ViewBag.Title = "Editer Template";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model EcoService.Models.EcoCerTempViewModel
+
+<!----------------------------------------------------- Section styles -------------------------------------------------->
+
+<style>
+    .view-content-box {
+        width: auto;
+        border-color: #e5e5e5;
+        border-radius: 8px;
+        padding: 30px;
+        /* background-color: #F5F5F7;*/
+        box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1), -4px 0 8px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .preview-box {
+    }
+
+    .editCertificate-input {
+        height: 40px;
+        width: auto;
+        border-style: solid;
+        border-width: 2px;
+        border-color: #d0d5dd;
+        border-radius: 9px;
+        padding: 14px;
+    }
+
+    input:focus {
+        border-color: #c5cedb;
+        border-width: 3px;
+        outline: none;
+    }
+
+    .view-content-box span {
+        color: #686D76;
+    }
+
+    .confirm-button {
+        background-color: #0082bb;
+        width: 300px;
+        height: 50px;
+        border-style: none;
+        border-radius: 9px;
+        text-align: center;
+        font-size: 1rem;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+        .confirm-button:active {
+            background-color: #005f8c;
+            transform: scale(0.95);
+        }
+
+    button:hover {
+        background-color: #007bb1;
+    }
+
+    .success-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background: #F5F5F7;
+        padding: 15px;
+        border-radius: 10px;
+        width: 500px;
+        box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
+    }
+
+    body.modal-open {
+        filter: blur(px);
+        pointer-events: none;
+    }
+</style>
+
+<!----------------------------------------------------- Section html -------------------------------------------------->
+
+<div class="view-content-box">
+    <h4>Formulaire de modification du template</h4>
+    <hr />
+
+    <form id="editCerTempForm" action="@Url.Action("EditCertificateTemplate","EcoCerAdmin")" method="post">
+        <div class="d-flex flex-column justify-content-center p-4 gap-md-4">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @* <div asp-validation-summary="ModelOnly" class="text-danger"></div> *@
+            <div class="d-flex flex-column gap-2">
+                <label for="headerText">Entête : </label>
+                <div class="p-2 shadow-sm rounded border mb-2">
+                    <span id="preview-HeaderText">@Model.HeaderText</span>
+                </div>
+                @Html.TextBoxFor(model => model.HeaderText, new { @class = "editCertificate-input", placeholder = "Modifier le texte d'entête" })
+                @Html.ValidationMessageFor(model => model.HeaderText, "", new { @class = "text-danger" })
+                @* <input type="text" asp-for="HeaderText" name="headerText" id="headerText" class="editCertificate-input" placeholder="Modifier le texte d'entête" />
+                    <span asp-validation-for="HeaderText" class="text-danger"></span> *@
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <label for="titleText">Titre : </label>
+                <div class="p-2 shadow-sm rounded border mb-2">
+                    <span id="preview-TitleText">@Model.TitleText</span>
+                </div>
+                @Html.TextBoxFor(model => model.TitleText, new { @class = "editCertificate-input", placeholder = "Modifier le titre du document" })
+                @Html.ValidationMessageFor(model => model.TitleText, "", new { @class = "text-danger" })
+                @* <input type="text" asp-for="TitleText" name="titleText" id="titleText" class="editCertificate-input" placeholder="Modifier le titre du document" />
+                    <span asp-validation-for="TitleText" class="text-danger"></span> *@
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <label for="bodyTextPart1">Corps du document(partie 1) : </label>
+                <div class="p-2 shadow-sm rounded border mb-2">
+                    <span id="preview-BodyTextPart1">@Model.BodyTextPart1</span>
+                </div>
+                @Html.TextBoxFor(model => model.BodyTextPart1, new { @class = "editCertificate-input", placeholder = "Modifier la première partie du corps du document" })
+                @Html.ValidationMessageFor(model => model.BodyTextPart1, "", new { @class = "text-danger" })
+                @* <input type="text" asp-for="BodyTextPart1" name="bodyTextPart1" id="bodyTextPart1" class="editCertificate-input" placeholder="Modifier la première partie du corps du document" />
+                    <span asp-validation-for="BodyTextPart1" class="text-danger"></span> *@
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <label for="bodyTextPart2">Corps du document(partie 2) : </label>
+                <div class="p-2 shadow-sm rounded border mb-2">
+                    <span id="preview-BodyTextPart2">@Model.BodyTextPart2</span>
+                </div>
+                @Html.TextBoxFor(model => model.BodyTextPart2, new { @class = "editCertificate-input", placeholder = "Modifier la deuxième partie du corps du document" })
+                @Html.ValidationMessageFor(model => model.BodyTextPart2, "", new { @class = "text-danger" })
+                @* <input type="text" asp-for="BodyTextPart2" name="bodyTextPart2" id="bodyTextPart2" class="editCertificate-input" placeholder="Modifier la deuxième partie du corps du document" />
+                    <span asp-validation-for="BodyTextPart2" class="text-danger"></span> *@
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <label for="bodyTextPart3">Corps du document(partie 3) : </label>
+                <div class="p-2 shadow-sm rounded border mb-2">
+                    <span id="preview-BodyTextPart3">@Model.BodyTextPart3</span>
+                </div>
+                @Html.TextBoxFor(model => model.BodyTextPart3, new { @class = "editCertificate-input", placeholder = "Modifier la troisième partie du corps du document" })
+                @Html.ValidationMessageFor(model => model.BodyTextPart3, "", new { @class = "text-danger" })
+                @* <input type="text" asp-for="BodyTextPart3" name="bodyTextPart3" id="bodyTextPart3" class="editCertificate-input" placeholder="Modifier la troisième partie du corps du document" />
+                    <span asp-validation-for="BodyTextPart3" class="text-danger"></span> *@
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <label for="footerTextPart1">Nom & prénom(s) du responsable : </label>
+                <div class="p-2 shadow-sm rounded border mb-2">
+                    <span id="preview-FooterTextPart1">@Model.FooterTextPart1</span>
+                </div>
+                @Html.TextBoxFor(model => model.FooterTextPart1, new { @class = "editCertificate-input", placeholder = "Modifier le nom et prénom du responsable" })
+                @Html.ValidationMessageFor(model => model.FooterTextPart1, "", new { @class = "text-danger" })
+                @* <input type="text" asp-for="FooterTextPart1" name="footerTextPart1" id="footerTextPart1" class="editCertificate-input" placeholder="Modifier le nom et prénom du responsable" />
+                    <span asp-validation-for="FooterTextPart1" class="text-danger"></span> *@
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <label for="footerTextPart2">Titre du responsable : </label>
+                <div class="p-2 shadow-sm rounded border mb-2">
+                    <span id="preview-FooterTextPart2">@Model.FooterTextPart2</span>
+                </div>
+                @Html.TextBoxFor(model => model.FooterTextPart2, new { @class = "editCertificate-input", placeholder = "Modifier le titre du responsable" })
+                @Html.ValidationMessageFor(model => model.FooterTextPart2, "", new { @class = "text-danger" })
+                @* <input type="text" asp-for="FooterTextPart2" name="footerTextPart2" id="footerTextPart2" class="editCertificate-input" placeholder="Modifier le titre du responsable" />
+                    <span asp-validation-for="FooterTextPart2" class="text-danger"></span> *@
+            </div>
+            <div class="d-flex justify-content-end align-items-end">
+                <button id="confirmButton" type="submit" class="confirm-button text-white text-center">Confirmer les modifications</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div id="successModal" class="success-modal">
+        <div class="modal-content">
+            <div class="d-flex justify-content-end ">
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+            </div>
+
+            <div class="d-flex justify-content-center align-items-center">
+                <p>@TempData["SuccessMessage"]</p>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button id="modalCloseBtn" class="btn btn-success">Ok</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!----------------------------------------------------- Section Javascript -------------------------------------------------->
+
+<script>
+    /*function updatePreview(inputId, previewId){
+        const inputValue = document.getElementById(inputId).value;
+        document.getElementById(previewId).innerText = inputValue || `[${previewId.replace('preview-','')}]`;
+    }*/
+
+    document.querySelectorAll('.editCertificate-input').forEach(input => {
+        input.addEventListener('input', () => {
+            let previewId = `preview-${input.id}`;
+            let inputValue = input.value.trim();
+            let placeholderText = input.placeholder || 'N/A';
+
+            document.getElementById(previewId).innerText = inputValue || placeholderText;
+        })
+    });
+
+    document.addEventListener("DOMContentLoaded", function(){
+        let modal = document.getElementById("successModal");
+        let modalBtn = document.getElementById("modalCloseBtn");
+
+        if(modal){
+            modal.style.display = "flex";
+
+            modalBtn.addEventListener("click", function(){
+                modal.style.display = "none";
+            });
+        }
+    });
+</script>
+
+

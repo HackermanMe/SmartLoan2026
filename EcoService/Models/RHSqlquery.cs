@@ -6,7 +6,7 @@ using System.Web.Configuration;
 using System.Web.Mvc;
 using System.Web.UI.WebControls;
 using DocumentFormat.OpenXml.Office.Word;
-using Microsoft.Office.Core;
+//using Microsoft.Office.Core;
 using NLog;
 
 namespace EcoService.Models
@@ -107,7 +107,6 @@ namespace EcoService.Models
         }
 
         // Méthode pour récupérer un ou des prêts selon le matricule du staff
-        [HttpPost]
         public SqlDataReader PretExistants(int matricule)
         {
             string query = "SELECT p.PretId, p.ReferencePret, p.NumeroCompte, p.Montant, p.EnCours, p.Taux, p.TypeCredit, p.StartDate, p.EndDate, p.Mensualites, p.CreatedAt " +
@@ -144,7 +143,7 @@ namespace EcoService.Models
         // Méthode pour récupérer les comptes
         public SqlDataReader Accounts(string login)
         {
-            string query = "SELECT b.Matricule AS Matriculee, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.IDGroup AS IDGroupe, a.NumeroCompte AS NumeroComptee, b.SalaireNet AS SalaireNete " +
+            string query = "SELECT b.Matricule AS Matriculee, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.IDGroup AS IDGroupe, a.NumeroCompte AS NumeroComptee, b.SalaireNet*500 AS SalaireNete " +
                 "FROM [EcoServiceDB].[dbo].RhAccounts a JOIN [EcoServiceDB].[dbo].[RHStaffs] b ON a.NumeroCompte = b.NumeroCompte";
             return ExecuteReader(query);
         }
@@ -152,7 +151,7 @@ namespace EcoService.Models
         // Méthode pour récupérer les comptes
         public SqlDataReader Accounts()
         {
-            string query = "SELECT b.Matricule AS Matriculee, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee, b.SalaireNet AS SalaireNete " +
+            string query = "SELECT b.Matricule AS Matriculee, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee, b.SalaireNet*500 AS SalaireNete " +
                 "FROM [EcoServiceDB].[dbo].RhAccounts a JOIN [EcoServiceDB].[dbo].[RHStaffs] b ON a.NumeroCompte = b.NumeroCompte";
             return ExecuteReader(query);
         }
@@ -160,7 +159,7 @@ namespace EcoService.Models
         // Méthode pour récupérer un compte selon le matricule
         public SqlDataReader Account(int matricule)
         {
-            string query = "SELECT b.Matricule AS Matriculee, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee, b.SalaireNet AS SalaireNete " +
+            string query = "SELECT b.Matricule AS Matriculee, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee, b.SalaireNet*500 AS SalaireNete " +
                 "FROM [EcoServiceDB].[dbo].RhAccounts a " +
                 "JOIN [EcoServiceDB].[dbo].[RHStaffs] b ON a.NumeroCompte = b.NumeroCompte WHERE b.Matricule = @Matricule";
             return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@Matricule", matricule));
@@ -169,7 +168,7 @@ namespace EcoService.Models
         // Méthode pour récupérer les informations du staff connecté selon le login(Nom d'utilisateur)
         public SqlDataReader AccountLogin(string login)
         {
-            string query = "SELECT b.Matricule AS Matriculee, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee, b.SalaireNet AS SalaireNete " +
+            string query = "SELECT b.Matricule AS Matriculee, a.idUser AS idUsere, a.Login AS Logine, a.Nom AS Nomm, a.Prenom AS Prenomm, a.NumeroCompte AS NumeroComptee, b.SalaireNet*500 AS SalaireNete " +
                 "FROM [EcoServiceDB].[dbo].RhAccounts a JOIN [EcoServiceDB].[dbo].[RHStaffs] b ON a.NumeroCompte = b.NumeroCompte WHERE a.Login = @Login";
             return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@Login", login));
         }
@@ -193,10 +192,7 @@ namespace EcoService.Models
         {
             string query = "DELETE FROM RHStaffs";
             ExecuteNonQuery(query);
-        }
-
-        // Méthode pour supprimer un prêt autres banques
-        
+        }        
 
         // Méthode pour insérer les informations des staffs dans la base de données 
         public void InsertStaffs(string matricule, string email, string salaireNet, string numeroCompte)
@@ -328,28 +324,6 @@ namespace EcoService.Models
             return staffList;
         }
 
-        // Méthode pour ajouter une demande de prêt à la base de données
-        public async Task<int> CreerDemande(Demande demande)
-        {
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                string query = "INSERT INTO LoanRequests (Montant, TypePret, Taux, NbreEcheances, Status, Quotity, Matricule, CreatedAt, UpdatedAt) OUTPUT INSERTED.Id VALUES (@Montant, @Amount, @Status, @CreatedAt, @UpdatedAt)";
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@Montant", demande.Montant);
-                cmd.Parameters.AddWithValue("@TypePret", demande.TypePret);
-                cmd.Parameters.AddWithValue("@Taux", demande.Taux);
-                cmd.Parameters.AddWithValue("@NbreEcheances", demande.NbreEcheances);
-                cmd.Parameters.AddWithValue("@Status", demande.Status);
-                cmd.Parameters.AddWithValue("@Quotity", demande.Quotity);
-                cmd.Parameters.AddWithValue("@Matricule", demande.Matricule);
-                cmd.Parameters.AddWithValue("@CreatedAt", demande.CreatedAt);
-                cmd.Parameters.AddWithValue("@UpdatedAt", demande.UpdatedAt);
-
-                await conn.OpenAsync();
-                int newId = (int)await cmd.ExecuteScalarAsync();
-                return newId;
-            }
-        }
 
         // Méthode pour récupérer les prêts CARPLAN
         public SqlDataReader GetCarPlans()
@@ -391,29 +365,63 @@ namespace EcoService.Models
         }
 
         // Méthode pour envoyer les simulations
-        public void SendSimulation(decimal MontantEmprunte, string TypePret, decimal annualRate, int months, decimal quotity, decimal netSalary, int matricule)
+        public void SendSimulation(decimal MontantEmprunte, string TypePret, decimal annualRate, int months, decimal netSalary, int matricule)
         {
           
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
-                var command = new SqlCommand("INSERT INTO RHDemandes (Montant, TypePret, Taux, NbreEcheances, Quotity, SalaireNet, Matricule, CreatedAt) VALUES (@Montant, @TypePret, @Taux, @NbreEcheances, @Quotity, @SalaireNet, @Matricule, @CreatedAt)", connection);
+                var command = new SqlCommand("INSERT INTO RHDemandes (Montant, TypePret, Taux, NbreEcheances, SalaireNet, Matricule, CreatedAt) VALUES (@Montant, @TypePret, @Taux, @NbreEcheances, @SalaireNet, @Matricule, @CreatedAt)", connection);
 
                 command.Parameters.AddWithValue("@Montant", MontantEmprunte);
                 command.Parameters.AddWithValue("@TypePret", TypePret);
                 command.Parameters.AddWithValue("@Taux", annualRate);
                 command.Parameters.AddWithValue("@NbreEcheances", months);
-                command.Parameters.AddWithValue("@Quotity", quotity);
                 command.Parameters.AddWithValue("@SalaireNet", netSalary);
                 command.Parameters.AddWithValue("@Matricule", matricule);
                 command.Parameters.AddWithValue("@CreatedAt", DateTime.Now);
-                //command.Parameters.AddWithValue("@SelectedLoanIds", string.Join(",", selectedLoanIds)); // ou autre format si nécessaire
-                //command.Parameters.AddWithValue("@AutresPrets", string.Join(",", autresPrets)); // ou autre format si nécessaire
-
+                
                 command.ExecuteNonQuery();
             }
         }
+
+        // Méthode pour mettre à jour la table RHDemandes
+        public void UpdateDemandes(string nomComplet, string numeroCompte, DateTime dateNaissance)
+        {
+
+        }
+
+        // Méthode pour mettre à jour une simulation
+        public void UpdateSimulation(int matricule, string nomPrenoms, string numeroCompte, DateTime dateNaissance)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand command = new SqlCommand())
+                {
+                    // Associer la connexion à la commande
+                    command.Connection = connection;
+
+                    // Requête SQL pour mettre à jour les informations dans la table
+                    command.CommandText = "UPDATE RHDemandes " +
+                                             "SET NomPrenoms = @NomPrenoms, NumeroCompte = @NumeroCompte, DateNaissance = @DateNaissance, UpdatedAt = @UpdatedAt " +
+                                             "WHERE Matricule = @Matricule";
+
+                    // Ajout des paramètres
+                    command.Parameters.AddWithValue("@NomPrenoms", nomPrenoms);
+                    command.Parameters.AddWithValue("@NumeroCompte", numeroCompte);
+                    command.Parameters.AddWithValue("@DateNaissance", dateNaissance);
+                    command.Parameters.AddWithValue("@UpdatedAt", DateTime.Now);
+                    command.Parameters.AddWithValue("@Matricule", matricule);
+
+                    // Exécuter la commande
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
 
         // Méthode pour ajouter les Prets existant autres banques
         public void InsertAutresPretsExistants(string TypePret, string nomBanque, DateTime StartDate, DateTime EndDate, decimal Montant, decimal Mensualites, decimal EnCours, string numeroCompte)
@@ -437,9 +445,6 @@ namespace EcoService.Models
                 command.ExecuteNonQuery();
             }
         }
-
-        // Méthode pour supprimer un prêt existants autres banques
-
 
         // Méthode pour récupérer la liste des demandes de prêt
         public async Task<List<Demande>> GetLoanRequests()
@@ -570,7 +575,7 @@ namespace EcoService.Models
             }
         }
 
-        // Méthode pour 
+        // Méthode pour proposer un attribution de rôle
         public bool ProposeUserRoleChange(int matricule, int newRole, int proposedBy)
         {
             string query = "INSERT INTO RHRoleChangesPending (Matricule, NewRole, ProposedBy) VALUES (@Matricule, @NewRole, @ProposedBy)";
@@ -593,6 +598,36 @@ namespace EcoService.Models
                 return false; // Retourne false en cas d'échec
             }
         }
+
+        // Méthode pour récupérer la liste des demandes de prêt
+        public List<RHDemande> GetDemandesPret()
+        {
+            string query = "SELECT Montant, TypePret, Taux, NbreEcheances, Matricule, CreatedAt, SalaireNet, NomPrenoms, NumeroCompte, DateNaissance FROM RHDemandes";
+            List<RHDemande> demandes = new List<RHDemande>();
+
+            SqlDataReader reader = ExecuteReader(query, cmd => { /* Pas de paramètres ici */ });
+
+            while (reader.Read())
+            {
+                RHDemande demande = new RHDemande
+                {
+                    Montant = reader.GetDecimal(0),
+                    TypePret = reader.GetString(1),
+                    Taux = reader.GetDouble(2),
+                    NbreEcheances = reader.GetInt32(3),
+                    Matricule = reader.GetInt32(4),
+                    CreatedAt = reader.GetDateTime(5),
+                    SalaireNet = reader.GetDecimal(6),
+                    NomComplet = reader.GetString(7),
+                    NumeroCompte = reader.GetString(8),
+                    DateNaissance = reader.GetDateTime(9)
+                };
+                demandes.Add(demande);
+            }
+
+            return demandes;
+        }
+
 
         // Méthode pour obtenir les changements de rôle en attente
         public List<RoleChangePendingModel> GetPendingRoleChanges()
@@ -698,16 +733,18 @@ namespace EcoService.Models
         }
 
         // Méthode pour créer un utilisateur
-        public int CreateUser(int matricule, string nom, string email, int roleId)
+        public int CreateUser(int matricule, string nom, string prenom, string email, string numeroCompte, int roleId)
         {
-            string query = "INSERT INTO RHAccounts (Matricule, Nom, Email, IDGroup) OUTPUT INSERTED.Id VALUES (@Matricule, @Nom, @Email, @RoleId)";
+            string query = "INSERT INTO RHAccounts (Matricule, Nom, Prenom, Email, NumeroCompte, IDGroup) OUTPUT INSERTED.IDUser VALUES (@Matricule, @Nom, @Prenom, @Email, @NumeroCompte, @RoleId)";
             int userId = 0;
 
             SqlDataReader reader = ExecuteReader(query, cmd =>
                 {
                     cmd.Parameters.AddWithValue("@Matricule", matricule);
                     cmd.Parameters.AddWithValue("@Nom", nom);
+                    cmd.Parameters.AddWithValue("@Prenom", prenom);
                     cmd.Parameters.AddWithValue("@Email", email);
+                    cmd.Parameters.AddWithValue("@NumeroCompte", numeroCompte);
                     cmd.Parameters.AddWithValue("@RoleId", roleId);
                 }
             );
@@ -721,14 +758,15 @@ namespace EcoService.Models
         }
 
         // Méthode pour ajouter un changement de rôle en attente
-        public void AddPendingRoleChange(int userId, int newRoleId)
+        public void AddPendingRoleChange(int matricule, int userId, int newRoleId)
         {
-            string query = "INSERT INTO PendingRoleChanges (Matricule, NewRole, RequestDate) VALUES (@Matricule, @NewRole, GETDATE())";
+            string query = "INSERT INTO RHRoleChangesPending (Matricule, NewRole, ProposedBy) VALUES (@Matricule, @NewRole, @ProposedBy)";
 
             ExecuteNonQuery(query, cmd =>
             {
-                cmd.Parameters.AddWithValue("@Matricule", userId);
+                cmd.Parameters.AddWithValue("@Matricule", matricule);
                 cmd.Parameters.AddWithValue("@NewRole", newRoleId);
+                cmd.Parameters.AddWithValue("@ProposedBy", userId);
             });
         }
 
@@ -736,7 +774,7 @@ namespace EcoService.Models
         public List<SelectListItem> GetAllRoles()
         {
             var roles = new List<SelectListItem>();
-            string query = "SELECT IDGroup, RoleName FROM RHRoles";
+            string query = "SELECT IDGroup, Libelle FROM RHRoles";
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -749,7 +787,7 @@ namespace EcoService.Models
                     roles.Add(new SelectListItem
                     {
                         Value = reader["IDGroup"].ToString(),
-                        Text = reader["RoleName"].ToString()
+                        Text = reader["Libelle"].ToString()
                     });
                 }
             }
@@ -760,4 +798,5 @@ namespace EcoService.Models
 
 
     }
+
 }

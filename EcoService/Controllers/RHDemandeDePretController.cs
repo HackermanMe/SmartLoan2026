@@ -28,6 +28,7 @@ namespace EcoService.Controllers
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         // Instance unique de RHSqlQuery pour l'utilisation dans le contrôleur
         private readonly RHSqlQuery _sqlQuery = new RHSqlQuery();
+        private int quotiteCessible = 50;
 
         // GET: RHDemandeDePret
         public ActionResult Index()
@@ -35,7 +36,7 @@ namespace EcoService.Controllers
             return View();
         }
 
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         public ActionResult CalculateMonthlyPayment(decimal MontantEmprunte, decimal annualRate, int months, decimal netSalary, List<int> selectedLoanIds, List<decimal> autresPrets)
         {
             try
@@ -100,7 +101,7 @@ namespace EcoService.Controllers
                     decimal quotity = totalMonthlyPayments / netSalary * 100;
 
                     var customCulture = (System.Globalization.CultureInfo)System.Globalization.CultureInfo.InvariantCulture.Clone();
-                    customCulture.NumberFormat.NumberGroupSeparator = "  ";
+                    customCulture.NumberFormat.NumberGroupSeparator = " ";
 
                     Logger.Info("Simulation faite pour le numéro de compte: ", Session["NumeroCompte"]);
 
@@ -137,7 +138,7 @@ namespace EcoService.Controllers
             }
         }
 
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         public ActionResult AjouterAutresPretsExistants(
             string TypePret, string NomBanque, string StartDate, string EndDate,
             string MontantStr, string MensualitesStr, string EncoursStr, string NumeroCompte
@@ -166,7 +167,7 @@ namespace EcoService.Controllers
             }
         }
 
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         public JsonResult SupprimerAutresPretsExistants(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -199,21 +200,20 @@ namespace EcoService.Controllers
             }
         }
 
-
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         public ActionResult SendSimulation(decimal Montant, string TypeDePret, decimal annualRate, int months, decimal quotity, decimal netSalary, int matricule)
         {
             if (Montant <= 0) return Json(new { success = false, message = "Le montant doit être supérieur à zéro." });
-            if (annualRate <= 0) return Json(new { success = false, message = "Le taux annuel doit être supérieur à zéro." });
+            //if (annualRate <= 0) return Json(new { success = false, message = "Le taux annuel doit être supérieur à zéro." });
             if (months <= 0) return Json(new { success = false, message = "La durée doit être supérieure à zéro mois." });
             if (netSalary <= 0) return Json(new { success = false, message = "Le salaire net doit être supérieur à zéro." });
 
             try
             {
                 // Enregistrement des données dans la base de données
-                _sqlQuery.SendSimulation(Montant, TypeDePret, annualRate, months, quotity, netSalary, matricule);
+                _sqlQuery.SendSimulation(Montant, TypeDePret, annualRate, months, netSalary, matricule);
 
-                decimal remboursementAdmis = netSalary * 40 / 100;
+                decimal remboursementAdmis = netSalary * quotiteCessible / 100;
 
                 // Stocker les données dans une session pour les passer à la prochaine action
                 HttpContext.Session["SimulationData"] = new SimulationViewModel
@@ -228,7 +228,6 @@ namespace EcoService.Controllers
                     Remboursement = remboursementAdmis
                 };
 
-                //Logger.
                 Logger.Info("Simulation envoyée pour le numero de compte : ", Session["NumeroCompte"]);
                 return Json(new { success = true, message = "La simulation a été envoyée avec succès.", redirectUrl = Url.Action("Create", "RHDemandeDePret") });
             }
@@ -293,7 +292,7 @@ namespace EcoService.Controllers
             return View(staffInfo);
         }
 
-        [HttpPost]
+        [System.Web.Mvc.HttpPost]
         public ActionResult GenerateDocument(
              decimal Montant, string nom,
              string TypeDePret, string numeroCompte,
@@ -303,16 +302,11 @@ namespace EcoService.Controllers
              decimal netSalary, string grade,
              int matricule, string notes, List<Dictionary<string, string>> prets)
         {
+
             // Récupérer les prêts autres banques 
             List<Dictionary<string, object>> existingLoans = _sqlQuery.GetExistingLoans(numeroCompte);
             string nomDocument = DateTime.UtcNow.ToString("-dd-MM-yyyy HH:mm", CultureInfo.CreateSpecificCulture("fr-FR"));
             
-        //// Supposez que 'prets' soit une liste de dictionnaires contenant les informations des prêts
-        //decimal sommeEncours = prets.Sum(pret => Convert.ToDecimal(pret["EnCours"]));
-        //decimal sommeMensualites = prets.Sum(pret => Convert.ToDecimal(pret["Mensualites"]));
-
-        //sommeEncours += existingLoans.Sum(pretsExistants => Convert.ToDecimal(pretsExistants["EnCours"]));
-        //sommeMensualites += existingLoans.Sum(pretsExistants => Convert.ToDecimal(pretsExistants["Mensualites"]));
         // Initialisation des sommes
         decimal sommeEncours = 0;
             decimal sommeMensualites = 0;
@@ -364,8 +358,6 @@ namespace EcoService.Controllers
                 ? existingLoans.Select(dict => dict.Values.Select(value => value.ToString()).ToList()).ToList()
                 : new List<List<string>>(); // Initialisation à une liste vide si existingLoans est null ou vide
 
-
-
             // Décodage des valeurs URL encodées
             nom = HttpUtility.UrlDecode(nom);
             TypeDePret = HttpUtility.HtmlDecode(HttpUtility.UrlDecode(TypeDePret));
@@ -389,9 +381,13 @@ namespace EcoService.Controllers
                 return Json(new { success = false, message = "Les champs obligatoires sont manquants." });
             }
 
+
+            // Compléter les informations de la demande
+            _sqlQuery.UpdateSimulation(matricule, nom, numeroCompte, parsedDateNaissance);
+
             try
             {
-                var remboursementAdmis = netSalary * 40 / 100;
+                var remboursementAdmis = netSalary * quotiteCessible / 100;
 
                 var fieldValues = new Dictionary<string, string>
                 {
@@ -423,7 +419,6 @@ namespace EcoService.Controllers
                 string ConsentementtemplatePath = @"\\10.8.14.65\SmartLoanList\Content\Files\Consentement.docx";
                 string PrimeAssurancetemplatePath = @"\\10.8.14.65\SmartLoanList\Content\Files\Prime_assurance.docx";
                 string ScolarLoanFormtemplatePath = @"\\10.8.14.65\SmartLoanList\Content\Files\Credit_scolarisation.docx";
-
 
                 List<byte[]> documentBytesList = new List<byte[]>();
                 if (!System.IO.File.Exists(LoanFormtemplatePath))

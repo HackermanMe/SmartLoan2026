@@ -9,7 +9,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Smart-Loan | Authentification</title>
+    <title>RH-Services | Authentification</title>
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
     <link rel="shortcut icon" type="image/png" href="~/Content/images/logos/favicon.ico" />
     <link rel="stylesheet" href="~/Content/css/styles.min.css" />
@@ -30,7 +30,7 @@
                                     <img src="../assets/images/logos/télécharger.png" width="180" alt="">
                                 </div>
                                 <div class="d-block align-items-center justify-content-center">
-                                    <h4 class="text-center">Smart Loan</h4>
+                                    <h4 class="text-center">RH-Services</h4>
                                     @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
                                     {
                                         @Html.AntiForgeryToken()
@@ -38,7 +38,7 @@
                                         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
                                         <div>
                                             <div class="mb-3">
-                                                @Html.LabelFor(m => m.UserName, "Nom d'utilisateur", new { @class = "form-label", @id = "exampleInputEmail1", aria_describedby = "emailHelp"})
+                                                @Html.LabelFor(m => m.UserName, "Nom d'utilisateur", new { @class = "form-label", @id = "exampleInputEmail1", aria_describedby = "emailHelp" })
                                                 @Html.TextBoxFor(m => m.UserName, new { autocomplete = "off", @class = "form-control" })
                                                 @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger" })
                                             </div>
@@ -68,6 +68,12 @@
     </div>
     <script src="~/Content/libs/jquery/dist/jquery.min.js"></script>
     <script src="~/Content/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        var timeoutInMinutes=20; // 20 minutes
+        setTimeout(function() {
+            location.reload(); // Rafraîchir la page automatiquement
+        }, timeoutInMinutes * 60 * 1000);
+    </script> 
 
 </body>
 </html>

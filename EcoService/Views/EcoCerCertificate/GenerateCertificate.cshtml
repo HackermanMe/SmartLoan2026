@@ -1,0 +1,222 @@
+﻿@model EcoService.Models.EcoCerCertificateFormModel
+
+@{
+    ViewBag.Title = "Générer mon attestation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!----------------------------------------------------- Section styles -------------------------------------------------->
+
+<style>
+    .custom-input1 {
+        height: 40px;
+        width: 320px;
+        border-style: solid;
+        border-width: 2px;
+        border-color: #d0d5dd;
+        border-radius: 9px;
+        padding: 14px;
+    }
+
+    input:focus {
+        border-color: #c5cedb;
+        border-width: 3px;
+        outline: none;
+    }
+
+    .custom-container {
+        width: 750px;
+        background-color: #F5F5F7;
+        border-color: #e5e5e5;
+        box-shadow: 5px 5px 5px rgb(0 0 0 / 0.1);
+        border-radius: 8px;
+    }
+
+    .inputs-container {
+        gap: 70px;
+    }
+
+    .custom-select {
+        width: 342px;
+        height: 40px;
+        border-style: solid;
+        border-width: 2px;
+        border-radius: 9px;
+        border-color: #d0d5dd;
+        padding: 7px;
+    }
+
+
+    .validate-button {
+        background-color: #0082bb;
+        width: 220px;
+        height: 50px;
+        border-style: none;
+        border-radius: 9px;
+        text-align: center;
+        font-size: 1rem;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+        .validate-button:active {
+            background-color: #005f8c;
+            transform: scale(0.95);
+        }
+
+    button:hover {
+        background-color: #007bb1;
+    }
+
+    .cancel-button {
+        background-color: #B7B7B7;
+        width: 170px;
+        height: 50px;
+        border-style: none;
+        border-radius: 9px;
+        font-size: 1rem;
+        text-decoration: none;
+        text-align: center;
+        display: inline-block;
+        line-height: 50px;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+        .cancel-button:active {
+            background-color: #999999 !important;
+            transform: scale(0.95);
+        }
+
+        .cancel-button:hover {
+            background-color: #B4B4B8;
+        }
+
+    a:hover {
+        text-decoration: none;
+    }
+
+    .information-box {
+        height: 50px;
+        background-color: red;
+    }
+
+    select:focus {
+        border-color: #c5cedb !important;
+        border-width: 3px !important;
+        outline: none !important;
+    }
+</style>
+
+<!----------------------------------------------------- Section html -------------------------------------------------->
+
+<div class="d-flex flex-column custom-container bg-gradient gap-2 justify-content-center align-content-center align-items-center pb-2 mx-auto rounded border">
+    <div class="d-flex p-4 justify-content-start align-items-start">
+        <h2 style="color:#0082bb;">Générer votre attestation</h2>
+    </div>
+    <div class="d-flex gap-3 align-items-center alert alert-danger flex-row" role="alert" style="text-align:justify; border:none; border-radius:0; font-size:0.9rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
+        </svg>
+        Vous avez la possibilité de modifier votre nom, votre prénom, votre genre et votre civilité. Assurez-vous ensuite que ces informations correspondent aux informations présentes sur
+        votre extrait/acte de naissance ou tout document en tenant lieu (jugement rectificatif, jugement supplétif...).
+    </div>
+    <div class="">
+        <p style="font-size:0.7rem;"><strong>NB : </strong>Les informations concernant votre catégorie professionnelle et votre date de recrutement figurent sur votre bulletin de paie</p>
+    </div>
+    <form action="@Url.Action("GenerateCertificate","EcoCerCertificate")" method="post">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @* <div asp-validation-summary="ModelOnly" class="text-danger"></div> *@
+        <div class="d-flex justify-content-center p-4 flex-column gap-md-4">
+            <div class="d-flex flex-column gap-2">
+                <label class="">Nom</label>
+                @Html.TextBoxFor(model => model.Nom, new { @class = "custom-input1 p-2 w-auto", placeholder = "Entrer votre Nom ici" })
+                @Html.ValidationMessageFor(model => model.Nom, "", new { @class = "text-danger" })
+                @* <input asp-for="Nom" class="custom-input1 p-2 w-auto" placeholder="Entrer votre Nom ici" />
+                    <span asp-validation-for="Nom" class="text-danger"></span> *@
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <label class="">Prenoms (Ex : Messi Ayi Kékéli)</label>
+                @Html.TextBoxFor(model => model.Prenom, new { @class = "custom-input1 p-2 w-auto", placeholder = "Entrer votre/vos Prénom(s) ici" })
+                @Html.ValidationMessageFor(model => model.Prenom, "", new { @class = "text-danger" })
+                @* <input asp-for="Prenom" class="custom-input1 p-2 w-auto" placeholder="Entrer votre/vos Prénom(s) ici" />
+                    <span asp-validation-for="Prenom" class="text-danger"></span> *@
+            </div>
+            <div class="d-flex gap-3 flex-row">
+                <div class="d-flex flex-column gap-2">
+                    <label class="">Genre</label>
+                    <select id="sexe" name="sexe" class="custom-select">
+                        @foreach (var sexe in Enum.GetValues(typeof(EcoService.Models.Enums.Sexe)).Cast<EcoService.Models.Enums.Sexe>())
+                        {
+                            <option value="@sexe" selected="@(Model.Sexe == sexe.ToString())">@sexe</option>
+                        }
+                    </select>
+                    @Html.ValidationMessageFor(model => model.Sexe, "", new { @class = "text-danger" })
+                    @* <span asp-validation-for="Sexe" class="text-danger"></span> *@
+                </div>
+                <div class="d-flex flex-column gap-2">
+                    <label class="">Civilité</label>
+                    <select id="civilite" name="civilite" class="custom-select">
+                        @foreach (var civilite in Enum.GetValues(typeof(EcoService.Models.Enums.Civilite)).Cast<EcoService.Models.Enums.Civilite>())
+                        {
+                            <option value="@civilite" selected="@(Model.Civilite == civilite.ToString())">@civilite</option>
+                        }
+                    </select>
+                    @Html.ValidationMessageFor(model => model.Civilite, "", new { @class = "text-danger" })
+                    @* <span asp-validation-for="Civilite" class="text-danger"></span> *@
+                </div>
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <label class="">Catégorie professionnelle</label>
+                @Html.TextBoxFor(model => model.CategorieProfessionnelle, new { @class = "custom-input1 p-2 w-auto", placeholder = "Cadre de banque/Agent de banque", @readonly = "readonly" })
+                @Html.ValidationMessageFor(model => model.CategorieProfessionnelle, "", new { @class = "text-danger" })
+
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <label class="">Date de recrutement</label>
+                @Html.TextBoxFor(model => model.DateRecrutement, new { @class = "custom-input1 p-2 w-auto", @readonly = "readonly" })
+                @Html.ValidationMessageFor(model => model.DateRecrutement, "", new { @class = "text-danger" })
+            </div>
+            <div class="d-flex justify-content-between flex-row">
+                @Html.ActionLink("Annuler", "Home", "EcoCerHome", null, new { @class = "cancel-button text-white" })
+                @* <a asp-controller="EcoCerHome" asp-action="Home" class="cancel-button text-white">Annuler</a> *@
+                <button type="submit" class="validate-button text-white text-center">Enrégistrer et continuer</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!----------------------------------------------------- Section javascript -------------------------------------------------->
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const sexeSelect = document.getElementById("sexe");
+        const civiliteSelect = document.getElementById("civilite");
+
+        function updateCivilityBasedOnSex() {
+            if (sexeSelect.value === "Homme") {
+                civiliteSelect.value = "Monsieur";
+            } else if (sexeSelect.value === "Femme") {
+                civiliteSelect.value = "Madame";
+            } else {
+                civiliteSelect.disabled = false;
+            }
+        }
+
+        function updateSexBasedOnCivility() {
+            if (civiliteSelect.value === "Monsieur") {
+                sexeSelect.value = "Homme";
+            } else if (civiliteSelect.value === "Madame") {
+                sexeSelect.value = "Femme";
+            } else {
+                sexeSelect.disabled = false;
+            }
+        }
+
+        sexeSelect.addEventListener("change", updateCivilityBasedOnSex);
+        civiliteSelect.addEventListener("change", updateSexBasedOnCivility);
+
+        updateCivilityBasedOnSex();
+        updateSexBasedOnCivility();
+    });
+
+</script>
