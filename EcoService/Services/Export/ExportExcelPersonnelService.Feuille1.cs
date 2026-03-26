@@ -52,7 +52,7 @@ namespace EcoService.Services.Export
             ws.Cells[r, 2].Value = "ETAT  DES  PRETS";
             S(ws.Cells[r, 2], bold: true, size: 14, hAlign: ExcelHorizontalAlignment.Center);
             ws.Cells[r, 2].Style.Font.Color.SetColor(Color.Black);
-            ws.Cells[r, 10].Value = "21";
+            ws.Cells[r, 10].Value = "";
             S(ws.Cells[r, 10], size: 11);
             ws.Row(r).Height = 22; r++;
 
@@ -60,12 +60,12 @@ namespace EcoService.Services.Export
             Merge(ws, r, 1, r, 5);
             ws.Cells[r, 1].Value = "le service du Personnel et";
             Merge(ws, r, 9, r, 10);
-            ws.Cells[r, 9].Value = "35%";
+            ws.Cells[r, 9].Value = "";
             ws.Cells[r, 9].Style.Font.Bold = true;
             r++;
 
             Merge(ws, r, 3, r, 8);
-            ws.Cells[r, 3].Value = "à joindre à la demande de prêt)";
+            ws.Cells[r, 3].Value = "(à joindre à la demande de prêt)";
             S(ws.Cells[r, 3], hAlign: ExcelHorizontalAlignment.Center);
             r++; r++; // ligne vide
 
