@@ -280,7 +280,7 @@
 <script>
 $(function () {
     var fmt = function(v) {
-        return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     };
 
     // ── Configuration par type de prêt (par index du select) ────────

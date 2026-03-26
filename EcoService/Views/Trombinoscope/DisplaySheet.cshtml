@@ -1,54 +1,135 @@
-﻿
 @{
-    ViewBag.Title = "Données de la feuille";
+    ViewBag.Title = "Donn&eacute;es de la feuille";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     string sheetName = ViewBag.SheetName ?? string.Empty;
-
-    /*if (sheetName.EndsWith("1"))
-    {
-        // Supprime le dernier caractère
-        sheetName = sheetName.Substring(0, sheetName.Length - 1);
-    }*/
-
-    //var departmentImage = ViewBag.DepartmentImage;
 }
 
 <style>
-    .image-container {
-        width: auto;
-        border-color: #e5e5e5;
+    .trombi-header {
+        background-color: #f8f9fa;
+        border-left: 5px solid #343a40;
+        padding: 20px;
+        margin-bottom: 30px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+    }
+    .trombi-title-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .trombi-title {
+        color: #343a40;
+        font-weight: 700;
+        margin: 0;
+        font-size: 22px;
+    }
+    .btn-back {
+        background-color: #6c757d;
+        color: #fff;
+        padding: 8px 16px;
+        font-size: 14px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-block;
+        margin-left: auto;
+        transition: background-color 0.2s;
+    }
+    .btn-back:hover {
+        background-color: #5a6268;
+        color: #fff;
+        text-decoration: none;
+    }
+    
+    .organigramme-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 0;
+        background: radial-gradient(circle, #fbfbfb, #f0f2f5);
         border-radius: 8px;
-        padding: 30px;
-        margin-bottom: 20px;
-        /* background-color: #F5F5F7;*/
-        box-shadow: -4px 0 8px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0,0,0,0.1);
+        border: 1px solid #e9ecef;
+    }
+
+    .image-node {
+        background: #fff;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+        border: 2px solid #dde1e5;
+        transition: transform 0.2s;
+        max-width: 90%;
+    }
+    .image-node:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+        border-color: #007bff;
+    }
+
+    .connector {
+        width: 4px;
+        height: 60px;
+        background-color: #495057;
+        margin: 0 auto;
+        border-radius: 2px;
+    }
+    
+    .connector-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #495057;
+        margin: 0 auto;
+    }
+    
+    .empty-state {
+        padding: 40px;
+        text-align: center;
+        color: #6c757d;
+        background: #fff;
+        border-radius: 8px;
+        border: 1px dashed #ced4da;
     }
 </style>
 
-@if (ViewBag.SheetImagesList is List<string> sheetImagesList && sheetImagesList.Any())
-{
-    @*<h1>Trombinoscope @sheetName</h1>*@
-    <div class="d-flex flex-column gap-3">
-        <a href="@Url.Action("Index", "Trombinoscope")">Revenir à la sélection</a>
-
-        @foreach (var image in sheetImagesList)
-        {
-            <div class="d-flex justify-content-center align-items-center image-container">
-                <img src="data:image/png;base64,@image" class="img-fluid" alt="Trombinoscope image" />
-            </div>
-        }
-
-    </div>
-}
-else
-{
-    <div class="d-flex flex-column gap-1">
-        <a href="@Url.Action("Index", "Trombinoscope")">Revenir à la sélection</a>
-        <br />
-        <div class="alert alert-danger">
-            <p>Aucune image n'a été trouvée</p>
+<div class="container mt-4" style="max-width: 1000px;">
+    <div class="trombi-header">
+        <div class="trombi-title-row">
+            <h2 class="trombi-title"><i class="fas fa-sitemap" style="margin-right: 10px;"></i> Trombinoscope : @sheetName</h2>
+            <a href="@Url.Action("Index", "Trombinoscope")" class="btn-back">
+                <i class="fas fa-arrow-left" style="margin-right: 6px;"></i> Retour&nbsp;&agrave;&nbsp;la&nbsp;s&eacute;lection
+            </a>
         </div>
     </div>
-}
 
+    @if (ViewBag.SheetImagesList is List<string> sheetImagesList && sheetImagesList.Any())
+    {
+        <div class="organigramme-container">
+            @for (int i = 0; i < sheetImagesList.Count; i++)
+            {
+                <div class="image-node text-center">
+                    <img src="data:image/png;base64,@sheetImagesList[i]" class="img-fluid" alt="Trombinoscope image" />
+                </div>
+                
+                if (i < sheetImagesList.Count - 1)
+                {
+                    <div class="connector-dot" style="margin-top: 5px;"></div>
+                    <div class="connector"></div>
+                    <div class="connector-dot" style="margin-bottom: 5px;"></div>
+                }
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fas fa-image" style="font-size: 48px; margin-bottom: 15px; color: #adb5bd;"></i>
+            <h5>Aucune donn&eacute;e trouv&eacute;e</h5>
+            <p class="mb-0">L'organigramme ou les images correspondants &agrave; ce d&eacute;partement n'ont pu &ecirc;tre t&eacute;l&eacute;charg&eacute;s.</p>
+        </div>
+    }
+</div>

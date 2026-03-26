@@ -1,5 +1,5 @@
 @{
-    ViewBag.Title = "Choisir un département";
+    ViewBag.Title = "Choisir un d&eacute;partement";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var errorMessage = TempData["ErrorMessage"] as string;
 }
@@ -115,10 +115,10 @@
     <div class="trombi-header">
         <div class="trombi-title-row">
             <h2 class="trombi-title"><i class="fas fa-sitemap" style="margin-right: 10px;"></i> Trombinoscope Indicatif ETG</h2>
-            <span class="trombi-date"><i class="far fa-calendar-alt" style="margin-right: 6px;"></i>Créé le : 10 Avril 2025</span>
+            <span class="trombi-date"><i class="far fa-calendar-alt" style="margin-right: 6px;"></i>Cr&eacute;&eacute; le : 10 Avril 2025</span>
         </div>
         <p class="trombi-desc">
-            Ce document a pour but d'afficher le trombinoscope hiérarchique des départements & divisions. Il permet d'appréhender plus efficacement l'organisation globale.
+            Ce document a pour but d'afficher le trombinoscope hi&eacute;rarchique des d&eacute;partements &amp; divisions. Il permet d'appr&eacute;hender plus efficacement l'organisation globale.
         </p>
     </div>
 
@@ -141,7 +141,7 @@
                     <input type="hidden" name="type" value="PC" />
 
                     <div class="form-group-custom">
-                        <label for="departmentSelect">Sélectionnez un département</label>
+                        <label for="departmentSelect">S&eacute;lectionnez un d&eacute;partement</label>
                         <select id="departmentSelect" name="selectedDepartment" class="form-control-custom" required>
                             @if (ViewBag.SheetNames != null)
                             {

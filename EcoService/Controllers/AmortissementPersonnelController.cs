@@ -66,6 +66,77 @@ namespace EcoService.Controllers
                 TypeAutresCredits2 = "Néant"
             };
 
+            try
+            {
+                string loginStaff = Session["accountName"] as string;
+                if (!string.IsNullOrEmpty(loginStaff))
+                {
+                    EcoService.Models.RHSqlQuery st = new EcoService.Models.RHSqlQuery();
+                    using (System.Data.SqlClient.SqlDataReader staffreadere = st.AccountLogin(loginStaff))
+                    {
+                        var staffInfo = new Dictionary<string, object>();
+                        while (staffreadere.Read())
+                        {
+                            for (int i = 0; i < staffreadere.FieldCount; i++)
+                            {
+                                staffInfo[staffreadere.GetName(i)] = staffreadere.GetValue(i);
+                            }
+                        }
+
+                        if (staffInfo.ContainsKey("Nom"))
+                        {
+                            model.NomDemandeur = Convert.ToString(staffInfo["Nom"]);
+                            if (staffInfo.ContainsKey("Prenom"))
+                                model.NomDemandeur += " " + Convert.ToString(staffInfo["Prenom"]);
+                        }
+                        if (staffInfo.ContainsKey("NumeroComptee"))
+                            model.NumeroCompte = Convert.ToString(staffInfo["NumeroComptee"]);
+                        else if (staffInfo.ContainsKey("NumeroCompte"))
+                            model.NumeroCompte = Convert.ToString(staffInfo["NumeroCompte"]);
+                            
+                        if (staffInfo.ContainsKey("SalaireNete"))
+                            model.SalaireNetActuel = Convert.ToDecimal(staffInfo["SalaireNete"]);
+                        else if (staffInfo.ContainsKey("SalaireNet"))
+                            model.SalaireNetActuel = Convert.ToDecimal(staffInfo["SalaireNet"]);
+
+                        if (!string.IsNullOrEmpty(model.NumeroCompte))
+                        {
+                            using (System.Data.SqlClient.SqlDataReader pretsReader = st.PretExistantsStaff(model.NumeroCompte))
+                            {
+                                int pretCount = 0;
+                                while (pretsReader.Read())
+                                {
+                                    if (pretCount == 0)
+                                    {
+                                        try { model.TypePretExistant = Convert.ToString(pretsReader["TypeCredit"]); } catch {}
+                                        try { model.MontantPretExistant = Convert.ToDecimal(pretsReader["Montant"]); } catch {}
+                                        try { model.MensualitesPretExistant = Convert.ToDecimal(pretsReader["Mensualites"]); } catch {}
+                                    }
+                                    pretCount++;
+                                }
+                            }
+                            var existingLoans = st.GetExistingLoans(model.NumeroCompte);
+                            if (existingLoans != null && existingLoans.Count > 0)
+                            {
+                               try { model.TypeAutresCredits1 = Convert.ToString(existingLoans[0]["TypeDeCredit"]); } catch {}
+                               try { model.MontantAutresCredits1 = Convert.ToDecimal(existingLoans[0]["Montant"]); } catch {}
+                               try { model.MensualitesAutresCredits1 = Convert.ToDecimal(existingLoans[0]["Mensualites"]); } catch {}
+                               
+                               if (existingLoans.Count > 1) {
+                                  try { model.TypeAutresCredits2 = Convert.ToString(existingLoans[1]["TypeDeCredit"]); } catch {}
+                                  try { model.MontantAutresCredits2 = Convert.ToDecimal(existingLoans[1]["Montant"]); } catch {}
+                                  try { model.MensualitesAutresCredits2 = Convert.ToDecimal(existingLoans[1]["Mensualites"]); } catch {}
+                               }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Continue if DB fetching fails
+            }
+
             ViewBag.TypesPret = ExportExcelPersonnelService.TypesPret;
             return View(model);
         }

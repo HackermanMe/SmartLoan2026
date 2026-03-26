@@ -1,4 +1,4 @@
-﻿using OfficeOpenXml;
+using OfficeOpenXml;
 using OfficeOpenXml.Drawing;
 using System;
 using System.Collections.Generic;
@@ -20,8 +20,12 @@ namespace EcoService.Controllers
         // GET:  Trombinoscope
         public ActionResult Index()
         {
-
-            var sheetNames = GetSheetNames(_filePath);
+            var sheetNames = System.Web.HttpRuntime.Cache["TrombiSheetNames"] as List<String>;
+            if (sheetNames == null)
+            {
+                sheetNames = GetSheetNames(_filePath);
+                System.Web.HttpRuntime.Cache.Insert("TrombiSheetNames", sheetNames, null, DateTime.Now.AddHours(2), TimeSpan.Zero);
+            }
             ViewBag.SheetNames = sheetNames;
             return View();
         }
@@ -90,9 +94,15 @@ namespace EcoService.Controllers
         [System.Web.Mvc.HttpPost]
         public ActionResult DisplaySheet(string selectedDepartment)
         {
-            var sheetImagesList = GetSheetImages(_filePath, selectedDepartment);
-            //var base64ImageString = sheetImage != null ? Convert.ToBase64String(sheetImage) : null;
-            var base64ImageStringList = sheetImagesList.Select(img => Convert.ToBase64String(img)).ToList();
+            string cacheKey = "TrombiImages_" + selectedDepartment;
+            var base64ImageStringList = System.Web.HttpRuntime.Cache[cacheKey] as List<string>;
+            if (base64ImageStringList == null)
+            {
+                var sheetImagesList = GetSheetImages(_filePath, selectedDepartment);
+                base64ImageStringList = sheetImagesList.Select(img => Convert.ToBase64String(img)).ToList();
+                System.Web.HttpRuntime.Cache.Insert(cacheKey, base64ImageStringList, null, DateTime.Now.AddHours(2), TimeSpan.Zero);
+            }
+            
             ViewBag.SheetName = selectedDepartment;
             ViewBag.SheetImagesList = base64ImageStringList;
 
