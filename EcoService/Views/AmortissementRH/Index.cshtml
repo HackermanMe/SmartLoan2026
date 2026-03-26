@@ -2,6 +2,12 @@
 @{
     ViewData["Title"] = "Amortissement Personnel";
     var typesPret = ViewBag.TypesPret as string[] ?? new string[0];
+
+    var defaultNom = Session["Nom"]?.ToString();
+    if (Session["Prenom"] != null) { defaultNom += " " + Session["Prenom"].ToString(); }
+    defaultNom = defaultNom?.Trim();
+
+    var defaultCompte = Session["NumeroCompte"]?.ToString();
 }
 
 <link rel="stylesheet" href="~/assets/css/amortissement.css" />
@@ -60,7 +66,11 @@
         <div class="rh-grid">
             <div class="fg">
                 @Html.LabelFor(m => m.NomDemandeur, "Nom du demandeur")
-                @Html.TextBoxFor(m => m.NomDemandeur, new { @class = "form-control", placeholder = "NOM Prenom" })
+                @if (!string.IsNullOrEmpty(defaultNom)) {
+                    @Html.TextBoxFor(m => m.NomDemandeur, new { @class = "form-control", @Value = defaultNom, @readonly = "readonly" })
+                } else {
+                    @Html.TextBoxFor(m => m.NomDemandeur, new { @class = "form-control", placeholder = "NOM Prenom" })
+                }
             </div>
             <div class="fg">
                 @Html.LabelFor(m => m.ClasseCategorie, "Classe / Categorie")
@@ -104,7 +114,11 @@
             </div>
             <div class="fg">
                 @Html.LabelFor(m => m.NumeroCompte, "Numero de compte (12 chiffres)")
-                @Html.TextBoxFor(m => m.NumeroCompte, new { @class = "form-control", pattern = "\\d{12}", maxlength = "12", minlength = "12", title = "Le numero de compte doit contenir exactement 12 chiffres", placeholder = "Ex: 012345678901" })
+                @if (!string.IsNullOrEmpty(defaultCompte)) {
+                    @Html.TextBoxFor(m => m.NumeroCompte, new { @class = "form-control", @Value = defaultCompte, @readonly = "readonly", pattern = "\\d{12}", maxlength = "12", minlength = "12" })
+                } else {
+                    @Html.TextBoxFor(m => m.NumeroCompte, new { @class = "form-control", pattern = "\\d{12}", maxlength = "12", minlength = "12", title = "Le numero de compte doit contenir exactement 12 chiffres", placeholder = "Ex: 012345678901" })
+                }
             </div>
             <div class="fg">
                 @Html.LabelFor(m => m.Montant, "Montant (FCFA)")
@@ -266,7 +280,7 @@
 <script>
 $(function () {
     var fmt = function(v) {
-        return Math.round(v).toLocaleString('fr-FR');
+        return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
     };
 
     // ── Configuration par type de prêt (par index du select) ────────

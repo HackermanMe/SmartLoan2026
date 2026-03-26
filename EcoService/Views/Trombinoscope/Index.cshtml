@@ -1,57 +1,163 @@
-﻿
 @{
     ViewBag.Title = "Choisir un département";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var errorMessage = TempData["ErrorMessage"] as string;
-
 }
 
-<h1> Trombinoscope Indicatif ETG  <font color="blue" size="2">Date de création : 10 Avril 2025 </font></h1>
+<style>
+    .trombi-header {
+        background-color: #f8f9fa;
+        border-left: 5px solid #343a40;
+        padding: 20px;
+        margin-bottom: 30px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+    }
+    .trombi-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+    .trombi-title {
+        color: #343a40;
+        font-weight: 700;
+        margin: 0;
+        font-size: 24px;
+    }
+    .trombi-date {
+        font-size: 13px;
+        color: #6c757d;
+        font-weight: 600;
+        background: #e9ecef;
+        padding: 5px 12px;
+        border-radius: 20px;
+    }
+    .trombi-desc {
+        color: #555;
+        font-size: 15px;
+        margin-bottom: 0;
+        line-height: 1.5;
+    }
+    .hierarchy-container {
+        display: flex;
+        justify-content: center;
+        margin: 40px 0;
+    }
+    .hierarchy-card {
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-top: 4px solid #343a40;
+        border-radius: 8px;
+        padding: 35px;
+        width: 100%;
+        max-width: 550px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        text-align: center;
+    }
+    .hierarchy-icon {
+        font-size: 50px;
+        color: #343a40;
+        margin-bottom: 20px;
+    }
+    .form-group-custom {
+        text-align: left;
+        margin-bottom: 25px;
+    }
+    .form-group-custom label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 10px;
+        display: inline-block;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .form-control-custom {
+        width: 100%;
+        padding: 12px 15px;
+        font-size: 15px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        background-color: #fdfdfd;
+        transition: all 0.2s ease-in-out;
+        color: #333;
+    }
+    .form-control-custom:focus {
+        border-color: #343a40;
+        outline: 0;
+        box-shadow: 0 0 0 3px rgba(52, 58, 64, 0.1);
+        background-color: #fff;
+    }
+    .btn-custom {
+        background-color: #343a40;
+        color: #ffffff;
+        padding: 12px 25px;
+        font-size: 15px;
+        font-weight: 600;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        width: 100%;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .btn-custom:hover {
+        background-color: #23272b;
+    }
+</style>
 
-<p>
-    Ce document a pour but d'afficher le trombinoscope des départements & divisions.
-</p>
-@*<p>
-        Il ne s’agit pas des évolutions figées mais des propositions qui devront servir de base à l’employé pour mieux appréhender et rendre efficace la gestion de sa carrière.
-    </p>
-    <p>
-        Toutes les informations sur ce document peuvent évoluer. Elles ne doivent en aucun cas être considérées comme un droit ou des acquis.
-    </p>
-
-        Les informations relatives aux postes telles que les grades, le niveau académique et l’expérience requise sont à titre indicatif et peuvent être différentes de la réalité à un moment donné.
-    </p>*@
-
-<p>Choisir un département puis cliquer sur Affichier pour consulter le trombinoscope </p>
-
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <div class="alert alert-success">
-        @errorMessage
+<div class="container mt-4" style="max-width: 900px;">
+    <div class="trombi-header">
+        <div class="trombi-title-row">
+            <h2 class="trombi-title"><i class="fas fa-sitemap" style="margin-right: 10px;"></i> Trombinoscope Indicatif ETG</h2>
+            <span class="trombi-date"><i class="far fa-calendar-alt" style="margin-right: 6px;"></i>Créé le : 10 Avril 2025</span>
+        </div>
+        <p class="trombi-desc">
+            Ce document a pour but d'afficher le trombinoscope hiérarchique des départements & divisions. Il permet d'appréhender plus efficacement l'organisation globale.
+        </p>
     </div>
-}
-else
-{
-    <table>
-        <tr>
-            <td>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-warning" role="alert" style="border-left: 4px solid #ffc107;">
+            <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i> @errorMessage
+        </div>
+    }
+    else
+    {
+        <div class="hierarchy-container">
+            <div class="hierarchy-card">
+                <div class="hierarchy-icon">
+                    <i class="fas fa-network-wired"></i>
+                </div>
+                <h4 style="margin-bottom: 25px; font-weight: 600; color: #343a40; font-size: 20px;">Consultation de l'Organigramme</h4>
+                
                 <form method="post" action="@Url.Action("DisplaySheet", "Trombinoscope")">
                     <input type="hidden" name="type" value="PC" />
 
-                    <label for="departmentSelect">Trombinoscope :</label>
+                    <div class="form-group-custom">
+                        <label for="departmentSelect">Sélectionnez un département</label>
+                        <select id="departmentSelect" name="selectedDepartment" class="form-control-custom" required>
+                            @if (ViewBag.SheetNames != null)
+                            {
+                                foreach (var sheetName in ViewBag.SheetNames)
+                                {
+                                    <option value="@sheetName">@sheetName</option>
+                                }
+                            }
+                        </select>
+                    </div>
 
-                    <select id="departmentSelect" name="selectedDepartment">
-                        @foreach (var sheetName in ViewBag.SheetNames)
-                        {
-                            <option value="@sheetName">@sheetName</option>
-                        }
-                    </select>
-
-                    <button type="submit">Afficher </button>
+                    <button type="submit" class="btn-custom">
+                        <i class="fas fa-eye" style="margin-right: 8px;"></i> Afficher le Trombinoscope
+                    </button>
                 </form>
-            </td>
-            @*<td>&nbsp;&nbsp;&nbsp;  </td>*@
-        </tr>
-    </table>
-}
-
-
+            </div>
+        </div>
+    }
+</div>
