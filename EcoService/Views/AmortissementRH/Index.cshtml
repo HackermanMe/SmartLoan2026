@@ -2,12 +2,6 @@
 @{
     ViewData["Title"] = "Amortissement Personnel";
     var typesPret = ViewBag.TypesPret as string[] ?? new string[0];
-
-    var defaultNom = Session["Nom"]?.ToString();
-    if (Session["Prenom"] != null) { defaultNom += " " + Session["Prenom"].ToString(); }
-    defaultNom = defaultNom?.Trim();
-
-    var defaultCompte = Session["NumeroCompte"]?.ToString();
 }
 
 <link rel="stylesheet" href="~/assets/css/amortissement.css" />
@@ -66,8 +60,8 @@
         <div class="rh-grid">
             <div class="fg">
                 @Html.LabelFor(m => m.NomDemandeur, "Nom du demandeur")
-                @if (!string.IsNullOrEmpty(defaultNom)) {
-                    @Html.TextBoxFor(m => m.NomDemandeur, new { @class = "form-control", @Value = defaultNom, @readonly = "readonly" })
+                @if (!string.IsNullOrEmpty(Model != null ? Model.NomDemandeur : null)) {
+                    @Html.TextBoxFor(m => m.NomDemandeur, new { @class = "form-control", @readonly = "readonly" })
                 } else {
                     @Html.TextBoxFor(m => m.NomDemandeur, new { @class = "form-control", placeholder = "NOM Prenom" })
                 }
@@ -114,8 +108,8 @@
             </div>
             <div class="fg">
                 @Html.LabelFor(m => m.NumeroCompte, "Numero de compte (12 chiffres)")
-                @if (!string.IsNullOrEmpty(defaultCompte)) {
-                    @Html.TextBoxFor(m => m.NumeroCompte, new { @class = "form-control", @Value = defaultCompte, @readonly = "readonly", pattern = "\\d{12}", maxlength = "12", minlength = "12" })
+                @if (!string.IsNullOrEmpty(Model != null ? Model.NumeroCompte : null)) {
+                    @Html.TextBoxFor(m => m.NumeroCompte, new { @class = "form-control", @readonly = "readonly", pattern = "\\d{12}", maxlength = "12", minlength = "12" })
                 } else {
                     @Html.TextBoxFor(m => m.NumeroCompte, new { @class = "form-control", pattern = "\\d{12}", maxlength = "12", minlength = "12", title = "Le numero de compte doit contenir exactement 12 chiffres", placeholder = "Ex: 012345678901" })
                 }
@@ -230,7 +224,11 @@
         <div class="rh-grid">
             <div class="fg">
                 @Html.LabelFor(m => m.SalaireNetActuel, "Salaire net actuel (FCFA)")
-                @Html.TextBoxFor(m => m.SalaireNetActuel, new { @class = "form-control", id = "inp_salaire", type = "number", min = "0" })
+                @if (Model != null && Model.SalaireNetActuel > 0) {
+                    @Html.TextBoxFor(m => m.SalaireNetActuel, new { @class = "form-control", id = "inp_salaire", type = "number", min = "0", @readonly = "readonly" })
+                } else {
+                    @Html.TextBoxFor(m => m.SalaireNetActuel, new { @class = "form-control", id = "inp_salaire", type = "number", min = "0" })
+                }
             </div>
             <div class="fg">
                 @Html.LabelFor(m => m.CumulPretPersonnelA, "Cumul Pret Personnel (A)")

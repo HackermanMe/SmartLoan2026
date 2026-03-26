@@ -83,17 +83,25 @@ namespace EcoService.Controllers
                             }
                         }
 
-                        if (staffInfo.ContainsKey("Nom"))
+                        // AccountLogin retourne les colonnes avec alias "Nomm", "Prenomm", "NumeroComptee", "SalaireNete"
+                        if (staffInfo.ContainsKey("Nomm"))
+                        {
+                            model.NomDemandeur = Convert.ToString(staffInfo["Nomm"]);
+                            if (staffInfo.ContainsKey("Prenomm"))
+                                model.NomDemandeur += " " + Convert.ToString(staffInfo["Prenomm"]);
+                        }
+                        else if (staffInfo.ContainsKey("Nom"))
                         {
                             model.NomDemandeur = Convert.ToString(staffInfo["Nom"]);
                             if (staffInfo.ContainsKey("Prenom"))
                                 model.NomDemandeur += " " + Convert.ToString(staffInfo["Prenom"]);
                         }
+
                         if (staffInfo.ContainsKey("NumeroComptee"))
                             model.NumeroCompte = Convert.ToString(staffInfo["NumeroComptee"]);
                         else if (staffInfo.ContainsKey("NumeroCompte"))
                             model.NumeroCompte = Convert.ToString(staffInfo["NumeroCompte"]);
-                            
+
                         if (staffInfo.ContainsKey("SalaireNete"))
                             model.SalaireNetActuel = Convert.ToDecimal(staffInfo["SalaireNete"]);
                         else if (staffInfo.ContainsKey("SalaireNet"))
