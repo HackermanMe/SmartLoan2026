@@ -13,7 +13,7 @@
     .rh-grid-2      { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     .fg label       { font-weight:600; font-size:11px; color: #6c757d; margin-bottom:4px; display:block; text-transform:uppercase; letter-spacing:0.3px; }
     .fg input,
-    .fg select      { width:100%; padding:6px 10px; border:1px solid #ced4da; border-radius:3px; font-size:13px; background:#fff; }
+    .fg select      { width:100%; padding:6px 10px; border:1px solid #ced4da; border-radius:3px; font-size:13px; background:#fff; color:#333; }
     .fg input:focus,
     .fg select:focus { border-color:#6c757d; outline:none; box-shadow:0 0 0 2px rgba(108,117,125,0.15); }
     .badge-quotite  { display:inline-block; padding:4px 14px; border-radius:3px; font-weight:600; font-size:13px; }
@@ -116,7 +116,7 @@
             </div>
             <div class="fg">
                 @Html.LabelFor(m => m.Montant, "Montant (FCFA)")
-                @Html.TextBoxFor(m => m.Montant, new { @class = "form-control", id = "inp_montant", type = "number", min = "1", step = "1", required = "required" })
+                @Html.TextBoxFor(m => m.Montant, "{0:0}", new { @class = "form-control", id = "inp_montant", type = "number", min = "1", step = "1", required = "required" })
                 @Html.ValidationMessageFor(m => m.Montant, "", new { @class = "text-danger" })
             </div>
             <div class="fg">
@@ -170,11 +170,11 @@
             </div>
             <div class="fg">
                 @Html.LabelFor(m => m.MontantPretExistant, "Montant")
-                @Html.TextBoxFor(m => m.MontantPretExistant, new { @class = "form-control", type = "number", min = "0" })
+                @Html.TextBoxFor(m => m.MontantPretExistant, "{0:0}", new { @class = "form-control", type = "number", min = "0" })
             </div>
             <div class="fg">
                 @Html.LabelFor(m => m.MensualitesPretExistant, "Mensualites (Interets) (2)")
-                @Html.TextBoxFor(m => m.MensualitesPretExistant, new { @class = "form-control", id = "inp_mens2", type = "number", min = "0" })
+                @Html.TextBoxFor(m => m.MensualitesPretExistant, "{0:0}", new { @class = "form-control", id = "inp_mens2", type = "number", min = "0" })
             </div>
         </div>
     </div>
@@ -190,11 +190,11 @@
             </div>
             <div class="fg">
                 @Html.LabelFor(m => m.MontantAutresCredits1, "Montant")
-                @Html.TextBoxFor(m => m.MontantAutresCredits1, new { @class = "form-control", type = "number", min = "0" })
+                @Html.TextBoxFor(m => m.MontantAutresCredits1, "{0:0}", new { @class = "form-control", type = "number", min = "0" })
             </div>
             <div class="fg">
                 @Html.LabelFor(m => m.MensualitesAutresCredits1, "Mensualites (Interets) (3)")
-                @Html.TextBoxFor(m => m.MensualitesAutresCredits1, new { @class = "form-control", id = "inp_mens3a", type = "number", min = "0" })
+                @Html.TextBoxFor(m => m.MensualitesAutresCredits1, "{0:0}", new { @class = "form-control", id = "inp_mens3a", type = "number", min = "0" })
             </div>
         </div>
     </div>
@@ -210,11 +210,11 @@
             </div>
             <div class="fg">
                 @Html.LabelFor(m => m.MontantAutresCredits2, "Montant")
-                @Html.TextBoxFor(m => m.MontantAutresCredits2, new { @class = "form-control", type = "number", min = "0" })
+                @Html.TextBoxFor(m => m.MontantAutresCredits2, "{0:0}", new { @class = "form-control", type = "number", min = "0" })
             </div>
             <div class="fg">
                 @Html.LabelFor(m => m.MensualitesAutresCredits2, "Mensualites (Interets) (3)")
-                @Html.TextBoxFor(m => m.MensualitesAutresCredits2, new { @class = "form-control", id = "inp_mens3b", type = "number", min = "0" })
+                @Html.TextBoxFor(m => m.MensualitesAutresCredits2, "{0:0}", new { @class = "form-control", id = "inp_mens3b", type = "number", min = "0" })
             </div>
         </div>
     </div>
@@ -225,9 +225,9 @@
             <div class="fg">
                 @Html.LabelFor(m => m.SalaireNetActuel, "Salaire net actuel (FCFA)")
                 @if (Model != null && Model.SalaireNetActuel > 0) {
-                    @Html.TextBoxFor(m => m.SalaireNetActuel, new { @class = "form-control", id = "inp_salaire", type = "number", min = "0", @readonly = "readonly" })
+                    @Html.TextBoxFor(m => m.SalaireNetActuel, "{0:0}", new { @class = "form-control", id = "inp_salaire", type = "number", min = "0", @readonly = "readonly" })
                 } else {
-                    @Html.TextBoxFor(m => m.SalaireNetActuel, new { @class = "form-control", id = "inp_salaire", type = "number", min = "0" })
+                    @Html.TextBoxFor(m => m.SalaireNetActuel, "{0:0}", new { @class = "form-control", id = "inp_salaire", type = "number", min = "0" })
                 }
             </div>
             <div class="fg">
