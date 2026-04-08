@@ -590,6 +590,7 @@
     <Compile Include="Models\EcoCerUserLoginModel.cs" />
     <Compile Include="Models\Enums.cs" />
     <Compile Include="Models\ErrorViewModel.cs" />
+    <Compile Include="Models\PretExistantEcobank.cs" />
     <Compile Include="Models\PretExistants.cs" />
     <Compile Include="Models\RHAccounts.cs" />
     <Compile Include="Models\RHDemande.cs" />

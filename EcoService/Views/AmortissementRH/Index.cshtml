@@ -161,22 +161,56 @@
 
     <div class="rh-card">
         <div class="rh-hdr">Prets existants Ecobank</div>
-        <div class="rh-grid-3">
-            <div class="fg">
-                @Html.LabelFor(m => m.TypePretExistant, "Type")
-                @Html.DropDownListFor(m => m.TypePretExistant,
-                    new SelectList(typesPret, Model != null ? Model.TypePretExistant : ""),
-                    new { @class = "form-control" })
+        @if (Model != null && Model.PretsExistantsEcobank != null && Model.PretsExistantsEcobank.Count > 0)
+        {
+            <div style="overflow-x:auto; margin-bottom:12px;">
+                <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                    <thead>
+                        <tr style="background:#343a40; color:#fff; font-weight:600; text-align:center; font-size:11px; text-transform:uppercase; letter-spacing:0.3px;">
+                            @* <th style="padding:8px 10px; border:1px solid #454d55;">Reference</th> *@
+                            <th style="padding:8px 10px; border:1px solid #454d55;">Type de Credit</th>
+                            @* <th style="padding:8px 10px; border:1px solid #454d55;">Montant</th> *@
+                            <th style="padding:8px 10px; border:1px solid #454d55;">En Cours</th>
+                            <th style="padding:8px 10px; border:1px solid #454d55;">Mensualites</th>
+                            @* <th style="padding:8px 10px; border:1px solid #454d55;">Taux (%)</th> *@
+                            @* <th style="padding:8px 10px; border:1px solid #454d55;">Date Debut</th> *@
+                            @* <th style="padding:8px 10px; border:1px solid #454d55;">Date Fin</th> *@
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var pret in Model.PretsExistantsEcobank)
+                        {
+                            <tr style="background:#fff; text-align:right;">
+                                @* <td style="padding:6px 10px; border:1px solid #e0e0e0; text-align:left; font-weight:600; color:#0082bb;">@pret.ReferencePret</td> *@
+                                <td style="padding:6px 10px; border:1px solid #e0e0e0; text-align:left;">@pret.TypeCredit</td>
+                                @* <td style="padding:6px 10px; border:1px solid #e0e0e0;">@pret.Montant.ToString("N0") FCFA</td> *@
+                                <td style="padding:6px 10px; border:1px solid #e0e0e0;">@pret.EnCours.ToString("N0") FCFA</td>
+                                <td style="padding:6px 10px; border:1px solid #e0e0e0; font-weight:600; color:#343a40;" class="pret-mensualite" data-mensualite="@pret.Mensualites">@pret.Mensualites.ToString("N0") FCFA</td>
+                                @* <td style="padding:6px 10px; border:1px solid #e0e0e0;">@pret.Taux.ToString("N2")%</td> *@
+                                @* <td style="padding:6px 10px; border:1px solid #e0e0e0; text-align:center;">@pret.StartDate.ToString("dd/MM/yyyy")</td> *@
+                                @* <td style="padding:6px 10px; border:1px solid #e0e0e0; text-align:center;">@pret.EndDate.ToString("dd/MM/yyyy")</td> *@
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr style="background:#6c757d; color:#fff; font-weight:600; text-align:right; font-size:12px;">
+                            <td colspan="2" style="padding:8px 10px; border:1px solid #545b62; text-align:center;">TOTAL MENSUALITES</td>
+                            <td style="padding:8px 10px; border:1px solid #545b62;" id="total-mensualites-ecobank">@Model.PretsExistantsEcobank.Sum(p => p.Mensualites).ToString("N0") FCFA</td>
+                            @* <td colspan="3" style="padding:8px 10px; border:1px solid #545b62;"></td> *@
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
-            <div class="fg">
-                @Html.LabelFor(m => m.MontantPretExistant, "Montant")
-                @Html.TextBoxFor(m => m.MontantPretExistant, "{0:0}", new { @class = "form-control", type = "number", min = "0" })
+            @Html.HiddenFor(m => m.MensualitesPretExistant, new { id = "inp_mens2" })
+        }
+        else
+        {
+            <div style="padding:20px; text-align:center; color:#6c757d; font-size:13px; background:#f8f9fa; border-radius:3px;">
+                <i class="fas fa-info-circle" style="font-size:24px; margin-bottom:8px; display:block;"></i>
+                Aucun prêt existant Ecobank trouvé pour ce compte.
             </div>
-            <div class="fg">
-                @Html.LabelFor(m => m.MensualitesPretExistant, "Mensualites (Interets) (2)")
-                @Html.TextBoxFor(m => m.MensualitesPretExistant, "{0:0}", new { @class = "form-control", id = "inp_mens2", type = "number", min = "0" })
-            </div>
-        </div>
+            @Html.HiddenFor(m => m.MensualitesPretExistant, new { id = "inp_mens2", value = "0" })
+        }
     </div>
 
     <div class="rh-card">
@@ -462,6 +496,20 @@ $(function () {
 
     $('#inp_montant,#inp_echeances,#inp_differes,#inp_taux,#inp_taf,' +
       '#inp_salaire,#inp_mens2,#inp_mens3a,#inp_mens3b').on('input', recalc);
+
+    // ── Calculer le total des mensualités des prêts existants Ecobank ──────
+    function calculerTotalPretsEcobank() {
+        var total = 0;
+        $('.pret-mensualite').each(function() {
+            var val = parseFloat($(this).data('mensualite')) || 0;
+            total += val;
+        });
+        $('#inp_mens2').val(total);
+        return total;
+    }
+
+    // Initialiser le total des mensualités Ecobank
+    calculerTotalPretsEcobank();
 
     appliquerConfigType();
     recalc();

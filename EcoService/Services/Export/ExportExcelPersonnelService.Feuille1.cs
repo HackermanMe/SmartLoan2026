@@ -208,31 +208,111 @@ namespace EcoService.Services.Export
             r++;
 
             // ═══════════════════════════════════════════════════════════════════
-            // PRETS EXISTANTS
+            // PRETS EXISTANTS ECOBANK (TABLEAU DYNAMIQUE)
             // ═══════════════════════════════════════════════════════════════════
-            Merge(ws, r, 1, r, 2);
-            TitreSection(ws, r, 1, "PRETS EXISTANTS");
-            ws.Cells[r, 1, r, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-            Merge(ws, r, 3, r, 5);
-            ws.Cells[r, 3].Value = inp.TypePretExistant;
-            ws.Cells[r, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-            AjouterDropdown(ws, r, 3, 5, TypesPret);
+            Merge(ws, r, 1, r, 10);
+            TitreSection(ws, r, 1, "PRETS EXISTANTS ECOBANK");
+            ws.Cells[r, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            ws.Cells[r, 1, r, 10].Style.Border.BorderAround(ExcelBorderStyle.Thin);
             r++;
 
-            r++; // espacement
+            if (inp.PretsExistantsEcobank != null && inp.PretsExistantsEcobank.Count > 0)
+            {
+                r++; // espacement
 
-            // Montant | jaune | Mensualités (Intérêts) (2) : | jaune
-            ws.Cells[r, 1].Value = "Montant";
-            ws.Cells[r, 1].Style.Font.Bold = true;
-            Merge(ws, r, 2, r, 3);
-            Jaune(ws.Cells[r, 2], montantExistant);
-            ws.Cells[r, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-            Merge(ws, r, 5, r, 8);
-            ws.Cells[r, 5].Value = "Mensualités (Intérêts)  (2) :";
-            Merge(ws, r, 9, r, 10);
-            Jaune(ws.Cells[r, 9], mensExistant);
-            ws.Cells[r, 9].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-            r++;
+                // En-têtes du tableau (3 colonnes : Type, En Cours, Mensualités)
+                Merge(ws, r, 1, r, 4);
+                ws.Cells[r, 1].Value = "Type de Crédit";
+                ws.Cells[r, 1].Style.Font.Bold = true;
+                ws.Cells[r, 1].Style.Font.Color.SetColor(Color.White);
+                ws.Cells[r, 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                ws.Cells[r, 1].Style.Fill.BackgroundColor.SetColor(BleuEntete);
+                ws.Cells[r, 1, r, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+                ws.Cells[r, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                ws.Cells[r, 1].Style.Font.Size = 9;
+
+                Merge(ws, r, 5, r, 7);
+                ws.Cells[r, 5].Value = "En Cours";
+                ws.Cells[r, 5].Style.Font.Bold = true;
+                ws.Cells[r, 5].Style.Font.Color.SetColor(Color.White);
+                ws.Cells[r, 5].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                ws.Cells[r, 5].Style.Fill.BackgroundColor.SetColor(BleuEntete);
+                ws.Cells[r, 5, r, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+                ws.Cells[r, 5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                ws.Cells[r, 5].Style.Font.Size = 9;
+
+                Merge(ws, r, 8, r, 10);
+                ws.Cells[r, 8].Value = "Mensualités (2)";
+                ws.Cells[r, 8].Style.Font.Bold = true;
+                ws.Cells[r, 8].Style.Font.Color.SetColor(Color.White);
+                ws.Cells[r, 8].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                ws.Cells[r, 8].Style.Fill.BackgroundColor.SetColor(BleuEntete);
+                ws.Cells[r, 8, r, 10].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+                ws.Cells[r, 8].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                ws.Cells[r, 8].Style.Font.Size = 9;
+                r++;
+
+                // Lignes de données
+                decimal totalMensualites = 0;
+                foreach (var pret in inp.PretsExistantsEcobank)
+                {
+                    // Type de Crédit (colonnes 1-4)
+                    Merge(ws, r, 1, r, 4);
+                    ws.Cells[r, 1].Value = pret.TypeCredit;
+                    ws.Cells[r, 1].Style.Font.Size = 9;
+                    ws.Cells[r, 1, r, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+
+                    // En Cours (colonnes 5-7)
+                    Merge(ws, r, 5, r, 7);
+                    ws.Cells[r, 5].Value = pret.EnCours;
+                    ws.Cells[r, 5].Style.Numberformat.Format = "# ##0";
+                    ws.Cells[r, 5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                    ws.Cells[r, 5].Style.Font.Size = 9;
+                    ws.Cells[r, 5, r, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+
+                    // Mensualités (colonnes 8-10)
+                    Merge(ws, r, 8, r, 10);
+                    ws.Cells[r, 8].Value = pret.Mensualites;
+                    ws.Cells[r, 8].Style.Numberformat.Format = "# ##0";
+                    ws.Cells[r, 8].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                    ws.Cells[r, 8].Style.Font.Bold = true;
+                    ws.Cells[r, 8].Style.Font.Size = 9;
+                    ws.Cells[r, 8, r, 10].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+
+                    totalMensualites += pret.Mensualites;
+                    r++;
+                }
+
+                // Ligne de total
+                Merge(ws, r, 1, r, 7);
+                ws.Cells[r, 1].Value = "TOTAL MENSUALITÉS (2)";
+                ws.Cells[r, 1].Style.Font.Bold = true;
+                ws.Cells[r, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                ws.Cells[r, 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                ws.Cells[r, 1].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(108, 117, 125));
+                ws.Cells[r, 1].Style.Font.Color.SetColor(Color.White);
+                ws.Cells[r, 1, r, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+
+                Merge(ws, r, 8, r, 10);
+                ws.Cells[r, 8].Value = totalMensualites;
+                ws.Cells[r, 8].Style.Numberformat.Format = "# ##0";
+                ws.Cells[r, 8].Style.Font.Bold = true;
+                ws.Cells[r, 8].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                ws.Cells[r, 8].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                ws.Cells[r, 8].Style.Fill.BackgroundColor.SetColor(JauneSaisie);
+                ws.Cells[r, 8, r, 10].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+                r++;
+            }
+            else
+            {
+                r++; // espacement
+                Merge(ws, r, 1, r, 10);
+                ws.Cells[r, 1].Value = "Aucun prêt existant Ecobank trouvé";
+                ws.Cells[r, 1].Style.Font.Italic = true;
+                ws.Cells[r, 1].Style.Font.Color.SetColor(Color.Gray);
+                ws.Cells[r, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                r++;
+            }
 
             r++; // espacement
 

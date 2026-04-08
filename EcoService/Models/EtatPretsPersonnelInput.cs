@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace EcoService.Models
@@ -62,5 +63,8 @@ namespace EcoService.Models
         // ── Assurance ────────────────────────────────────────────────────────
         public decimal? TauxAssurance { get; set; }
         public decimal? AssuranceFixe { get; set; }
+
+        // ── Liste des prêts existants Ecobank (chargés dynamiquement) ───────
+        public List<PretExistantEcobank> PretsExistantsEcobank { get; set; } = new List<PretExistantEcobank>();
     }
 }

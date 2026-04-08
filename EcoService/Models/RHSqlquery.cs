@@ -124,6 +124,37 @@ namespace EcoService.Models
             return ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@NumeroCompte", numeroCompte));
         }
 
+        // Méthode pour récupérer tous les prêts existants actifs selon le numéro de compte
+        public List<PretExistantEcobank> GetPretsExistantsActifs(string numeroCompte)
+        {
+            var pretsList = new List<PretExistantEcobank>();
+            string query = "SELECT PretId, ReferencePret, TypeCredit, Montant, EnCours, Taux, Mensualites, StartDate, EndDate, NumeroCompte " +
+                           "FROM RHPretsExistants " +
+                           "WHERE NumeroCompte = @NumeroCompte AND EndDate > GETDATE() " +
+                           "ORDER BY StartDate DESC";
+
+            using (SqlDataReader reader = ExecuteReader(query, cmd => cmd.Parameters.AddWithValue("@NumeroCompte", numeroCompte)))
+            {
+                while (reader.Read())
+                {
+                    pretsList.Add(new PretExistantEcobank
+                    {
+                        PretId = reader.GetInt32(reader.GetOrdinal("PretId")),
+                        ReferencePret = reader.GetString(reader.GetOrdinal("ReferencePret")),
+                        TypeCredit = reader.GetString(reader.GetOrdinal("TypeCredit")),
+                        Montant = reader.GetDecimal(reader.GetOrdinal("Montant")),
+                        EnCours = reader.GetDecimal(reader.GetOrdinal("EnCours")),
+                        Taux = reader.GetDecimal(reader.GetOrdinal("Taux")),
+                        Mensualites = reader.GetDecimal(reader.GetOrdinal("Mensualites")),
+                        StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                        EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                        NumeroCompte = reader.GetString(reader.GetOrdinal("NumeroCompte"))
+                    });
+                }
+            }
+            return pretsList;
+        }
+
         // Méthode pour récupérer les prêts autres banques selon le numéro de compte
         public SqlDataReader AutresPretExistantsStaff(string numeroCompte)
         {

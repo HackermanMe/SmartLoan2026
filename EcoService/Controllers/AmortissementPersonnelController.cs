@@ -109,6 +109,10 @@ namespace EcoService.Controllers
 
                         if (!string.IsNullOrEmpty(model.NumeroCompte))
                         {
+                            // Charger tous les prêts existants actifs Ecobank
+                            model.PretsExistantsEcobank = st.GetPretsExistantsActifs(model.NumeroCompte);
+
+                            // Remplir les champs de compatibilité (premier prêt uniquement)
                             using (System.Data.SqlClient.SqlDataReader pretsReader = st.PretExistantsStaff(model.NumeroCompte))
                             {
                                 int pretCount = 0;
@@ -164,6 +168,13 @@ namespace EcoService.Controllers
 
             try
             {
+                // Recharger les prêts existants Ecobank pour l'export Excel
+                if (!string.IsNullOrEmpty(model.NumeroCompte))
+                {
+                    EcoService.Models.RHSqlQuery st = new EcoService.Models.RHSqlQuery();
+                    model.PretsExistantsEcobank = st.GetPretsExistantsActifs(model.NumeroCompte);
+                }
+
                 var bytes = _excelService.Generer(model);
                 string nom = string.IsNullOrWhiteSpace(model.NomDemandeur)
                     ? "Personnel"
@@ -199,6 +210,13 @@ namespace EcoService.Controllers
 
             try
             {
+                // Recharger les prêts existants Ecobank si nécessaire
+                if (!string.IsNullOrEmpty(model.NumeroCompte))
+                {
+                    EcoService.Models.RHSqlQuery st = new EcoService.Models.RHSqlQuery();
+                    model.PretsExistantsEcobank = st.GetPretsExistantsActifs(model.NumeroCompte);
+                }
+
                 // Mêmes calculs que pour l'Excel
                 decimal tauxTAF = model.TauxTAF;
                 decimal rMoisTTC = model.TauxAnnuel * (1m + tauxTAF / 100m) / 12m / 100m;
