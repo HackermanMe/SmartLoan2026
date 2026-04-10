@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(xxd -l 16 \"d:/Projects/RH-Services2026/SmartLoan2025/EcoService/Templates/BilletOrdre.docx\")",
-      "Bash(find . -name bootstrap* -type f)"
+      "Bash(find . -name bootstrap* -type f)",
+      "Bash(dir \"D:\\\\Projects\\\\SmartLoan2025\\\\EcoService\\\\Templates\\\\DOSSIER*\")",
+      "Bash(powershell -Command:*)"
     ]
   }
 }
